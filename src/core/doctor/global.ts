@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 
 import { finding, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
 import { isTestProcess } from "src/utils/test-process.js";
-import { inspectPlatform, type DoctorTarget } from "src/core/doctor/global-inspect.js";
+import { inspectPlatform, type DoctorTarget, type PlatformInspection } from "src/core/doctor/global-inspect.js";
 import { finalizeInspection, safeCommandLookup } from "src/core/doctor/global-status.js";
 import type {
   DiagnoseGlobalIntegrationsOptions,
@@ -12,7 +12,11 @@ import type {
 } from "src/core/doctor/global-types.js";
 import { globalTargets, type GlobalPlanProvider } from "src/core/global/targets.js";
 import { getPlatform, PLATFORM_IDS } from "src/core/platform/registry.js";
-import { resolveUserPlatformRoots, selectedUserRoot, type UserPlatformRoots } from "src/core/platform/user-paths.js";
+import {
+  resolveSelectedUserPlatformRoots,
+  selectedUserRoot,
+  type SelectedUserPlatformRoots,
+} from "src/core/platform/user-paths.js";
 
 export interface DiagnoseGlobalDeps {
   readonly plans: GlobalPlanProvider;
@@ -45,23 +49,8 @@ export async function diagnoseGlobal(
       "Global diagnostics require an injected commandLookup in test mode.",
     );
   }
-  let roots: UserPlatformRoots;
-  try {
-    roots =
-      options.roots ??
-      (await resolveUserPlatformRoots({
-        ...(options.environment === undefined ? {} : { environment: options.environment }),
-        ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
-      }));
-  } catch {
-    return invalid("global-root-invalid", "The user-global integration root could not be resolved safely.");
-  }
-
-  const inspections = await Promise.all(
-    platforms.map(async (platform) =>
-      inspectPlatform(platform, doctorTargets(platform, roots, deps.plans), roots, deps.generatorVersion),
-    ),
-  );
+  const resolved = await Promise.all(platforms.map(async (platform) => resolvePlatform(platform, options, deps)));
+  const inspections = resolved.map((item) => item.inspection);
   const launcherAvailable = inspections.some((inspection) => inspection.state === "healthy")
     ? await safeCommandLookup(options.commandLookup ?? deps.defaultCommandLookup)
     : undefined;
@@ -70,12 +59,62 @@ export async function diagnoseGlobal(
       finalizeInspection(inspection, launcherAvailable, options.codexTrustLookup, options.capabilityLookup),
     ),
   );
-  return diagnoses.map((diagnosis) => withAmbiguousRoot(diagnosis, options.environment, roots));
+  return diagnoses.map((diagnosis, index) =>
+    withAmbiguousRoot(diagnosis, options.environment, resolved[index]?.roots ?? {}),
+  );
+}
+
+interface ResolvedPlatform {
+  readonly roots: SelectedUserPlatformRoots | undefined;
+  readonly inspection: PlatformInspection;
+}
+
+/** One platform's roots are resolved and inspected alone, so a bad relocation variable invalidates only that platform. */
+async function resolvePlatform(
+  platform: GlobalDoctorPlatform,
+  options: DiagnoseGlobalIntegrationsOptions,
+  deps: DiagnoseGlobalDeps,
+): Promise<ResolvedPlatform> {
+  let roots: SelectedUserPlatformRoots;
+  try {
+    roots =
+      options.roots ??
+      (await resolveSelectedUserPlatformRoots([platform], {
+        ...(options.environment === undefined ? {} : { environment: options.environment }),
+        ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
+      }));
+  } catch {
+    return {
+      roots: undefined,
+      inspection: {
+        platform,
+        state: "invalid",
+        findings: [finding("global-root-invalid", "error", undefined, invalidRootMessage(platform, options), false)],
+      },
+    };
+  }
+  const inspection = await inspectPlatform(
+    platform,
+    doctorTargets(platform, roots, deps.plans),
+    roots,
+    deps.generatorVersion,
+  );
+  return { roots, inspection };
+}
+
+/** Names the relocation variable that is set (never its value) so the user knows what to fix. */
+function invalidRootMessage(platform: GlobalDoctorPlatform, options: DiagnoseGlobalIntegrationsOptions): string {
+  const environment = options.environment ?? process.env;
+  const variable = getPlatform(platform).roots.find(
+    (root) => root.envOverride !== null && environment[root.envOverride] !== undefined,
+  )?.envOverride;
+  const subject = variable === null || variable === undefined ? "" : ` Check ${variable}.`;
+  return `The user-global integration root could not be resolved safely.${subject}`;
 }
 
 function doctorTargets(
   platform: GlobalDoctorPlatform,
-  roots: UserPlatformRoots,
+  roots: SelectedUserPlatformRoots,
   plans: GlobalPlanProvider,
 ): DoctorTarget[] {
   return globalTargets([platform], roots).map((target) => ({
@@ -95,7 +134,7 @@ function selectedPlatforms(requested: readonly GlobalDoctorPlatform[] | undefine
 function withAmbiguousRoot(
   diagnosis: GlobalIntegrationDiagnosis,
   environment: Readonly<Record<string, string | undefined>> | undefined,
-  roots: UserPlatformRoots,
+  roots: SelectedUserPlatformRoots,
 ): GlobalIntegrationDiagnosis {
   const record = getPlatform(diagnosis.platform);
   const configured =

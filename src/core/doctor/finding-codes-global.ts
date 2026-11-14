@@ -7,6 +7,7 @@ export const GLOBAL_FINDING_CODES = [
   "global-managed-conflict",
   "global-managed-deleted",
   "global-managed-drift",
+  "global-managed-linked-outside-root",
   "global-managed-missing",
   "global-managed-modified",
   "global-managed-obsolete",

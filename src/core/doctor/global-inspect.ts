@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 import { finding, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
+import { inspectLinkedEntries } from "src/core/doctor/global-linked.js";
 import type { GlobalDoctorPlatform } from "src/core/doctor/global-types.js";
 import {
   readGlobalManagedManifest,
@@ -14,7 +15,7 @@ import {
 } from "src/core/global/managed-files.js";
 import type { GlobalTarget } from "src/core/global/targets.js";
 import { getPlatform } from "src/core/platform/registry.js";
-import { selectedUserRoot, type UserPathRoot, type UserPlatformRoots } from "src/core/platform/user-paths.js";
+import { selectedUserRoot, type SelectedUserPlatformRoots, type UserPathRoot } from "src/core/platform/user-paths.js";
 import { isMissingPathError } from "src/utils/errno.js";
 
 /** A registered target together with what the configurators say it should contain. */
@@ -53,7 +54,7 @@ const DRIFT_CODES = new Set([
 export async function inspectPlatform(
   platform: GlobalDoctorPlatform,
   targets: readonly DoctorTarget[],
-  roots: UserPlatformRoots,
+  roots: SelectedUserPlatformRoots,
   generatorVersion: string,
 ): Promise<PlatformInspection> {
   const inspections = await Promise.all(targets.map(async (target) => inspectTarget(target, generatorVersion)));
@@ -91,7 +92,7 @@ export async function inspectPlatform(
 /** A non-empty shadowing file (for example Codex AGENTS.override.md) takes precedence over the Harnix block. */
 async function inspectShadowingFiles(
   platform: GlobalDoctorPlatform,
-  roots: UserPlatformRoots,
+  roots: SelectedUserPlatformRoots,
 ): Promise<DoctorFinding[]> {
   const record = getPlatform(platform);
   const findings: DoctorFinding[] = [];
@@ -199,7 +200,10 @@ async function inspectTarget(target: DoctorTarget, generatorVersion: string): Pr
     });
     return {
       state: manifest === undefined ? "missing" : "valid",
-      findings: findingsFromReconciliation(target, manifest, reconciliation),
+      findings: [
+        ...findingsFromReconciliation(target, manifest, reconciliation),
+        ...(await inspectLinkedEntries(target, manifest)),
+      ],
     };
   } catch {
     return invalidTarget(

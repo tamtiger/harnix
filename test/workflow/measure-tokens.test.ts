@@ -24,18 +24,21 @@ interface MeasureTokens {
   budgetUsage(
     budgets: {
       skill: number;
+      techniqueSkill?: number;
       skills: Record<string, number>;
       reference: number;
       workflow: number;
       referenceExemptions: string[];
     },
     sizes: { workflow: number; skills: Record<string, number>; references: Record<string, number> },
+    kinds?: Record<string, string>,
   ): {
     workflow: BudgetEntry;
     skills: Record<string, BudgetEntry>;
     references: (BudgetEntry & { id: string; exempt: boolean })[];
     referencesOverCeiling: string[];
   };
+  listingUsage(budgets: { skillListing: number }, skills: { description: string }[]): BudgetEntry;
   measureInstructionFiles(
     root: string,
     estimate: (text: string) => number,
@@ -77,6 +80,26 @@ describe("measure-tokens helpers", () => {
     expect(usage.references.map((item) => item.id)).toEqual(["a/big", "a/small"]);
     expect(usage.references[0]).toMatchObject({ percent: 150, exempt: true });
     expect(usage.referencesOverCeiling).toEqual(["a/big"]);
+  });
+
+  it("uses the technique ceiling for a technique skill and the common one for the rest", () => {
+    const usage = script.budgetUsage(
+      { skill: 2000, techniqueSkill: 1200, skills: {}, reference: 1200, workflow: 2500, referenceExemptions: [] },
+      { workflow: 1, skills: { "harnix-lens": 900, "harnix-review": 900 }, references: {} },
+      { "harnix-lens": "technique", "harnix-review": "workflow" },
+    );
+
+    expect(usage.skills["harnix-lens"]).toEqual({ tokens: 900, budget: 1200, percent: 75 });
+    expect(usage.skills["harnix-review"]).toEqual({ tokens: 900, budget: 2000, percent: 45 });
+  });
+
+  it("measures the skill descriptions a host lists in every session against their own ceiling", () => {
+    const usage = script.listingUsage({ skillListing: 100 }, [
+      { description: "a".repeat(200) },
+      { description: "b".repeat(100) },
+    ]);
+
+    expect(usage).toEqual({ tokens: 75, budget: 100, percent: 75 });
   });
 
   it("measures the SKILL.md, reference and workflow.md files of a source tree", async () => {

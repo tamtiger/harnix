@@ -197,7 +197,9 @@ export async function addCriterionWorkflow(
     throw new Error(`Acceptance criterion ${input.id} already exists.`);
   }
   if (input.checks.length === 0)
-    throw new Error("workflow --add-criterion requires --check <check-id> so the criterion is covered.");
+    throw new Error(
+      'workflow --add-criterion requires --check <check-id> so the criterion is covered.\nGợi ý: harnix workflow --add-criterion <id> --text "<tiêu chí>" --check <check-id>; xem các check có sẵn bằng harnix status --checks.',
+    );
   for (const checkId of input.checks)
     if (!task.validationPlan.some((check) => check.id === checkId))
       throw unknownIdError(

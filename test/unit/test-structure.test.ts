@@ -244,7 +244,7 @@ describe("test suite structure", () => {
   });
 
   it("never lowers the amount of verification recorded before the restructuring", () => {
-    const BASELINE = { assertions: 4285, tests: 1372 };
+    const BASELINE = { assertions: 7200, tests: 2600 };
     const assertionPattern = /\bexpect(?:\.[a-zA-Z]+)?\(/gu;
     const testPattern = /\b(?:it|test)(?:\.each\([^)]*\))?\(/gu;
     const totals = testFiles.reduce(

@@ -53,4 +53,21 @@ describe("workflow lifecycle --file payload", () => {
       "The --file payload is not valid JSON.",
     );
   });
+
+  it.each([
+    ["checks", '{ "checks": "zz" }'],
+    ["criteria", '{ "criteria": [1, 2] }'],
+  ])(
+    "rejects a --file whose %s is not an array of strings with a hint instead of an internal error",
+    async (field, body) => {
+      const root = await temporaryRepository();
+      await initializeUtcProject(root);
+      await writeFile(join(root, "payload.json"), body);
+
+      const failure = LIFECYCLE_HANDLERS.init!(context(root, { title: "T", file: "payload.json" }));
+
+      await expect(failure).rejects.toThrow(new RegExp(`field "${field}" must be an array of strings`, "u"));
+      await expect(failure).rejects.toThrow(/Gợi ý: ví dụ/u);
+    },
+  );
 });

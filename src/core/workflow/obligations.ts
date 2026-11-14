@@ -23,7 +23,9 @@ export function preserveObligations(previous: TaskRecord, next: TaskRecord, revi
   }
   if (isEditablePlanningDraft(previous)) {
     if (previous.evidence.some((evidence) => evidence.checkId !== undefined))
-      throw new Error("Workflow planning obligations with check evidence are already frozen.");
+      throw new Error(
+        'Workflow planning obligations with check evidence are already frozen.\nGợi ý: check đã fail thì thay bằng harnix workflow --replace-check <old> <new> --reason "<lý do>"; muốn đổi tiêu chí hãy chuyển ready/ready rồi sửa kèm --reason. Chạy --run-check khi còn planning sẽ đóng băng obligations.',
+      );
     if (revision !== undefined)
       throw new Error("Workflow planning obligations do not require contractRevision before first ready.");
     return next;

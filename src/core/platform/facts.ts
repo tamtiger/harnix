@@ -19,9 +19,9 @@ export const KIRO_FACTS: readonly PlatformFact[] = [
 export const ANTIGRAVITY_FACTS: readonly PlatformFact[] = [
   {
     claim:
-      "Antigravity hook events are PreToolUse, PostToolUse, PreInvocation, PostInvocation and Stop; PreInvocation takes a flat handler list and may return injectSteps",
+      "Antigravity hook events are SessionStart, PreToolUse, PostToolUse, PreInvocation, PostInvocation and Stop; PreInvocation takes a flat handler list and may return injectSteps; plugin-level hooks (hooks.json inside a plugin) are documented for the CLI only, while the App and IDE document workspace and global hooks",
     source: "https://antigravity.google/docs/hooks/",
-    verifiedOn: "2026-10-01",
+    verifiedOn: "2026-11-13",
   },
 ];
 

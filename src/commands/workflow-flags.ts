@@ -259,7 +259,9 @@ function assertNoteFlags(action: string, flags: WorkflowFlags): void {
       'workflow --set-baseline requires --result, --classification, --authorized-by and --scope.\nGợi ý: harnix workflow --set-baseline <check-id> --result pass|fail --classification pre-existing|introduced|environment|unknown --authorized-by user --scope "<phạm vi được duyệt>".',
     );
   if (action === "addDecision" && (flags.text === undefined || flags.rationale === undefined))
-    throw new Error("workflow --add-decision requires --text and --rationale.");
+    throw new Error(
+      'workflow --add-decision requires --text and --rationale.\nGợi ý: harnix workflow --add-decision <id> --text "<quyết định>" --rationale "<vì sao>".',
+    );
   if (action === "addRisk" && flags.text === undefined) throw new Error("workflow --add-risk requires --text.");
   if (flags.severity !== undefined && !["low", "medium", "high"].includes(flags.severity))
     throw new Error("--severity must be low, medium or high.");

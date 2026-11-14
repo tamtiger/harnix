@@ -94,6 +94,22 @@ describe("acceptsSuiteCommand", () => {
     expect(await acceptsSuiteCommand(root, "node run.js", undefined, ["pnpm test"])).toBe(false);
   });
 
+  it("accepts the root test command at a package cwd only when it is that package's own test command", async () => {
+    const root = await monorepo();
+    const packages = [
+      { path: "packages/a", hasTests: true, commands: { test: "pnpm --filter a test" } },
+      { path: "packages/b", hasTests: true, commands: { test: "pnpm test" } },
+    ];
+    const known = ["pnpm test", "pnpm --filter a test"];
+
+    expect(await acceptsSuiteCommand(root, "pnpm test", "packages/a", known, packages)).toBe(false);
+    expect(await acceptsSuiteCommand(root, "pnpm --filter a test", "packages/a", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm test", "packages/b/", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm test", "packages/other", known, packages)).toBe(false);
+    expect(await acceptsSuiteCommand(root, "pnpm test", undefined, known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm test", ".", known, packages)).toBe(true);
+  });
+
   it("judges only the inputs when no test command is detected", async () => {
     expect(await acceptsSuiteCommand(await monorepo(), "anything", undefined, [])).toBe(true);
     expect(known).toHaveLength(1);

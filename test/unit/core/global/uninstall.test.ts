@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { access, lstat, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -50,6 +50,37 @@ describe("global uninstall lifecycle", () => {
     expect(result.platforms[0]?.removed).toContain("~/.kiro/steering/harnix.md");
     await expect(access(join(home, ".kiro", "steering", "harnix.md"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(home, ".kiro", "harnix"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("keeps a linked directory of a relocated root when it removes the owned files below it", async () => {
+    const home = await temporaryUserHome();
+    const profile = join(home, "profile");
+    const shared = join(home, ".claude", "skills");
+    await mkdir(profile, { recursive: true });
+    await mkdir(shared, { recursive: true });
+    await symlink(shared, join(profile, "skills"), process.platform === "win32" ? "junction" : "dir");
+    const claudePlans: GlobalPlanProvider = {
+      desired: (planKey) =>
+        planKey === "claude"
+          ? [{ path: "skills/harnix-x/SKILL.md", sourceId: "claude-skill", kind: "file", content: "skill\n" }]
+          : [],
+      memberMatchers: () => undefined,
+    };
+    const common = {
+      plans: claudePlans,
+      generatorVersion: "2.0.0",
+      lockAcquirer: acquireHarnixFileLock,
+      homeResolver: () => Promise.resolve(home),
+      environment: { CLAUDE_CONFIG_DIR: profile },
+      platforms: ["claude" as const],
+    };
+    await setupGlobal({ ...common, commandLookup: () => Promise.resolve(true) });
+    await access(join(shared, "harnix-x", "SKILL.md"));
+
+    await uninstallGlobal({ ...common, yes: true });
+
+    await expect(access(join(shared, "harnix-x", "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    expect((await lstat(join(profile, "skills"))).isSymbolicLink()).toBe(true);
   });
 
   it("requires at least one platform", async () => {

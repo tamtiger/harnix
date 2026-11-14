@@ -36,7 +36,9 @@ function parseResult(value: string): EvidenceResult {
 function parseExitCode(value: string | undefined, required: boolean): number | undefined {
   if (value === undefined) {
     if (!required) return undefined;
-    throw new Error("--exit-code is required for a pass or fail result and for any command-backed check.");
+    throw new Error(
+      '--exit-code is required for a pass or fail result and for any command-backed check.\nGợi ý: thêm --exit-code 0 cho kết quả pass hoặc mã thoát thật cho fail, ví dụ harnix workflow --evidence --check <id> --result pass --summary "<tóm tắt>" --exit-code 0.',
+    );
   }
   if (!/^-?\d+$/u.test(value)) throw new Error("--exit-code must be an integer.");
   return Number(value);

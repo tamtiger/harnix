@@ -1,0 +1,122 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220246-token-and-docs-hygiene",
+  "title": "Đo token đúng, nâng sàn test và đồng bộ tài liệu",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Các số đo và sàn kiểm tra phản ánh đúng thực tế, và tài liệu không còn mâu thuẫn với code; member cuối đóng epic bằng release 2.33.0.",
+  "nonGoals": [
+    "Không tách file sát trần (A4, A5, A11) và không gom helper trùng (A7); để task sau."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "measure:tokens dùng đúng trần techniqueSkill cho skill technique (TOK-02) và báo thêm tổng mô tả của các skill harnix-* trong danh sách skill, có trần trong token-budgets.json (TOK-01).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Sàn BASELINE trong test-structure.test.ts và ngưỡng trong vitest.config.ts được nâng sát số đo thật, không hạ ngưỡng nào (A8, P3-3).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tài liệu được sửa theo phát hiện: schema.ts mô tả đúng bố cục epic, sơ đồ phụ thuộc trong AGENTS.md/PRD/IMPLEMENTATION_PLAN không nhắc src/migration và nêu src/catalog, src/guides, HARNIX_WORKFLOW.md khớp công thức digest chuẩn hóa CRLF (A2, A9, P3-7).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "scripts/measure-tokens.mjs",
+    "scripts/token-budget-usage.mjs",
+    "src/templates/harnix/token-budgets.json",
+    "test/unit/test-structure.test.ts",
+    "vitest.config.ts",
+    "docs"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test ngân sách token, cấu trúc test và tài liệu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/templates/harnix/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:49:10.418+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9cea370bf63ae27bb0cc102b667d4e94b9bf1488d8c33aea65fdbadb214b9bf2"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:51:07.467+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bdf35d9ce8530f8ddd5c670a9b27a704b0d97fdeee77420f2fb05ea6d068b171"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-14T02:41:26.576+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    }
+  ],
+  "completedAt": "2026-11-14T02:41:26.576+07:00"
+}

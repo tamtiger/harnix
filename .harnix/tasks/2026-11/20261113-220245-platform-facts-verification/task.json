@@ -1,0 +1,133 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220245-platform-facts-verification",
+  "title": "Xác minh facts nền tảng trên profile dùng thử và cập nhật facts.ts",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Các rủi ro tương thích còn là suy luận được kiểm chứng trên một profile dùng thử, và facts.ts, setupNotice, doctor phản ánh kết quả.",
+  "nonGoals": [
+    "Không chạm profile thật của người dùng; không thêm hook Cursor và không dùng beforeSubmitPrompt."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Kết quả kiểm chứng được ghi thành decision cho: Cursor liệt kê trùng harnix-* và hook Claude chạy trong Cursor, đường dẫn plugin Antigravity và hook PreInvocation, hook global của Kiro (S6); mục nào không thể chạy thử trên máy này (thiếu ứng dụng hoặc đăng nhập) được ghi rõ là chưa kiểm chứng thay vì suy đoán.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "facts.ts được cập nhật theo kết quả (ví dụ thêm SessionStart cho Antigravity), kèm ngày kiểm; setupNotice hoặc finding doctor được thêm khi xác nhận có rủi ro.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/platform/facts.ts",
+    "src/core/platform/records.ts",
+    "src/configurators"
+  ],
+  "relevantSpecs": [
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test platform registry, facts và configurators",
+      "command": "pnpm exec vitest run test/unit/core/platform test/platform --coverage.enabled=false",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/configurators/**",
+        "src/core/platform/**",
+        "test/platform/**",
+        "test/unit/core/platform/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:31:48.339+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/unit/core/platform test/platform --coverage.enabled=false — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "d23c344d32772f670ae2d6d78e783a9952debe7622badaff29539d3d61178584"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:32:04.631+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/platform test/platform --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d8a19eaf9dbd7c1a2cbcba2e0e14dc3ae5a38f5945c9d2ce1d1ca30b4126db8f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:34:04.911+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c4ee86aea1f7472cc151326f891b862b732c63990a7f51f3e3072cb6cdd4c589"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-13T22:36:47.955+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    },
+    {
+      "id": "dec-antigravity-paths",
+      "text": "agy 1.5.6 plugin list (profile dùng thử) chỉ thấy plugin ở ~/.gemini/config/plugins/harnix, không thấy ở ~/.gemini/antigravity-cli/plugins/harnix; hook plugin chỉ có tài liệu cho CLI.",
+      "rationale": "Thử trực tiếp 3 trường hợp (chỉ desktop, chỉ cli, cả hai) trong profile tạm; mới kiểm tra discovery, chưa chạy phiên có đăng nhập nên chưa biết hook có chạy. Giữ cả hai gốc vì phiên bản agy cũ có thể dùng gốc CLI."
+    },
+    {
+      "id": "dec-cursor-not-run",
+      "text": "Cursor (trùng skill harnix-*, hook Claude chạy trong Cursor và stdout hợp lệ) chưa kiểm chứng thực nghiệm.",
+      "rationale": "Máy không cài Cursor nên chỉ có suy luận từ tài liệu; để mở, cần chạy trên máy có Cursor với profile tạm trước khi đổi bất kỳ hành vi nào."
+    },
+    {
+      "id": "dec-kiro-not-run",
+      "text": "Hook global ~/.kiro/hooks của Kiro chưa kiểm chứng thực nghiệm; giữ ghi chú documented limit.",
+      "rationale": "Chỉ có kiro-cli, chưa có phiên Kiro có đăng nhập để thấy hook chạy; tài liệu hook global chỉ xác nhận cho CLI V3."
+    }
+  ],
+  "completedAt": "2026-11-13T22:36:47.955+07:00"
+}

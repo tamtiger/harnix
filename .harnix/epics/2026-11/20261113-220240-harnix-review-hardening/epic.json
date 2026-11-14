@@ -1,0 +1,21 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261113-220240-harnix-review-hardening",
+  "title": "Xử lý các phát hiện từ review toàn bộ Harnix (2026-11-13)",
+  "goal": "Sửa các phát hiện P1/P2 và nhóm P3 có bằng chứng của đợt review toàn bộ Harnix ngày 2026-11-13, trong ranh giới sản phẩm hiện tại. Quy tắc phiên bản: các member bump 2.33.0-dev.N theo thứ tự, member cuối đóng epic bằng 2.33.0.",
+  "nonGoals": [
+    "Không thêm nền tảng thứ bảy, MCP, daemon, network ngầm hay tự động hóa Git.",
+    "Không làm các refactor lớn (A4, A5, A7, A11) và tính năng mới (spec sống, wave song song) trong epic này."
+  ],
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-13T22:13:05.533+07:00",
+  "order": [
+    "20261113-220241-uninstall-link-safety",
+    "20261113-220243-doctor-hardening",
+    "20261113-220244-workflow-error-hints",
+    "20261113-220245-platform-facts-verification",
+    "20261113-220246-token-and-docs-hygiene",
+    "20261113-220242-suite-gate-hardening"
+  ]
+}

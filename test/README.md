@@ -43,8 +43,8 @@ Import source and support modules through the `src/...` and `test/...` aliases (
 `vitest.config.ts`), for example `import { at } from "test/support/builders.js"`. Only same-directory `./x.js`
 imports stay relative; ESLint forbids parent-relative `../` imports.
 
-`pnpm test` runs `vitest run --coverage` (v8 provider). The floors in `vitest.config.ts` (lines and statements 95,
-functions 98.6, branches 89) only ever rise: raise them when coverage improves, never lower one to make a change
+`pnpm test` runs `vitest run --coverage` (v8 provider). The floors in `vitest.config.ts` (lines and statements 96,
+functions 98.8, branches 90.5) only ever rise: raise them when coverage improves, never lower one to make a change
 pass. The per-test timeout is 20 seconds because filesystem-heavy workflow tests run in parallel.
 
 Do not regenerate `test/workflow/behavior-snapshot.golden.json` to make a refactor pass.

@@ -28,13 +28,19 @@ const SOURCE_SEGMENTS = new Set([
   "client",
 ]);
 const NON_SOURCE_ROOTS = new Set(["docs", "doc", ".github", ".harnix", ".vscode", "scripts"]);
-const WILDCARD_INPUTS = new Set([".", "**", "**/*", "*"]);
+const WILDCARD_INPUTS = new Set([".", "**", "**/*"]);
 const GLOB_CHARACTERS = /[*?[\]{}()!]/u;
 const TREE_TERMINATORS = new Set(["", "**", "*"]);
 
 interface InputShape {
   directories: string[];
   isTree: boolean;
+  /** A tree, a directory or a `**` glob reaches files below it; a single file or a lone `*` does not. */
+  isDeep: boolean;
+}
+
+function normalizeInput(input: string): string {
+  return input.replace(/\\/gu, "/").replace(/^\.\//u, "");
 }
 
 /** Test directories: `test`, `tests`, `spec`, `__tests__`, a `.tests`/`-spec` suffix, or a camel-case `UnitTests` suffix. */
@@ -47,21 +53,26 @@ function isTestDirectory(name: string): boolean {
 }
 
 function shapeOf(input: string): InputShape | undefined {
-  const normalized = input.replace(/\\/gu, "/").replace(/^\.\//u, "");
+  const normalized = normalizeInput(input);
   if (normalized.startsWith("!")) return undefined;
   const segments = normalized.split("/");
   const last = segments[segments.length - 1] ?? "";
   const isTree = TREE_TERMINATORS.has(last);
   const lastIsDirectory = !isTree && !GLOB_CHARACTERS.test(last) && !last.includes(".");
   const directories = isTree || lastIsDirectory ? segments : segments.slice(0, -1);
-  return { directories: directories.filter((segment) => segment !== "" && !GLOB_CHARACTERS.test(segment)), isTree };
+  return {
+    directories: directories.filter((segment) => segment !== "" && !GLOB_CHARACTERS.test(segment)),
+    isTree,
+    isDeep: isTree || lastIsDirectory || segments.includes("**"),
+  };
 }
 
 function coversTest(shape: InputShape): boolean {
-  return shape.directories.some(isTestDirectory);
+  return shape.isDeep && shape.directories.some(isTestDirectory);
 }
 
 function coversSource(shape: InputShape): boolean {
+  if (!shape.isDeep || shape.directories.length === 0) return false;
   if (shape.directories.some(isTestDirectory)) return false;
   const first = shape.directories[0]?.toLowerCase();
   if (first !== undefined && NON_SOURCE_ROOTS.has(first)) return false;
@@ -74,7 +85,7 @@ export function coversSourceAndTest(inputs: readonly string[] | string[] | undef
   let hasTest = false;
 
   for (const input of inputs) {
-    if (WILDCARD_INPUTS.has(input)) return true;
+    if (WILDCARD_INPUTS.has(normalizeInput(input))) return true;
     const shape = shapeOf(input);
     if (shape === undefined) continue;
     if (coversSource(shape)) hasSource = true;
@@ -102,10 +113,11 @@ export function knownTestCommands(plan: VerifyPlan): string[] {
 async function firstAccepted(
   projectRoot: string,
   covering: readonly ValidationCheck[],
-  known: readonly string[],
+  plan: VerifyPlan,
 ): Promise<ValidationCheck | undefined> {
+  const known = knownTestCommands(plan);
   for (const check of covering)
-    if (await acceptsSuiteCommand(projectRoot, check.command, check.cwd, known)) return check;
+    if (await acceptsSuiteCommand(projectRoot, check.command, check.cwd, known, plan.packages)) return check;
   return undefined;
 }
 
@@ -124,7 +136,7 @@ function suiteCommandError(action: string, known: readonly string[], plan: Verif
       ? ""
       : ` For a .NET repository use dotnet test <path/to/solution.sln> (a relative path to an existing solution) or keep a bare dotnet test and declare --cwd <dir> (candidates from verify-plan --recursive: ${candidates.join(", ")}).`;
   return new Error(
-    `Workflow ${action}: the suite check command must be the project test command (${known.join(" or ")}); a command that runs only part of the tests, such as a single test file, does not prove the suite.${dotnet}`,
+    `Workflow ${action}: the suite check command must be the project test command (${known.join(" or ")}); a command that runs only part of the tests, such as a single test file, does not prove the suite; with a package cwd it must be that package's own test command (fix with harnix workflow --set-check <id> --command <cmd> --cwd <dir> --reason "<why>").${dotnet}`,
   );
 }
 
@@ -141,13 +153,12 @@ async function selectSuiteCheck(
 ): Promise<ValidationCheck | undefined> {
   const covering = task.validationPlan.filter((check) => check.required && coversSourceAndTest(check.inputs));
   if (covering.length === 0) return undefined;
-  const direct = await firstAccepted(projectRoot, covering, knownTestCommands(plan));
+  const direct = await firstAccepted(projectRoot, covering, plan);
   if (direct) return direct;
   const recursive = await buildVerifyPlan(projectRoot, { recursive: true });
-  const known = knownTestCommands(recursive);
-  const nested = await firstAccepted(projectRoot, covering, known);
+  const nested = await firstAccepted(projectRoot, covering, recursive);
   if (nested) return nested;
-  throw suiteCommandError(action, known, recursive);
+  throw suiteCommandError(action, knownTestCommands(recursive), recursive);
 }
 
 /**
@@ -165,7 +176,7 @@ export async function suiteGateProblem(
     if (!plan.hasTests) return undefined;
     const check = await selectSuiteCheck(projectRoot, task, plan, "finish");
     if (check === undefined)
-      return 'no required check covers source and tests with the project test command (for example inputs ["src/**","test/**"]); finish will refuse.';
+      return 'no required check covers source and tests with the project test command (for example inputs ["src/**","test/**"]; a lone "*" or single files do not count); finish will refuse.';
     if (!requirePass || authorizedRedBaseline(task, check)) return undefined;
     const latest = selectLatestEvidence(task.evidence, check.id);
     if (latest?.result !== "pass")
@@ -189,7 +200,7 @@ export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord
   const suiteCheck = await selectSuiteCheck(projectRoot, task, plan, "ready");
   if (!suiteCheck) {
     throw new Error(
-      'Workflow ready requires a required check whose inputs cover both source and test (for example inputs ["**"], or a source tree plus a test tree such as ["src/**","test/**"]). Scope must be "focused" or "full" (there is no "project" scope).',
+      'Workflow ready requires a required check whose inputs cover both source and test (for example inputs ["**"], or a source tree plus a test tree such as ["src/**","test/**"]; a lone "*" or single files do not count). Scope must be "focused" or "full" (there is no "project" scope). Fix with harnix workflow --set-check <id> --input <globs> --reason "<why>".',
     );
   }
 }
@@ -202,7 +213,7 @@ export async function assertSuiteGateFinishing(projectRoot: string, task: TaskRe
   const suiteCheck = await selectSuiteCheck(projectRoot, task, plan, "finish");
   if (!suiteCheck) {
     throw new Error(
-      'Workflow finish requires a passing required check whose inputs cover both source and test (for example ["**"] or ["src/**","test/**"]) with a current input digest. Scope must be "focused" or "full".',
+      'Workflow finish requires a passing required check whose inputs cover both source and test (for example ["**"] or ["src/**","test/**"]; a lone "*" or single files do not count) with a current input digest. Scope must be "focused" or "full". Fix with harnix workflow --set-check <id> --input <globs> --reason "<why>".',
     );
   }
 

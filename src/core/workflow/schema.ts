@@ -75,7 +75,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
       contractRevision:
         "optional { reason: 10-1000 characters }, accepted in the save that sets checkpoint replan on an unfinished task and revises unproven obligations",
-      epic: "optional EpicRecord schema v1; when present, upserts .harnix/epics/<epic-id>.json and regenerates markdown",
+      epic: "optional EpicRecord schema v1; when present, upserts .harnix/epics/<YYYY-MM>/<epic-id>/epic.json (a legacy flat layout is kept in place until migrated) and regenerates epic.md",
       epicMembers:
         "optional TaskRecord[] schema v3 in planning state; saved as non-active member tasks with matching epicId",
       task: "TaskRecord, required",
@@ -198,7 +198,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--finish":
         "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) that changed since HEAD (every such file when Git cannot answer, noted in the hint) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }], hint } (at most 5, never a value; hint names .gitignore, narrower check inputs and harnix-secret-waiver; advice, it does not block).",
       "--cancel":
-        "Terminal cancellation; the only cancellation transport. Add --task <task-id> to cancel another unfinished task (the active pointer is cleared only if it names that task).",
+        "Terminal cancellation; the only cancellation transport. Add --task <task-id> to cancel another unfinished task (the active pointer is cleared only if it names that task). It accepts --brief for uniformity but always prints the cancelled record with its cancellation, so a script that adds --brief to every write does not fail here.",
       "--tick":
         "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item can be 1-based index '1', 'all', or substring pattern).",
       "--learn":

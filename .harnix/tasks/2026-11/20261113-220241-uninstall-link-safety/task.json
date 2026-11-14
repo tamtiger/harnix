@@ -1,0 +1,128 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220241-uninstall-link-safety",
+  "title": "Uninstall không xóa junction/symlink của profile và doctor cảnh báo file dùng chung",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sau khi cho phép junction con trong root override (2.32.4), uninstall và doctor phải xử lý đúng các link đó: không xóa link, và phát hiện khi hai manifest cùng sở hữu một file vật lý.",
+  "nonGoals": [
+    "Không thu hẹp lại linkBoundary (S3) và không đổi hành vi root mặc định (S4)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "removeEmptyDirectory kiểm tra lstat và bỏ qua symlink/junction, nên uninstall --global không xóa junction của profile (S1); có test hồi quy trên Windows (junction) và POSIX (symlink).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "doctor có finding mức warning mới trong DOCTOR_FINDING_CODES, kèm fixture, khi realpath của một file managed nằm ngoài root logic hoặc hai manifest cùng sở hữu một file vật lý (S2).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/global/uninstall.ts",
+    "src/core/doctor",
+    "src/core/platform/user-paths.ts"
+  ],
+  "relevantSpecs": [
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test uninstall và doctor global",
+      "command": "pnpm exec vitest run test/unit/core/global test/unit/core/doctor --coverage.enabled=false",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/doctor/**",
+        "src/core/global/**",
+        "test/unit/core/doctor/**",
+        "test/unit/core/global/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:08:12.004+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/global test/unit/core/doctor --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1144d514609071ae1cba0ea7f8b4a7b4c04bcc1b5320db3441481c7b637a6375"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:10:15.339+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c0672830d6b7eaf35aa319338dd11b2bd84f6c8799a8e5101e72dc87310a7c15"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:10:38.298+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/global test/unit/core/doctor --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2a30901c707f830dc83dc8873b747546377bdbd071f325842fa16e078207ecdb"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:12:48.031+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f1b81d127dc9b97a51b2e1ac615ad8fe5b3f24196e654906cdeac90fc0b1f5f6"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-13T22:12:59.337+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    }
+  ],
+  "completedAt": "2026-11-13T22:12:59.337+07:00"
+}

@@ -84,7 +84,7 @@ Các boundary mới:
 - `CodexRootResolver` tôn trọng `CODEX_HOME` cho `.codex` surfaces; `$HOME/.agents/skills` vẫn là root riêng theo official contract.
 - Kiro mặc định dùng `<home>/.kiro`. `KIRO_HOME` chỉ được dùng nếu capability/version detection chứng minh IDE và CLI hiện tại cùng đọc nó; nếu không doctor cảnh báo thay vì ghi hai nơi mơ hồ.
 - Antigravity dùng `<home>/.gemini`, sau đó tách Desktop plugin và CLI plugin roots.
-- `resolveSafeUserPath` chỉ nhận root đã xác minh và relative POSIX path, từ chối filesystem root, traversal, symlink/junction escape và path nằm ngoài root.
+- `resolveSafeUserPath` chỉ nhận root đã xác minh và relative POSIX path, từ chối filesystem root, traversal, symlink/junction escape và path nằm ngoài root. Ngoại lệ (2.32.4): root người dùng tự relocate bằng `CLAUDE_CONFIG_DIR`, `CODEX_HOME` hoặc `XDG_CONFIG_HOME` được chứa junction/symlink con có đích thật nằm trong home đã xác minh (`UserPathRoot.linkBoundary`); `uninstall --global` không bao giờ xóa link đó và `doctor` cảnh báo `global-managed-linked-outside-root` vì root khác có thể cùng sở hữu file (2.33.0-dev.1).
 - Không persist hoặc in absolute home path. JSON/human output dùng logical path như `~/.kiro/...`, `$CODEX_HOME/...`.
 - Project discovery của hook đi ngược từ cwd để tìm **nearest** `.harnix/config.yaml`, kể cả non-Git workspace. Git root chỉ là một boundary signal; symlink-equivalent roots phải realpath-dedupe trước khi chọn.
 

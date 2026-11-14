@@ -4,6 +4,7 @@ export const PROJECT_FINDING_CODES = [
   "active-pointer-tracked",
   "active-pointer-unreadable",
   "broad-permissions",
+  "cache-tracked",
   "cli-version-skew",
   "config-invalid",
   "config-outdated",

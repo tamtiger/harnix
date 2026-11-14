@@ -88,7 +88,7 @@ export const PLATFORM_RECORDS = [
     ],
     healthyReadiness: "precedence-unknown",
     setupNotice:
-      "Antigravity plugin-versus-workspace hook precedence is not verified; inspect the active tool session before relying on injection.",
+      "Antigravity plugin-versus-workspace hook precedence is not verified and plugin hooks are documented for the CLI only; inspect the active tool session before relying on injection.",
     ambiguousRootEnv: null,
     shadowingFiles: [],
     facts: ANTIGRAVITY_FACTS,

@@ -4,6 +4,20 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.33.0] - 2026-11-14
+
+### Fixed
+
+- uninstall --global không còn xóa junction/symlink của root override (Windows rmdir xóa cả link) và doctor cảnh báo global-managed-linked-outside-root khi file owned nằm ngoài root qua link.
+- doctor cô lập lỗi root theo từng nền tảng (biến relocate sai chỉ làm nền tảng đó invalid, message nêu tên biến) và cảnh báo cache-tracked khi git theo dõi file trong .harnix/cache.
+- Siết suite gate: bỏ `*` và input file đơn khỏi cây source/test, và check có `cwd` của package phải chạy đúng lệnh test của package đó; sửa doctor không báo invalid khi một link hỏng và bớt cảnh báo planning thừa.
+
+### Changed
+
+- Lỗi workflow agent hay gặp có Gợi ý chạy được (--init khi đã có task active, --run-check ở planning, thiếu --check/--rationale/--exit-code), --init --file kiểm kiểu payload, --cancel chấp nhận --brief.
+- facts.ts của Antigravity thêm SessionStart và ghi nhận hook plugin chỉ có tài liệu cho CLI; setupNotice nêu điều đó; AGENTS.md ghi nhận agy 1.5.6 plugin list chỉ thấy plugin ở ~/.gemini/config/plugins (kiểm trên profile dùng thử, chưa chạy hook).
+- measure:tokens dùng đúng trần techniqueSkill và đo tổng mô tả skill (skillListing, trần 520); nâng sàn coverage (96/96/98.8/90.5) và sàn số test/assertion; sửa tài liệu: schema epic, sơ đồ phụ thuộc, công thức digest.
+
 ## [2.32.4] - 2026-11-13
 
 ### Fixed

@@ -73,6 +73,17 @@ describe("global diagnostics", () => {
     });
   });
 
+  it("isolates a bad relocation variable to its own platform and names the variable", async () => {
+    const { homeResolver, commandLookup } = await context();
+
+    const result = await diagnoseGlobal({ homeResolver, commandLookup, environment: { CODEX_HOME: "" } }, deps);
+
+    expect(statuses(result)).toMatchObject({ codex: "invalid", kiro: "not-installed", claude: "not-installed" });
+    const codex = result.find((item) => item.platform === "codex");
+    expect(codex?.findings[0]).toMatchObject({ code: "global-root-invalid" });
+    expect(codex?.findings[0]?.message).toContain("CODEX_HOME");
+  });
+
   it("reports a healthy install with the registered status per platform", async () => {
     const { homeResolver, commandLookup } = await context();
     await setupGlobal({

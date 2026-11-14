@@ -14,6 +14,8 @@ export interface TokenBudgets {
   readonly skills: Readonly<Record<string, number>>;
   /** A technique skill (arch-review, security-lens and the like). */
   readonly techniqueSkill: number;
+  /** The descriptions of every skill a host lists in each session, together. */
+  readonly skillListing: number;
   /** One reference file. */
   readonly reference: number;
   /** The `.harnix/workflow.md` template. */

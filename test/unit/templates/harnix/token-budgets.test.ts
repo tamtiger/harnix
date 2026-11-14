@@ -17,6 +17,7 @@ describe("token budgets", () => {
       alwaysLoaded: 1540,
       skill: 2000,
       techniqueSkill: 1200,
+      skillListing: 520,
       reference: 1200,
       workflow: 2500,
       directPath: 3600,

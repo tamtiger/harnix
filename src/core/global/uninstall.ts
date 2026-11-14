@@ -1,4 +1,4 @@
-import { rmdir } from "node:fs/promises";
+import { lstat, rmdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 import {
@@ -193,6 +193,7 @@ async function removeEmptyAncestorsAboveRoot(root: UserPathRoot): Promise<void> 
   for (let level = 0; level < aboveRoot; level += 1) {
     directory = dirname(directory);
     try {
+      if ((await lstat(directory)).isSymbolicLink()) return;
       await rmdir(directory);
     } catch (error: unknown) {
       if (isMissingPathError(error) || isNonEmptyOrNotDirectory(error)) return;
@@ -207,8 +208,10 @@ async function removeEmptyOwnedRoot(root: UserPathRoot, probePath: string): Prom
   await removeEmptyDirectory(root.path);
 }
 
+/** A link is never removed: on Windows rmdir deletes a junction even when its target is not empty. */
 async function removeEmptyDirectory(path: string): Promise<void> {
   try {
+    if ((await lstat(path)).isSymbolicLink()) return;
     await rmdir(path);
   } catch (error: unknown) {
     if (isMissingPathError(error) || isNonEmptyOrNotDirectory(error)) return;

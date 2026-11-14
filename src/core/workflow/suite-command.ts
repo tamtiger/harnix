@@ -5,6 +5,12 @@ import { inspectDotnetDirectory, isSolutionFile } from "src/core/stack/dotnet-pr
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { equivalentCommand, splitCommand } from "./command-match.js";
 
+/** The part of a verify-plan package the gate reads: its repository-relative path and its test command. */
+export interface SuitePackage {
+  readonly path: string;
+  readonly commands: { readonly test?: string | undefined };
+}
+
 // A solution path becomes an argument of a spawned command, so anything a shell or an option parser reads is refused.
 const UNSAFE_CHARACTERS = /[;&|<>`$()^%!*?{}\r\n\0\\]/u;
 
@@ -44,22 +50,37 @@ async function isDotnetTestDirectory(projectRoot: string, cwd: string): Promise<
   }
 }
 
+/** A check at a package `cwd` proves that package only when its command is the package's own test command. */
+function runsPackageTest(packages: readonly SuitePackage[], cwd: string, command: string): boolean {
+  const directory = cwd.replace(/\\/gu, "/").replace(/^\.\//u, "").replace(/\/+$/u, "");
+  return packages.some(
+    (item) =>
+      item.path.replace(/\/+$/u, "") === directory &&
+      item.commands.test !== undefined &&
+      equivalentCommand(item.commands.test, command),
+  );
+}
+
 const unquote = (word: string): string => word.replace(/["']/gu, "");
 
 /**
  * Whether a suite check's command proves the whole suite: the detected project test command, or in a .NET repository
  * `dotnet test <solution.sln>` with a safe path, or a bare `dotnet test` whose check declares the `cwd` of a solution
- * or project. Without a detected test command only the inputs are judged.
+ * or project. A check that declares the `cwd` of a package must run that package's own test command, since the root
+ * command run there tests only that package. Without a detected test command only the inputs are judged.
  */
 export async function acceptsSuiteCommand(
   projectRoot: string,
   command: string | undefined,
   cwd: string | undefined,
   known: readonly string[],
+  packages: readonly SuitePackage[] = [],
 ): Promise<boolean> {
   if (known.length === 0) return true;
   if (command === undefined) return false;
-  if (known.some((candidate) => equivalentCommand(candidate, command))) return true;
+  if (known.some((candidate) => equivalentCommand(candidate, command))) {
+    if (cwd === undefined || cwd === "." || runsPackageTest(packages, cwd, command)) return true;
+  }
   const [executable, verb, ...rest] = splitCommand(command).map(unquote);
   if (executable?.replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase() !== "dotnet" || verb !== "test") return false;
   if (rest.length === 0) return cwd !== undefined && cwd !== "." && (await isDotnetTestDirectory(projectRoot, cwd));

@@ -1,11 +1,18 @@
 import { readFile, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { trackTaskReads } from "src/core/tasks/read-tracker.js";
 import { runCheckWorkflow, type CheckRunner } from "src/core/workflow/run-check.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { commandlessImplementingTaskV3, implementingTaskV3 } from "test/support/workflow-fixtures.js";
+import { saveWorkflow } from "src/core/workflow/index.js";
+import {
+  commandlessImplementingTaskV3,
+  implementingTaskV3,
+  initializeUtcProject,
+  taskV3,
+  writeProjectSource,
+} from "test/support/workflow-fixtures.js";
 import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -263,5 +270,22 @@ describe("workflow --run-check", () => {
     expect(result.result).toBe("pass");
     const updatedPlan = await readFile(planPath, "utf8");
     expect(updatedPlan).toContain("- [x] [check] Run the focused check");
+  });
+
+  it("warns once that a run while planning freezes the obligations, and not after evidence exists", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    await saveWorkflow(root, { task: taskV3("planning", "planning") });
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    try {
+      await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner: fakeRunner(1).runner, now: NOW });
+      await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner: fakeRunner(1).runner, now: NOW });
+
+      const notices = stderr.mock.calls.filter(([text]) => String(text).includes("still planning"));
+      expect(notices).toHaveLength(1);
+    } finally {
+      stderr.mockRestore();
+    }
   });
 });

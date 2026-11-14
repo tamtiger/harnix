@@ -93,7 +93,10 @@ async function saveWorkflowLocked(
   const active = quiet ? undefined : await resolveSaveTarget(harnixRoot);
   const context: SaveContext = { root, harnixRoot, envelope, active, existing };
 
-  if (active && active.id !== initialCandidate.id) throw new Error("Workflow save may update only the active task.");
+  if (active && active.id !== initialCandidate.id)
+    throw new Error(
+      "Workflow save may update only the active task.\nGợi ý: tạo task mới mà không đổi pointer bằng harnix workflow --init ... --no-activate (thêm --epic <id> khi cùng sáng kiến), hoặc harnix pause rồi --init; để sửa một task chưa xong khác dùng --task <task-id>.",
+    );
   const replayed = await replayCommittedSave(context, initialCandidate);
   if (replayed !== undefined) return replayed;
   const candidate = existing

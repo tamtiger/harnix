@@ -18,14 +18,25 @@ async function loadInitFilePayload(root: string, file: string | undefined): Prom
   >;
 }
 
+/** A `--file` payload field that must be an array of strings; anything else is refused with the expected shape. */
+function stringList(value: unknown, field: string, example: string): string[] {
+  if (Array.isArray(value) && value.every((item) => typeof item === "string")) return value;
+  throw new Error(
+    `The --file payload field "${field}" must be an array of strings.\nGợi ý: ví dụ { "${field}": [${example}] }.`,
+  );
+}
+
 function resolveCriteria(filePayload: Record<string, unknown>, flags: HandlerContext["flags"]): string[] | undefined {
-  if (filePayload.criteria !== undefined) return filePayload.criteria as string[];
+  if (filePayload.criteria !== undefined) return stringList(filePayload.criteria, "criteria", '"<tiêu chí>"');
   if (flags.text !== undefined) return [flags.text].flat();
   return undefined;
 }
 
 function resolveChecks(filePayload: Record<string, unknown>, flags: HandlerContext["flags"]) {
-  if (filePayload.checks !== undefined) return (filePayload.checks as string[]).map(parseCheckSpec);
+  if (filePayload.checks !== undefined)
+    return stringList(filePayload.checks, "checks", '"id=chk-1;command=pnpm test;criteria=ac-1;input=src/**"').map(
+      parseCheckSpec,
+    );
   return flags.withCheck?.map(parseCheckSpec);
 }
 

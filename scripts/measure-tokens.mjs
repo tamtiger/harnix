@@ -6,9 +6,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
-import { budgetUsage, loadTokenBudgets, measureInstructionFiles } from "./token-budget-usage.mjs";
+import { measureBudgetUsage } from "./token-budget-usage.mjs";
 
-export { budgetUsage, loadTokenBudgets, measureInstructionFiles };
+export * from "./token-budget-usage.mjs";
 
 /** Same approximation as `context.tokenApproximation` in `.harnix/config.yaml`. */
 export const TOKEN_APPROXIMATION = 4;
@@ -324,7 +324,7 @@ async function main() {
       `hook learning must appear while planning and not while implementing (planning ${planning}, in_progress ${inProgress}).`,
     );
   const guides = await measureGuides(join(root, "src", "guides"));
-  const usage = budgetUsage(await loadTokenBudgets(), await measureInstructionFiles(root, estimateTokens));
+  const usage = await measureBudgetUsage(root, cli, estimateTokens, TOKEN_APPROXIMATION);
   process.stdout.write(`${JSON.stringify({ ...buildReport(brief, full, guides), budgetUsage: usage })}\n`);
 }
 

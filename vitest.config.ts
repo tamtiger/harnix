@@ -44,7 +44,7 @@ export default defineConfig({
       reporter: ["text-summary", "json-summary"],
       // Floor = coverage measured when `standardize-tests` finished (rounded down). It only ever goes up:
       // raise it when coverage improves, never lower it to make a change pass.
-      thresholds: { lines: 95, statements: 95, functions: 98.6, branches: 89 },
+      thresholds: { lines: 96, statements: 96, functions: 98.8, branches: 90.5 },
     },
   },
 });

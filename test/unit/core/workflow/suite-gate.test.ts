@@ -30,7 +30,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
 
     // Monorepo / subproject nested paths
     expect(coversSourceAndTest(["frt-paymenthub/src/**", "frt-paymenthub/test/**"])).toBe(true);
-    expect(coversSourceAndTest(["packages/core/src/index.ts", "packages/core/test/index.test.ts"])).toBe(true);
+    expect(coversSourceAndTest(["packages/core/src/**/*.ts", "packages/core/test/**/*.ts"])).toBe(true);
     expect(coversSourceAndTest(["frt-paymenthub\\src\\**", "frt-paymenthub\\test\\**"])).toBe(true);
     expect(coversSourceAndTest(["./src/**", "./test/**"])).toBe(true);
 
@@ -48,6 +48,18 @@ describe("Suite Gate (ac-suite-gate)", () => {
     expect(coversSourceAndTest(["services/**/*.ts", "test/**"])).toBe(true);
     expect(coversSourceAndTest(["modules/**/*.go", "tests/**"])).toBe(true);
     expect(coversSourceAndTest(["domain/**/*.java", "test/**"])).toBe(true);
+  });
+
+  it("coversSourceAndTest refuses a bare * and single-file inputs, and keeps the usual tree forms", () => {
+    expect(coversSourceAndTest(["*"])).toBe(false);
+    expect(coversSourceAndTest(["*", "test/**"])).toBe(false);
+    expect(coversSourceAndTest(["src/a.ts", "test/a.test.ts"])).toBe(false);
+    expect(coversSourceAndTest(["src/a.ts", "test/**"])).toBe(false);
+
+    expect(coversSourceAndTest(["./**"])).toBe(true);
+    expect(coversSourceAndTest(["**/*"])).toBe(true);
+    expect(coversSourceAndTest(["src/**/*.ts", "test/**/*.ts"])).toBe(true);
+    expect(coversSourceAndTest(["Foo.Api/**", "Foo.Api.Tests/**"])).toBe(true);
   });
 
   it("ready accepts task with project-level suite check covering full source and test inputs", async () => {

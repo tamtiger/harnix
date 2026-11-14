@@ -68,7 +68,7 @@ harnix workflow --save | --batch --file <path> --brief   # UTF-8 payload; --batc
 harnix workflow --add-decision <id> --text "<t>" --rationale "<why>" | --add-risk <id> --text "<t>" --severity medium --brief
 harnix resume --next | <id> --force | harnix pause [--dry-run]   # next epic task | switch task | clear the pointer
 harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why>" --brief   # user-authorized
-harnix workflow --cancel --reason "<why>"     # terminal, only on explicit user instruction
+harnix workflow --cancel --reason "<why>" --brief     # terminal, only on explicit user instruction; --brief is accepted, the cancelled record is always printed
 harnix workflow --finish --brief
 ```
 

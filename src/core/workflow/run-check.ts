@@ -96,6 +96,10 @@ export async function runCheckWorkflow(
       checkId,
       task.validationPlan.map((check) => check.id),
     );
+  if (task.status === "planning" && !task.evidence.some((evidence) => evidence.checkId !== undefined))
+    process.stderr.write(
+      "notice: a check run while the task is still planning records evidence, and evidence freezes the planning obligations; finish editing criteria and checks first, or use --replace-check afterwards.\n",
+    );
   const beforeSnapshot = await computeInputDigest(root, task, checkId);
   const before = beforeSnapshot.inputDigest;
   assertRetryAllowed(task, checkId, dependencies.now ? Date.parse(dependencies.now) : undefined, before);

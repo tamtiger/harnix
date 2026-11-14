@@ -1,0 +1,154 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220242-suite-gate-hardening",
+  "title": "Siết suite gate: loại kẽ hở wildcard và cwd làm pass giả",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Một check suite chỉ được chấp nhận khi inputs và cwd thật sự phủ toàn bộ source và test của dự án (hoặc đúng package được kiểm).",
+  "nonGoals": [
+    "Không đổi công thức input digest và không đổi luật circuit breaker (P3-2)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "coversSourceAndTest không coi chuỗi * là wildcard toàn repo, không chấp nhận input file đơn hay thư mục không thuộc nhóm source làm tree nguồn (P2-1).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "acceptsSuiteCommand xét cwd: lệnh root chạy với cwd của một package chỉ được chấp nhận khi trùng lệnh test của đúng package đó (P2-2).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Hợp đồng đóng băng được cập nhật đồng bộ: IMPLEMENTATION_PLAN mục 4.5, AGENTS.md, workflow template và golden chỉ đổi đúng chuỗi mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/suite-gate.ts",
+    "src/core/workflow/suite-command.ts",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md#4"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test suite-gate và suite-command",
+      "command": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/workflow/suite-command.test.ts --coverage.enabled=false",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/suite-command.ts",
+        "src/core/workflow/suite-gate.ts",
+        "test/unit/core/workflow/suite-command.test.ts",
+        "test/unit/core/workflow/suite-gate.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Các test hợp đồng nhanh (CLI, tài liệu, cấu trúc test, ngân sách token, golden)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-14T10:47:33.776+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/workflow/suite-command.test.ts --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ef262b6d53a00f795bfc94bb9b2536233aba6b22deed3ebf1295d80788c10046"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-14T10:47:43.467+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "99ec81ef5cbec4ada56d35571e428413f4cac20e2be04191a7954b0190101a6e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-14T10:49:29.174+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ad0006e126a8cd8a4f11b97f9145dc54432829e166c7a1e4cf71bc90e3594890"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-14T10:49:48.809+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    },
+    {
+      "id": "dec-suite-package-cwd",
+      "text": "Check có cwd package phải trùng lệnh test của đúng package theo verify-plan, thay vì chỉ so lệnh gốc",
+      "rationale": "Lệnh test gốc chạy ở cwd con chỉ kiểm package đó nên không chứng minh cả suite."
+    }
+  ],
+  "completedAt": "2026-11-14T10:49:48.809+07:00"
+}

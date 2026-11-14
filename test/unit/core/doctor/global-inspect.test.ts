@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -80,6 +80,33 @@ describe("global integration inspection", () => {
       "2.0.0",
     );
     expect(retired.findings.map((item) => item.code)).toContain("global-managed-obsolete");
+  });
+
+  it("warns when an owned file of a relocated root really lives outside it through a junction", async () => {
+    const home = await temporaryUserHome();
+    const profile = join(home, "profile");
+    const shared = join(home, ".claude", "skills");
+    await mkdir(profile, { recursive: true });
+    await mkdir(shared, { recursive: true });
+    await symlink(shared, join(profile, "skills"), process.platform === "win32" ? "junction" : "dir");
+    const homeResolver = () => Promise.resolve(home);
+    const environment = { CLAUDE_CONFIG_DIR: profile };
+    await setupGlobal({
+      platforms: ["claude"],
+      plans: plans("v1"),
+      generatorVersion: "2.0.0",
+      commandLookup: () => Promise.resolve(true),
+      lockAcquirer: acquireHarnixFileLock,
+      homeResolver,
+      environment,
+    });
+    const roots = await resolveUserPlatformRoots({ homeResolver, environment });
+
+    const result = await inspectPlatform("claude", targetsOf("claude", roots, "v1"), roots, "2.0.0");
+
+    expect(result.findings).toContainEqual(
+      expect.objectContaining({ code: "global-managed-linked-outside-root", severity: "warning", fixable: false }),
+    );
   });
 
   it("flags a non-empty shadowing file from the registry", async () => {

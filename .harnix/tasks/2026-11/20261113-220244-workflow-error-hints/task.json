@@ -1,0 +1,185 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220244-workflow-error-hints",
+  "title": "Hint và kiểm kiểu cho các lỗi flag workflow agent hay gặp",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Các lỗi agent hay gặp khi dùng harnix workflow nêu rõ cách thoát và không lộ lỗi nội bộ.",
+  "nonGoals": [
+    "Không thêm hint cho toàn bộ 255 điểm throw; chỉ nhóm lỗi đã có bằng chứng."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lỗi --init khi đang có task active, lỗi --run-check ở planning rồi sửa obligations, và các lỗi thiếu cờ đi kèm (--add-criterion thiếu --check, --add-decision thiếu --rationale, --evidence thiếu --exit-code) đều có hint nêu lệnh sửa (UX-01, UX-02, UX-03).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "--init --file kiểm kiểu payload (ví dụ checks không phải mảng) và trả lỗi chuẩn có hint thay vì lỗi nội bộ (A3).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "--cancel chấp nhận hoặc mặc định --brief, hoặc khối luôn nạp bỏ câu thêm --brief cho mọi lệnh ghi; cách chọn được ghi thành decision (UX-04).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/save.ts",
+    "src/core/workflow/obligations.ts",
+    "src/commands/workflow-lifecycle-handlers.ts",
+    "src/commands/workflow-flags.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test workflow handlers, hint và hợp đồng CLI",
+      "command": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts test/workflow/cli-contract.test.ts --coverage.enabled=false",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/workflow-*.ts",
+        "src/core/workflow/**",
+        "test/unit/commands/workflow-handlers.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Các test hợp đồng nhanh (CLI, tài liệu, cấu trúc test, ngân sách token, golden)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:23:54.910+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts test/workflow/cli-contract.test.ts --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bebac62e236604d2e3e381c1e5664df3f955a4a052cc736b5b41f87af849a60e"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-13T22:24:07.273+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ff2616514011bf8e7739ee7bd4b0b091db2e0e4436fa456bdb21107c03b772b5"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:26:04.631+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ca2d126ddc45bcb2c7375e8f937129aff00f2580008270b718223ddbd8c91df4"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:27:31.890+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts test/workflow/cli-contract.test.ts --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e90bdc2d08b3b779b6df8a8e0b6a454aeae6eac6407c61c68282357e868c9ad9"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-13T22:27:41.968+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f5f0afd2a2ef36dd9a556954101bec6396bfc3b0cf3bd714977f23c6921d1b97"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:29:24.964+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e3e476b3854b57a08815b991705920f326825670f7071e21653512f55d9fdff0"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-13T22:29:27.938+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    },
+    {
+      "id": "dec-tdd-exception",
+      "text": "Hint của lỗi workflow thêm sau code, test viết ngay sau.",
+      "rationale": "Chỉ đổi câu chữ thông báo (ngoại lệ TDD: văn bản), kiểm chứng bằng test tích hợp mới kiểm hint và golden chỉ đổi đúng chuỗi mới."
+    }
+  ],
+  "completedAt": "2026-11-13T22:29:27.938+07:00"
+}

@@ -70,7 +70,8 @@ harnix/
 Dependency direction:
 
 ```text
-commands/configurators/migration -> core -> utils/pure types
+commands/configurators -> core -> utils/pure types
+core -> catalog, guides (typed data and Markdown, no logic)
 commands -> terminal UI
 configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
@@ -514,7 +515,8 @@ harnix/
 Dependency direction:
 
 ```text
-commands/configurators/migration -> core -> utils/pure types
+commands/configurators -> core -> utils/pure types
+core -> catalog, guides (typed data and Markdown, no logic)
 commands -> terminal UI
 configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
@@ -1554,7 +1556,7 @@ git diff --check
 Script contracts:
 
 - `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Tại bản phát hành 2.0.0, toàn bộ danh sách miễn trừ trong `eslint.config.mjs` (`OVERSIZED_SOURCE_FILES`, `COMPLEX_SOURCE_FILES`, `RELEASE_SCRIPT_EXEMPTIONS`) đã được dọn sạch hoàn toàn về rỗng `[]`; mọi file trong `src/` đều ≤ 300 dòng code và complexity ≤ 20.
-- `test`: `vitest run --coverage` (provider v8, `@vitest/coverage-v8`) trên toàn bộ `test/**/*.test.ts`; sàn coverage `lines`/`statements` 95, `functions` 98.6, `branches` 89 nằm trong `vitest.config.ts` và chỉ được nâng lên, không hạ để một thay đổi pass; `testTimeout` 20 giây. Bố cục test được mô tả trong `test/README.md` và bị `test/unit/test-structure.test.ts` ép buộc (unit phản chiếu `src`, `integration/commands` phản chiếu `src/commands`, mọi file ≤ 400 dòng, dùng builder dùng chung, mọi module có test hoặc lý do, số test/assertion không giảm). Import dùng alias `src/...` và `test/...` (tsconfig `paths` + alias vitest) trong cả `src` và `test`; ESLint cấm import cha `../`.
+- `test`: `vitest run --coverage` (provider v8, `@vitest/coverage-v8`) trên toàn bộ `test/**/*.test.ts`; sàn coverage `lines`/`statements` 96, `functions` 98.8, `branches` 90.5 nằm trong `vitest.config.ts` và chỉ được nâng lên, không hạ để một thay đổi pass; `testTimeout` 20 giây. Bố cục test được mô tả trong `test/README.md` và bị `test/unit/test-structure.test.ts` ép buộc (unit phản chiếu `src`, `integration/commands` phản chiếu `src/commands`, mọi file ≤ 400 dòng, dùng builder dùng chung, mọi module có test hoặc lý do, số test/assertion không giảm). Import dùng alias `src/...` và `test/...` (tsconfig `paths` + alias vitest) trong cả `src` và `test`; ESLint cấm import cha `../`.
 - `test:acceptance`: alias của `pnpm run test` (toàn bộ unit/integration/migration/platform/workflow/safety test directories kèm coverage, gồm clean và seeded unsafe Doctor JSON fixtures). Acceptance sequence chạy đúng một lần `pnpm test` để sàn coverage trong `vitest.config.ts` được ép buộc; không chạy thêm các suite con. `test/workflow/package-contract.test.ts` bảo vệ điều này.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.

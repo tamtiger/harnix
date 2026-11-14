@@ -1,0 +1,104 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-220243-doctor-hardening",
+  "title": "Doctor: cô lập lỗi theo nền tảng và cảnh báo cache repo-map bị git theo dõi",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "doctor không báo invalid cho mọi nền tảng vì một biến môi trường sai, và phát hiện .harnix/cache bị git theo dõi.",
+  "nonGoals": [
+    "Không tự chạy git rm --cached; việc gỡ file khỏi index do người dùng duyệt."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "diagnoseGlobal resolve root theo từng nền tảng: một CODEX_HOME rỗng hay sai chỉ làm nền tảng Codex bị invalid, message nêu tên biến (không lộ giá trị) (S5).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "doctor có finding warning mới (mã trong DOCTOR_FINDING_CODES kèm fixture) khi git theo dõi .harnix/cache, theo mẫu active-pointer-tracked (A1).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/doctor",
+    "src/core/platform/user-paths.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test doctor",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts --coverage.enabled=false",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/doctor/**",
+        "test/integration/commands/doctor.test.ts",
+        "test/unit/core/doctor/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-13T22:16:13.307+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f5ff7651345fca3578af8ca0259cffe2139f539fb041e0319891df3d4656ab97"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T22:18:08.179+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "803573b1945a49c72a0266dbd0282c598f9a5696060dc5106e3029b8bc1decec"
+    }
+  ],
+  "epicId": "20261113-220240-harnix-review-hardening",
+  "createdAt": "2026-11-13T22:02:39.204+07:00",
+  "updatedAt": "2026-11-13T22:18:12.977+07:00",
+  "decisions": [
+    {
+      "id": "dec-source",
+      "text": "Nguồn của task: báo cáo review toàn bộ Harnix ngày 2026-11-13 (research.md của epic).",
+      "rationale": "Mỗi tiêu chí là một phát hiện đã được nhóm review nêu kèm file:dòng; phải đối chiếu lại với mã hiện tại trước khi chuyển sang ready."
+    }
+  ],
+  "completedAt": "2026-11-13T22:18:12.977+07:00"
+}
