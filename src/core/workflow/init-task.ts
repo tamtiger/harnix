@@ -9,6 +9,7 @@ import { equivalentCommand } from "./command-match.js";
 import { flagIssueError } from "./flag-issues.js";
 import { asciiFold, slugOrIssue } from "./init-issues.js";
 import { checksNotice } from "./init-checks-notice.js";
+import { buildLintCheck, LINT_CHECK_ID } from "./init-lint-check.js";
 import { resolveLineage } from "./init-lineage.js";
 import type { InitCheckSpec } from "./init-spec.js";
 import { saveWorkflow } from "./save.js";
@@ -32,15 +33,43 @@ export interface InitTaskOptions {
   activate?: boolean | undefined;
   /** Repository-relative directory of the package the task is about: its test command and inputs become the default. */
   cwd?: string | undefined;
+  /** True for `--with-lint`: also declare a read-only check-lint from the project lint command. */
+  lint?: boolean | undefined;
   injectedNow?: string | undefined;
 }
 
-const SUITE_DESCRIPTION = "Toàn bộ test, lint và typecheck của dự án phải xanh";
+const SUITE_DESCRIPTION = "Toàn bộ test của dự án phải xanh";
 
 async function projectTestCommand(root: string, cwd: string | undefined): Promise<string | undefined> {
   if (cwd === undefined) return (await buildVerifyPlan(root)).commands.test?.trim() || undefined;
   const plan = await buildVerifyPlan(root, { recursive: true });
   return plan.packages.find((pkg) => pkg.path === cwd)?.commands.test?.trim() || undefined;
+}
+
+async function projectLintCommand(root: string, cwd: string | undefined): Promise<string | undefined> {
+  if (cwd === undefined) return (await buildVerifyPlan(root)).commands.lint?.trim() || undefined;
+  const plan = await buildVerifyPlan(root, { recursive: true });
+  return plan.packages.find((pkg) => pkg.path === cwd)?.commands.lint?.trim() || undefined;
+}
+
+/** The `--with-lint` check (or the notice saying why there is none); a declared `check-lint` always wins. */
+async function resolveLintCheck(
+  root: string,
+  options: InitTaskOptions,
+  declared: readonly ValidationCheckV3[],
+  criteria: TaskRecordV3["acceptanceCriteria"],
+  inputs: string[],
+  cwd: string | undefined,
+): Promise<ReturnType<typeof buildLintCheck>> {
+  if (options.lint !== true || declared.some(({ id }) => id === LINT_CHECK_ID)) return {};
+  const built = buildLintCheck({
+    command: await projectLintCommand(root, cwd),
+    criteriaIds: criteria.map(({ id }) => id),
+    inputs,
+    cwd,
+  });
+  if (built.notice !== undefined) process.stderr.write(built.notice);
+  return built;
 }
 
 /** The package directory of `--cwd`, or undefined for the repository root (absent, empty or a dot). */
@@ -154,6 +183,10 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
 
   const { epicId, followUpOf, relevantPaths, relevantSpecs } = await resolveLineage(root, options);
 
+  const declared = (options.checks ?? []).map((spec) => declaredCheck(spec, cwd));
+  const base = command === undefined ? undefined : defaultCheck(title, command, projectTest, criteria, inputs, cwd);
+  const lint = await resolveLintCheck(root, options, declared, criteria, inputs, cwd);
+
   const candidate: TaskRecordV3 = {
     generator: "harnix",
     schemaVersion: 3,
@@ -168,8 +201,9 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     ...(followUpOf !== undefined ? { followUpOf } : {}),
     acceptanceCriteria: criteria,
     validationPlan: [
-      ...(command === undefined ? [] : [defaultCheck(title, command, projectTest, criteria, inputs, cwd)]),
-      ...(options.checks ?? []).map((spec) => declaredCheck(spec, cwd)),
+      ...(lint.check === undefined ? [] : [lint.check]),
+      ...(base === undefined ? [] : [base]),
+      ...declared,
     ],
     evidence: [],
     relevantPaths,
@@ -194,7 +228,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   )) as TaskRecordV3;
   const notice = similarTaskNotice(similar);
   if (notice !== undefined) process.stderr.write(notice);
-  const autoId = command === undefined ? undefined : candidate.validationPlan[0]?.id;
+  const autoId = base?.id;
   process.stderr.write(checksNotice(candidate.validationPlan, autoId));
   return saved;
 }

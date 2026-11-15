@@ -155,6 +155,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--epic <epic-id>", "Existing epic to attach the new task to (--init only)")
     .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
     .option("--no-activate", "Create the task (--init only) without moving the active pointer")
+    .option("--with-lint", "Also declare a read-only check-lint from the project lint command (--init only)")
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .option("--full", "Print full task record instead of default brief output")
     .option("--checklist", "With --transition --dry-run, also print reviewChecklist for any target")

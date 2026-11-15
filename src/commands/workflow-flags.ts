@@ -76,6 +76,7 @@ export interface WorkflowFlags {
   checklist?: boolean;
   epic?: string;
   activate?: boolean;
+  withLint?: boolean;
   expectedTask?: string;
 }
 

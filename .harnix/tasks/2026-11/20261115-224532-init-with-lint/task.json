@@ -1,0 +1,187 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261115-224532-init-with-lint",
+  "title": "Sửa mô tả check suite và thêm cờ --with-lint opt-in",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Mô tả check mặc định khớp lệnh thực chạy (chỉ test); workflow --init có cờ opt-in --with-lint thêm check bắt buộc check-lint chỉ-đọc, không đổi hành vi mặc định.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Mô tả check mặc định (SUITE_DESCRIPTION) chỉ nói về test, đúng với lệnh test thực chạy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-init-lint-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "workflow --init --with-lint thêm check bắt buộc check-lint (scope full, khai báo trước check-suite, phủ mọi criterion) với lệnh lint của verify-plan theo --cwd; không có cờ thì danh sách check không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-init-lint-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Lệnh lint chứa token --fix hoặc --write không bao giờ được thêm làm check; thiếu lệnh lint thì không lỗi, không thêm check và có notice nêu cách sửa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-init-lint-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Cờ --with-lint được khai báo đủ theo checklist thêm cờ workflow (command, flags, owners, handler, schema, golden, tài liệu) và có một dòng cookbook, trong trần token.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-init-lint",
+      "description": "chk-init-lint",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-command.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/integration/commands/**",
+        "test/unit/commands/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "chk-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-init-lint-1",
+      "checkId": "chk-init-lint",
+      "recordedAt": "2026-11-15T22:54:27.386+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d4e0969d3ebd4b7d1344bfd51f2fa213aa3055132b40b08b50170f529918103d"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-15T22:54:41.322+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d89dabba1507a063fab348df3addf3b6bd6e77600b520ebbf19da3271d1e86ff"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-15T22:57:02.738+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b884763ff7fe73fca39a5edb5e718060d969136b28d4f7e05a5af4e8bcbaeda6"
+    },
+    {
+      "id": "ev-chk-init-lint-2",
+      "checkId": "chk-init-lint",
+      "recordedAt": "2026-11-15T22:59:04.492+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1800db07b89fb1356bb9d6b56c64ffbf0638361bb20da7b6771f73d9bb265f22"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-15T22:59:16.749+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "795f368061bff6a5790aab7f8b717f40a9572d1eea8dfdb5e31947fd628b23d8"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-15T23:01:35.454+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "66431546bff185425c99ad7ff3b400f7fb300a46803509d156a0ce0a374a22c2"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-15T22:45:32.719+07:00",
+  "updatedAt": "2026-11-15T23:05:50.092+07:00",
+  "decisions": [
+    {
+      "id": "d-optin",
+      "text": "Lint là opt-in (--with-lint), không mặc định",
+      "rationale": "Review độc lập: không có sự cố thật, lint đỏ sẵn chặn task cũ, script --fix làm default thành no-op; đã có --with-check thủ công"
+    },
+    {
+      "id": "d-scope-full",
+      "text": "check-lint scope full, khai báo trước check-suite",
+      "rationale": "Ready gate chỉ đếm check focused; lint focused sẽ thỏa gate mà không có test hành vi"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-fix-script",
+      "text": "Guard chỉ xét token trong chuỗi lệnh, không đọc thân script package.json",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-15T23:05:50.092+07:00"
+}

@@ -53,7 +53,7 @@ Run from the repository root; read `harnix workflow --schema` once per session. 
 ```text
 harnix status --summary | --criteria | --checks | --explain   # no positional argument
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
-harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"] [--command "<cmd>"] [--input "src/**"] [--epic <id>] [--follow-up <id>] [--cwd <dir>] [--no-activate] --brief
+harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"] [--command "<cmd>"] [--input "src/**"] [--epic <id>] [--follow-up <id>] [--cwd <dir>] [--no-activate] [--with-lint] --brief
 harnix workflow --transition ready/ready [--reviewed] [--dry-run] --brief
 harnix workflow --run-checks --brief         # verify: every required check not passing, stops at the first failure
 harnix workflow --run-check <check-id> --brief -- pnpm test   # snapshot, run, record; argv must equal the declared command

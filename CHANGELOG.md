@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.33.1] - 2026-11-15
+
+### Changed
+
+- workflow --init --with-lint thêm check-lint opt-in; mô tả check-suite chỉ nói về test
+
 ## [2.33.0] - 2026-11-14
 
 ### Fixed

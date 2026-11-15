@@ -175,5 +175,6 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   },
   initOwner("--follow-up", (f) => f.followUp),
   { name: "--no-activate", isSet: (f) => f.activate === false, actions: ["init"] },
+  { name: "--with-lint", isSet: (f) => f.withLint === true, actions: ["init"] },
   initOwner("--with-check", (f) => (listed(f.withCheck) ? "set" : undefined)),
 ];

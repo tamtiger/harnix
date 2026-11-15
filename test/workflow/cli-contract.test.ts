@@ -165,6 +165,7 @@ describe("CLI command contract", () => {
       "--epic",
       "--follow-up",
       "--no-activate",
+      "--with-lint",
       "--brief",
       "--full",
       "--checklist",

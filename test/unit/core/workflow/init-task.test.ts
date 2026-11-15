@@ -78,7 +78,7 @@ describe("initTaskWorkflow", () => {
       expect(task.validationPlan[0]).toMatchObject({
         id: "check-suite",
         scope: "full",
-        description: "Toàn bộ test, lint và typecheck của dự án phải xanh",
+        description: "Toàn bộ test của dự án phải xanh",
         criterionIds: ["ac-1"],
       });
   });
