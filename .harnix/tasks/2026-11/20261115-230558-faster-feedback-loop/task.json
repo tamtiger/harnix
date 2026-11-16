@@ -1,0 +1,187 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261115-230558-faster-feedback-loop",
+  "title": "Rút ngắn vòng phản hồi implement và verify của Harnix",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Giảm thời gian và số lần chạy lại suite trong vòng implement đến verify: bắt lỗi rẻ (lint, typecheck, complexity) sớm hơn suite có coverage, tránh làm bằng chứng suite hết hạn không cần thiết.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --run-check và --run-checks báo thời lượng (durationMs) của mỗi check đã chạy, cả pass lẫn fail; evidence ghi thêm field tùy chọn durationMs.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2",
+        "ev-chk-timing-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "workflow --run-checks chạy check ngắn trước trong cùng scope theo thời lượng ghi nhận gần nhất (chưa có thì giữ thứ tự khai báo), vẫn focused trước full và dừng ở check fail đầu tiên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-timing-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "workflow --init: khi dự án có cả cây mã nguồn và cây test, input mặc định của check-suite là hai cây đó cộng file manifest ở gốc, nên sửa tài liệu không làm bằng chứng suite hết hạn; ngược lại giữ **, và vẫn qua suite gate.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-timing-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Cờ, field và hành vi mới được đồng bộ ở schema, golden, tài liệu và template workflow, trong trần token hiện có.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-timing",
+      "description": "Thời lượng, thứ tự chạy và input mặc định",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/utils test/unit/core/tasks",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/**",
+        "src/utils/**",
+        "test/unit/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Hợp đồng CLI, schema, golden và tài liệu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-timing-1",
+      "checkId": "chk-timing",
+      "recordedAt": "2026-11-15T23:28:16.599+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/utils test/unit/core/tasks — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "27d7bc61efe206e1d237a5019dbe793fea2868db7fe514d892fbd9313197e65d"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-15T23:28:28.295+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13cbfe01ac00b9400a20c97877a599a5fbd16318196329353946a6c0c8cb21f9"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-15T23:30:43.704+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "053ac38edf162200785e099c1405e75c815762ec05fb33d103e5f67773cb77cf"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-15T23:32:18.962+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "83d3a75422e0258efd31165c4f843b59e67dd212fdca40a64495f5768e8ffaf1"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-15T23:34:29.622+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "854a75315cc39ad93f99f929e8adfaacf7f2b0902c1c61b99d03c8f7ee83f225"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-15T23:05:58.741+07:00",
+  "updatedAt": "2026-11-16T10:36:55.875+07:00",
+  "decisions": [
+    {
+      "id": "d-duration-field",
+      "text": "Thời lượng lưu bằng field tùy chọn durationMs trên evidence",
+      "rationale": "Cần nhớ thời lượng lần chạy trước để sắp xếp; field tùy chọn cộng thêm không phá evidence cũ. Phương án thay thế chỉ báo ra output thì không sắp xếp được theo lịch sử"
+    },
+    {
+      "id": "d-order-within-scope",
+      "text": "Chỉ sắp xếp theo thời lượng bên trong cùng scope; focused vẫn trước full",
+      "rationale": "Giữ nguyên hợp đồng thứ tự hiện tại; check chưa có thời lượng giữ thứ tự khai báo nên hành vi cũ không đổi"
+    },
+    {
+      "id": "d-default-inputs",
+      "text": "Input mặc định thu hẹp chỉ khi có cả cây mã nguồn và cây test",
+      "rationale": "Suite gate chấp nhận wildcard hoặc cây nguồn cộng cây test; thu hẹp để docs không làm suite hết hạn, và cộng manifest ở gốc để đổi phụ thuộc vẫn làm hết hạn"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-narrow-inputs",
+      "text": "Input hẹp bỏ sót file ngoài src và test ảnh hưởng kết quả test (cấu hình, fixture ở thư mục khác) (Mitigation: Cộng manifest và file cấu hình ở gốc; dự án có cấu trúc khác vẫn dùng ** và người dùng đổi bằng --input)",
+      "severity": "medium"
+    },
+    {
+      "id": "r-frozen-evidence",
+      "text": "Thêm field vào evidence chạm hợp đồng đóng băng của TaskRecord v3 (Mitigation: Field tùy chọn, bỏ qua khi đọc evidence cũ, cập nhật validator, tài liệu và test migration)",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-11-16T10:36:55.875+07:00"
+}

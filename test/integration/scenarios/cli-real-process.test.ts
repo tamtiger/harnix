@@ -53,8 +53,8 @@ describe.sequential("real-process workflow commands", () => {
     expect(created.code).toBe(0);
     expect(JSON.parse(run.out)).toEqual({
       ran: [
-        { id: "check-1", result: "pass", exitCode: 0 },
-        { id: "check-bad", result: "fail", exitCode: 3, outputTail: "" },
+        { id: "check-1", result: "pass", exitCode: 0, durationMs: expect.any(Number) },
+        { id: "check-bad", result: "fail", exitCode: 3, outputTail: "", durationMs: expect.any(Number) },
       ],
       remaining: [],
     });

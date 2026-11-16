@@ -16,6 +16,8 @@ export interface EvidenceFlags {
   exitCode?: string | undefined;
   artifacts?: readonly string[] | undefined;
   digest?: string | undefined;
+  /** Milliseconds the check ran, from `--run-check`; never typed by hand. */
+  durationMs?: number | undefined;
   /** Criteria to mark met from this pass, in the same save (`--evidence --criterion <ids> --met`). */
   markMet?: readonly string[] | undefined;
 }
@@ -111,6 +113,7 @@ export async function appendEvidenceFlagsWorkflow(
     summary,
     artifactPaths: [...(flags.artifacts ?? [])],
     ...(inputDigest === undefined ? {} : { inputDigest }),
+    ...(flags.durationMs === undefined ? {} : { durationMs: flags.durationMs }),
   };
   const recorded = { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) };
   const acceptanceCriteria =

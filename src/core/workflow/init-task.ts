@@ -9,6 +9,7 @@ import { equivalentCommand } from "./command-match.js";
 import { flagIssueError } from "./flag-issues.js";
 import { asciiFold, slugOrIssue } from "./init-issues.js";
 import { checksNotice } from "./init-checks-notice.js";
+import { defaultCheckInputs } from "./init-default-inputs.js";
 import { buildLintCheck, LINT_CHECK_ID } from "./init-lint-check.js";
 import { resolveLineage } from "./init-lineage.js";
 import type { InitCheckSpec } from "./init-spec.js";
@@ -147,7 +148,7 @@ async function resolveCheckTarget(
         : `workflow --init --cwd ${cwd} found no test command for that package; pass --command <cmd> explicitly.`
       : undefined;
   const given = Array.isArray(options.input) ? options.input : [];
-  const inputs = given.length > 0 ? [...new Set(given)].sort() : [cwd === undefined ? "**" : `${cwd}/**`];
+  const inputs = given.length > 0 ? [...new Set(given)].sort() : await defaultCheckInputs(root, cwd);
   return { cwd, projectTest, command, inputs, ...(issue === undefined ? {} : { issue }) };
 }
 

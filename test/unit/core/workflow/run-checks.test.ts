@@ -65,8 +65,8 @@ describe("workflow --run-checks", () => {
     expect(calls).toEqual(["pnpm exec vitest run one.test.ts", "pnpm test"]);
     expect(result).toEqual({
       ran: [
-        { id: "focus", result: "pass", exitCode: 0 },
-        { id: "suite", result: "pass", exitCode: 0 },
+        { id: "focus", result: "pass", exitCode: 0, durationMs: expect.any(Number) },
+        { id: "suite", result: "pass", exitCode: 0, durationMs: expect.any(Number) },
       ],
       remaining: [],
     });
@@ -92,7 +92,7 @@ describe("workflow --run-checks", () => {
 
     expect(calls).toEqual(["pnpm exec vitest run one.test.ts"]);
     expect(result).toEqual({
-      ran: [{ id: "focus", result: "fail", exitCode: 1, outputTail: "boom" }],
+      ran: [{ id: "focus", result: "fail", exitCode: 1, outputTail: "boom", durationMs: expect.any(Number) }],
       remaining: ["suite"],
     });
   });

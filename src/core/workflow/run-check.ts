@@ -19,6 +19,8 @@ export interface RunCheckDependencies {
   summary?: string | undefined;
   now?: string | undefined;
   cwd?: string | undefined;
+  /** Monotonic milliseconds clock for the run duration; tests inject it. */
+  monotonicNow?: (() => number) | undefined;
 }
 
 export interface RunCheckResult {
@@ -27,6 +29,8 @@ export interface RunCheckResult {
   result: "pass" | "fail";
   exitCode: number;
   outputTail: string;
+  /** Milliseconds the check's process ran. */
+  durationMs: number;
 }
 
 function safeCwd(value: string, label: string): string {
@@ -106,7 +110,10 @@ export async function runCheckWorkflow(
   assertDeclaredCommand(declared, argv);
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
   await saveInputDigestSnapshot(harnixRoot, beforeSnapshot);
+  const clock = dependencies.monotonicNow ?? (() => performance.now());
+  const startedAt = clock();
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
+  const durationMs = Math.max(0, Math.round(clock() - startedAt));
   const launcher = launcherFailure(run.output, run.exitCode, executable);
   if (launcher !== undefined) throw new Error(`Check ${checkId} could not start: ${launcher}; nothing was recorded.`);
   const after = (await computeInputDigest(root, task, checkId)).inputDigest;
@@ -123,6 +130,7 @@ export async function runCheckWorkflow(
         exitCode: String(run.exitCode),
         summary: dependencies.summary ?? `${describeCommand(argv)} — exit ${run.exitCode}`,
         digest: before,
+        durationMs,
       },
       dependencies.now,
     ),
@@ -133,5 +141,6 @@ export async function runCheckWorkflow(
     result,
     exitCode: run.exitCode,
     outputTail: result === "fail" ? summarizeCheckOutput(run.output) : "",
+    durationMs,
   };
 }

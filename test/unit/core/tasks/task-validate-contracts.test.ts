@@ -150,6 +150,29 @@ describe("task validation contracts", () => {
     ).toThrow(/digest/iu);
   });
 
+  it("accepts an optional non-negative finite durationMs on v2 evidence and rejects any other value", () => {
+    const evidence = {
+      id: "e",
+      checkId: "check",
+      recordedAt: timestamp,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "ok",
+      artifactPaths: [],
+      inputDigest: "a".repeat(64),
+    };
+    const build = (extra: Record<string, unknown>) => ({
+      ...taskV2Fixture(),
+      evidence: [{ ...evidence, ...extra }],
+      acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }],
+    });
+    expect(() => validateTask(build({ durationMs: 0 }))).not.toThrow();
+    expect(() => validateTask(build({ durationMs: 1234 }))).not.toThrow();
+    expect(() => validateTask(build({}))).not.toThrow();
+    for (const bad of [-1, Number.NaN, Number.POSITIVE_INFINITY, "5", 1.5e300 * 1e300])
+      expect(() => validateTask(build({ durationMs: bad }))).toThrow(/Evidence is invalid/iu);
+  });
+
   it("accepts optional findings on EvidenceRecordV2 but rejects them on EvidenceRecordV1", () => {
     const fixtureV2 = taskV2Fixture();
     const withFindings = {

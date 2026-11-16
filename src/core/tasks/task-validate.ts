@@ -165,6 +165,8 @@ function isEvidenceShape(item: unknown, allowUnsafeArtifacts: boolean): boolean 
 
 function assertEvidenceFindings(value: TaskObject): void {
   for (const item of value.evidence as Record<string, unknown>[]) {
+    if (item.durationMs !== undefined && !(Number.isFinite(item.durationMs) && (item.durationMs as number) >= 0))
+      throw new TaskValidationError("Evidence is invalid.");
     if (item.findings === undefined) continue;
     if (!Array.isArray(item.findings)) throw new TaskValidationError("Evidence finding is invalid.");
     for (const finding of item.findings as unknown[]) {

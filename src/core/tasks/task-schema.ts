@@ -82,6 +82,8 @@ export interface EvidenceFindingV1 {
 export interface EvidenceV2 extends EvidenceBase {
   inputDigest?: string;
   findings?: EvidenceFindingV1[];
+  /** How long the check's process ran, in milliseconds; recorded by `--run-check` and optional on older evidence. */
+  durationMs?: number;
 }
 export type EvidenceV3 = EvidenceV2;
 export type Evidence = EvidenceV1 | EvidenceV2;
@@ -212,7 +214,7 @@ export const evidenceV1Keys = new Set([
   "result",
   "summary",
 ]);
-export const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest", "findings"]);
+export const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest", "findings", "durationMs"]);
 export const evidenceFindingKeys = new Set(["id", "severity", "text"]);
 export const blockerKeys = new Set(["kind", "nextAction", "resumeStatus", "summary"]);
 export const cancellationKeys = new Set(["authorizedBy", "reason"]);

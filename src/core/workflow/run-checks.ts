@@ -5,18 +5,22 @@ import { type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { splitCommand } from "./command-match.js";
+import { orderChecks } from "./check-order.js";
 import { runCheckWorkflow } from "./run-check.js";
 import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface RunChecksDependencies {
   runner?: CheckRunner | undefined;
   now?: string | undefined;
+  monotonicNow?: (() => number) | undefined;
 }
 
 export interface RanCheck {
   id: string;
   result: "pass" | "fail";
   exitCode: number;
+  /** Milliseconds the check ran. */
+  durationMs: number;
   /** Only a failing check carries its output, so a pass costs no tokens. */
   outputTail?: string;
 }
@@ -27,8 +31,8 @@ export interface RunChecksResult {
 }
 
 /**
- * Runs every required check that is not currently passing, focused before full and otherwise in declaration order,
- * each exactly like `--run-check` with its declared command and cwd, and stops at the first failure. Nothing runs
+ * Runs every required check that is not currently passing, focused before full and, inside a scope, shortest recorded
+ * duration first (declaration order without durations; see `orderChecks`), each exactly like `--run-check` with its declared command and cwd, and stops at the first failure. Nothing runs
  * when any of them is at the circuit breaker or has no command to run.
  */
 export async function runChecksWorkflow(
@@ -43,9 +47,10 @@ export async function runChecksWorkflow(
       .filter((inspection) => inspection.state !== "passed")
       .map((inspection) => inspection.id),
   );
-  const todo = task.validationPlan
-    .filter((check) => pending.has(check.id))
-    .sort((left, right) => Number(right.scope === "focused") - Number(left.scope === "focused"));
+  const todo = orderChecks(
+    task.validationPlan.filter((check) => pending.has(check.id)),
+    task.evidence,
+  );
   for (const check of todo) {
     // Like --run-check: changed inputs (a new digest) reopen a check that failed twice in a row.
     const digest = (await computeInputDigest(root, task, check.id)).inputDigest;
@@ -68,12 +73,19 @@ export async function runChecksWorkflow(
     const run = await runCheckWorkflow(root, check.id, splitCommand(check.command as string), {
       runner: dependencies.runner,
       now: dependencies.now,
+      monotonicNow: dependencies.monotonicNow,
     });
     if (run.result === "pass") {
-      ran.push({ id: check.id, result: "pass", exitCode: run.exitCode });
+      ran.push({ id: check.id, result: "pass", exitCode: run.exitCode, durationMs: run.durationMs });
       continue;
     }
-    ran.push({ id: check.id, result: "fail", exitCode: run.exitCode, outputTail: run.outputTail });
+    ran.push({
+      id: check.id,
+      result: "fail",
+      exitCode: run.exitCode,
+      durationMs: run.durationMs,
+      outputTail: run.outputTail,
+    });
     return { ran, remaining: todo.slice(index + 1).map((rest) => rest.id) };
   }
   return { ran, remaining: [] };

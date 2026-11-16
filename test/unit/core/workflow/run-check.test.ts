@@ -49,6 +49,22 @@ describe("workflow --run-check", () => {
     expect(result).toMatchObject({ result: "fail", evidenceId: "ev-check-1" });
   });
 
+  it("measures how long the check ran and records it as durationMs on the evidence", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const ticks = [1000, 1750];
+    const { runner } = fakeRunner(0);
+
+    const result = await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], {
+      runner,
+      now: NOW,
+      monotonicNow: () => ticks.shift() ?? 0,
+    });
+
+    expect(result.durationMs).toBe(750);
+    expect(result.task.evidence.at(-1)).toMatchObject({ durationMs: 750 });
+  });
+
   it("records a pass with the shared digest and returns the output tail without persisting it", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);

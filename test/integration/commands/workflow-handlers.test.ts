@@ -40,7 +40,7 @@ describe.sequential("workflow --run-checks", () => {
     const brief = await run(["--run-checks", "--brief"], { checkRunner });
 
     expect(JSON.parse(full.out)).toEqual({
-      ran: [{ id: "check", result: "fail", exitCode: 1, outputTail: "boom" }],
+      ran: [{ id: "check", result: "fail", exitCode: 1, outputTail: "boom", durationMs: expect.any(Number) }],
       remaining: [],
     });
     expect(JSON.parse(brief.out)).toEqual(JSON.parse(full.out));
