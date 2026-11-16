@@ -6,6 +6,9 @@ export const LINT_CHECK_ID = "check-lint";
 const WRITING_FLAGS = new Set(["--fix", "--write"]);
 /** Formatters whose `-w` means "write the result back" (for pnpm, `-w` selects the workspace root and is harmless). */
 const WRITE_SHORT_FLAG_TOOLS = new Set(["prettier", "gofmt", "goimports"]);
+/** The executable name of a token: its last path segment without an `.exe`, `.cmd` or `.bat` suffix, in lower case. */
+const toolName = (token: string): string =>
+  (token.split(/[\\/]/u).pop() ?? token).replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase();
 const SEPARATORS = /[;|&\n"'`()]+/u;
 
 /**
@@ -15,7 +18,8 @@ const SEPARATORS = /[;|&\n"'`()]+/u;
 export function isReadOnlyCommand(command: string): boolean {
   return !command.split(SEPARATORS).some((part) => {
     const tokens = part.split(/\s+/u).filter((token) => token.length > 0);
-    const writesWithShortFlag = tokens.includes("-w") && tokens.some((token) => WRITE_SHORT_FLAG_TOOLS.has(token));
+    const writesWithShortFlag =
+      tokens.includes("-w") && tokens.some((token) => WRITE_SHORT_FLAG_TOOLS.has(toolName(token)));
     return writesWithShortFlag || tokens.some((token) => WRITING_FLAGS.has(token.split("=")[0] ?? ""));
   });
 }

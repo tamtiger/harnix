@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.35.1] - 2026-11-16
+
+### Fixed
+
+- Review epic upstream-review-fixes: cwd suite dùng normalizeCheckCwd, nhận formatter theo basename, input mặc định thêm pnpm-workspace.yaml và *.slnx
+
 ## [2.35.0] - 2026-11-16
 
 ### Fixed

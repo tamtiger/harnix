@@ -73,6 +73,8 @@ describe("defaultCheckInputs", () => {
       "Directory.Packages.props",
       "global.json",
       "pytest.ini",
+      "pnpm-workspace.yaml",
+      "App.slnx",
     ];
     await layout(root, ["src", "test"], [...configs, "README.md", "CHANGELOG.md", "notes.txt"]);
 

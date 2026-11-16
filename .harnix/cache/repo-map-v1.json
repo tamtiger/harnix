@@ -1,7 +1,7 @@
 {
   "extractorVersion": 2,
   "generator": "harnix",
-  "inventoryFingerprint": "bab3a1f049585d7dc9af81b6431e145803345588d44a1b1ac0468bd6cd20f8ba",
+  "inventoryFingerprint": "e7a9fffe52b009d7b5df346cc6e129075c358dfbba983eedbe007cb9ce8d110e",
   "records": [
     {
       "byteLength": 351,
@@ -20,7 +20,7 @@
       "path": ".gitattributes"
     },
     {
-      "byteLength": 119,
+      "byteLength": 128,
       "contentHash": "e239c568f6359f4bd40cfaf35f50ba07b46fd08903ce6c3113440a286fbf099b",
       "extension": "",
       "headings": [],
@@ -31,7 +31,7 @@
       "path": ".gitignore"
     },
     {
-      "byteLength": 964,
+      "byteLength": 933,
       "contentHash": "f0d7116d961d8dfba430fdb98275bb79338b0cfd1725c74b016cf63b059e9e0c",
       "extension": "mjs",
       "headings": [],
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "byteLength": 84,
+      "byteLength": 76,
       "contentHash": "c8796409ecfb9849ba817956e4ca3be66e43f9780c75baec06a58a70036a8d09",
       "extension": "",
       "headings": [],
@@ -77,8 +77,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 49110,
-      "contentHash": "ba0b5e3c067d109c7392d93f80fa34d5dcdcff20bb13f832cecd158e92be05c1",
+      "byteLength": 49959,
+      "contentHash": "78f441f3990364d2299f16223dc9f884b577d62dd32e4ac66e0b4709716e8f94",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -116,26 +116,26 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 104857,
-      "contentHash": "c99e79f0a94f2bc41cc9ae15dc9d1bdca1ae922d04e29fe687464a468e023158",
+      "byteLength": 106299,
+      "contentHash": "2636fbfc6f9780e8f567f12ffcd9953e1404ce724c7fea9bfb96b7b745639c3f",
       "extension": "md",
       "headings": [
         "Added",
         "Changed",
         "Changelog",
         "Fixed",
-        "[2.29.0] - 2026-11-09",
-        "[2.29.1] - 2026-11-09",
-        "[2.30.0] - 2026-11-09",
-        "[2.30.1] - 2026-11-09",
-        "[2.31.0] - 2026-11-09",
         "[2.31.1] - 2026-11-09",
         "[2.32.0] - 2026-11-10",
         "[2.32.1] - 2026-11-12",
         "[2.32.2] - 2026-11-12",
         "[2.32.3] - 2026-11-12",
         "[2.32.4] - 2026-11-13",
-        "[2.33.0] - 2026-11-14"
+        "[2.33.0] - 2026-11-14",
+        "[2.33.1] - 2026-11-15",
+        "[2.33.2] - 2026-11-15",
+        "[2.34.0] - 2026-11-16",
+        "[2.35.0] - 2026-11-16",
+        "[2.35.1] - 2026-11-16"
       ],
       "identifiers": [
         "is",
@@ -152,7 +152,7 @@
       "path": "CHANGELOG.md"
     },
     {
-      "byteLength": 35184,
+      "byteLength": 34523,
       "contentHash": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
       "extension": "",
       "headings": [],
@@ -188,7 +188,7 @@
     },
     {
       "byteLength": 51741,
-      "contentHash": "a40963a32498c02819c998d78f1944b29fd642930db0562ab2130d8e0d9eb9a1",
+      "contentHash": "333170a35707b8b8aa5586de93e525659ee29d737b00e2e31cbe266c4eb7e217",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -217,7 +217,7 @@
       "path": "README.md"
     },
     {
-      "byteLength": 39450,
+      "byteLength": 39014,
       "contentHash": "0f9d1b5c9cacafce0c6cfe4f4bc2d912e85e1b74f7f884cf232807f9be20f384",
       "extension": "md",
       "headings": [
@@ -251,7 +251,7 @@
       "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 45675,
+      "byteLength": 44672,
       "contentHash": "9ef7cc0565024fb42d711ae38195ae7dc7ff952541ffed30fcf1049dc5bed59c",
       "extension": "json",
       "headings": [],
@@ -262,7 +262,7 @@
       "path": "docs/HARNESS_FEATURE_PROVENANCE.json"
     },
     {
-      "byteLength": 41345,
+      "byteLength": 41008,
       "contentHash": "795a4231e500a524979cbf3c4746d68883f92f9732632a783254ee86014b8b63",
       "extension": "md",
       "headings": [
@@ -294,8 +294,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 103062,
-      "contentHash": "d36ab6e6fd85b97776c3ffbf0f91a2aedb9c26e65e7c7331629eb0356733d1c6",
+      "byteLength": 103572,
+      "contentHash": "a6a7aab3c78aa1732a5f796ac733001874bf788fae67a143844f3f4f87bf4eaf",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -337,8 +337,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 81410,
-      "contentHash": "a611616d13ebfa9b6147741ecd5f5405766a2d1e7cb52730b518613b78bdbb50",
+      "byteLength": 83714,
+      "contentHash": "1ecde0660e9f02d3d59d404c6fae50e1c45ac015afd1783298072fdbfd3be9df",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -377,8 +377,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 195056,
-      "contentHash": "46ad89e9b8db41426b45d67b35aef62d6d25f898033092bf16bb41f3be4f21c8",
+      "byteLength": 195506,
+      "contentHash": "dd854c9d3967a0f97ece84f0236c9e4e53371f55b5cc5c372a1d58d314913f0e",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -494,7 +494,7 @@
       "path": "docs/OVERHAUL_DECISIONS.md"
     },
     {
-      "byteLength": 11687,
+      "byteLength": 11576,
       "contentHash": "b1ed5f0f75e388424bd218482e3171bbd86912037805843b5c7d891146da5692",
       "extension": "md",
       "headings": [
@@ -594,7 +594,7 @@
       "path": "docs/UPSTREAM_MAPPING.md"
     },
     {
-      "byteLength": 23372,
+      "byteLength": 22989,
       "contentHash": "600c0b6a9723d662d27a8e660076a586ad1916827bde70e17224299a6ec2d0c6",
       "extension": "md",
       "headings": [
@@ -781,7 +781,7 @@
       "path": "docs/prompts/review-refactor-claude-setup.md"
     },
     {
-      "byteLength": 11385,
+      "byteLength": 11510,
       "contentHash": "6ca43f9984ab4c6ffe97e07b5d7d94b4d3713a24a1d215969ed7142233f10212",
       "extension": "md",
       "headings": [
@@ -921,7 +921,7 @@
     },
     {
       "byteLength": 2666,
-      "contentHash": "b9c412acfb62d60736fead3bdcc8c8254f09e3a532a183ca2d0a23780349cb77",
+      "contentHash": "21b39b2a2e0265f5158308a688ee9a6246437d8368afe8f90bcd0096ba91f19c",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -933,7 +933,7 @@
       "path": "package.json"
     },
     {
-      "byteLength": 102624,
+      "byteLength": 99527,
       "contentHash": "2a251b776a5e248d9f487fbaa591cac24dcd45f59e59700fa12332603543df61",
       "extension": "yaml",
       "headings": [],
@@ -962,6 +962,7 @@
       "language": "javascript",
       "references": [
         "before",
+        "built",
         "cli",
         "measurement",
         "pnpm",
@@ -1021,7 +1022,7 @@
       ]
     },
     {
-      "byteLength": 4503,
+      "byteLength": 4394,
       "contentHash": "fab21a151ea86170fae433ef30fee952ede3e4a60238935e1762d4c04141fe3f",
       "extension": "py",
       "headings": [],
@@ -1166,6 +1167,7 @@
         "args",
         "assertBuilt",
         "assertSetupExitContract",
+        "built",
         "cli",
         "codex",
         "context",
@@ -1238,7 +1240,8 @@
         "process",
         "recursive",
         "seconds",
-        "stdout"
+        "stdout",
+        "trees"
       ]
     },
     {
@@ -1361,7 +1364,6 @@
         "pnpm",
         "process",
         "reads",
-        "recursive",
         "resolve",
         "runs",
         "seed",
@@ -1370,6 +1372,7 @@
         "slice",
         "split",
         "stdout",
+        "tests",
         "transition",
         "work",
         "workspace"
@@ -1451,6 +1454,7 @@
         "failed",
         "git",
         "install",
+        "lint",
         "measure",
         "none",
         "pnpm",
@@ -1654,10 +1658,10 @@
         "launcher",
         "listing",
         "managed",
-        "message",
         "must",
         "notice",
         "opencode",
+        "options",
         "own",
         "packed",
         "pending",
@@ -2069,7 +2073,8 @@
         "slice",
         "split",
         "stdout",
-        "suite"
+        "suite",
+        "tests"
       ]
     },
     {
@@ -2117,6 +2122,7 @@
       "references": [
         "all",
         "array",
+        "built",
         "cannot",
         "characters",
         "cli",
@@ -2671,8 +2677,8 @@
       ]
     },
     {
-      "byteLength": 12180,
-      "contentHash": "d4d7d59bddea27e4f2e0718e699dfaf6d43acdcafb58764c1cb342e5be4aa84f",
+      "byteLength": 12211,
+      "contentHash": "2ed1b65e6de0dc50edfb58c2ca184a0140f258fc151ca6d259cf9f2bbf03c5af",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2747,6 +2753,7 @@
         "REDACTED",
         "argv",
         "available",
+        "built",
         "cancelled",
         "cannot",
         "capability",
@@ -2756,9 +2763,7 @@
         "context",
         "days",
         "errors",
-        "events",
         "exact",
-        "extra",
         "fixed",
         "folders",
         "format",
@@ -2788,6 +2793,7 @@
         "splitHint",
         "starts",
         "stdout",
+        "tests",
         "workspace"
       ]
     },
@@ -3138,12 +3144,12 @@
         "readBoundedInput",
         "readiness",
         "rebuild",
-        "recursive",
         "refresh",
         "refs",
         "registerTasksCommand",
         "registry",
-        "rejected"
+        "rejected",
+        "reportProjectContext"
       ]
     },
     {
@@ -3272,7 +3278,8 @@
         "replan",
         "resolveSafeHarnixPath",
         "restore",
-        "restoreFromArchive"
+        "restoreFromArchive",
+        "tests"
       ]
     },
     {
@@ -3989,7 +3996,6 @@
         "context",
         "details",
         "effective",
-        "empty",
         "events",
         "fallbackCwd",
         "filesystem",
@@ -4006,6 +4012,7 @@
         "outside",
         "per",
         "process",
+        "proved",
         "readConfig",
         "registry",
         "resolveActiveTask",
@@ -4122,6 +4129,7 @@
       "language": "typescript",
       "references": [
         "Array",
+        "action",
         "analyzeLearningStatement",
         "archived",
         "are",
@@ -4158,7 +4166,6 @@
         "rejected",
         "reported",
         "resolveSafeHarnixPath",
-        "rest",
         "retireLearning",
         "reviewLearning",
         "similar",
@@ -4350,21 +4357,26 @@
       ]
     },
     {
-      "byteLength": 4168,
-      "contentHash": "f636377052244355738c05846c3c260315f8ad6d25c6eee03bff3bb4f822c966",
+      "byteLength": 6003,
+      "contentHash": "162c18d96bde09fca5e1489eea75006c4ab8fbaae38812129d3fb66b9386beaa",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "POWERSHELL_RECURSE",
         "PRETOOL_EVENT_NAME",
         "RECURSIVE_GREP_FLAG",
+        "SELECT_STRING",
         "SEPARATORS",
         "SYMBOL",
         "Set",
+        "VALUE_PARAMETERS",
         "bare",
         "bashSymbol",
         "char",
         "command",
         "current",
+        "firstPositional",
+        "flag",
         "flags",
         "flush",
         "grepToolSymbol",
@@ -4374,9 +4386,12 @@
         "isRecord",
         "pair",
         "pattern",
+        "powershellSymbol",
         "pretoolHintFor",
         "quote",
         "record",
+        "recursive",
+        "rest",
         "segment",
         "segmentSymbol",
         "symbol",
@@ -4393,19 +4408,20 @@
       "language": "typescript",
       "references": [
         "Array",
+        "alias",
         "before",
         "blocks",
         "characters",
         "context",
+        "dir",
         "document",
         "event",
-        "flag",
+        "form",
+        "listing",
         "open",
         "quoted",
         "reads",
-        "recursive",
         "refs",
-        "rest",
         "separator",
         "slice",
         "stdout",
@@ -4528,8 +4544,8 @@
         "statusWorkspaceRepoMap",
         "summarizeSkipped",
         "taskTerms",
-        "unchanged",
-        "validateRepoMapOptions"
+        "tests",
+        "unchanged"
       ]
     },
     {
@@ -4830,8 +4846,8 @@
       ]
     },
     {
-      "byteLength": 9013,
-      "contentHash": "13c1c596994f2575098f69f92daabacbf9342668979a382696c0038626478cd7",
+      "byteLength": 9152,
+      "contentHash": "0920d587ffd8465c66ca11f1de94503f54601fa100dceeba9123e7a4bd6a32ca",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4936,7 +4952,6 @@
         "optional",
         "other",
         "payload",
-        "pending",
         "readConfig",
         "readGitContext",
         "readWorkspaceGitStatus",
@@ -4946,6 +4961,7 @@
         "resolveActiveTask",
         "resolveSafeHarnixPath",
         "resolveWorkspaceRoot",
+        "retired",
         "runGit",
         "runs",
         "suite",
@@ -5206,8 +5222,8 @@
       ]
     },
     {
-      "byteLength": 11166,
-      "contentHash": "099426d3b82406905e33a172269af9fd280e3f24a01eb99bbf56b30d604beb4a",
+      "byteLength": 11541,
+      "contentHash": "969020bac465592f06a674a1119330cef076a2e3d2c1702da178a517074335bd",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5285,6 +5301,7 @@
         "payload",
         "per",
         "pnpm",
+        "prd",
         "process",
         "program",
         "rationale",
@@ -5299,8 +5316,7 @@
         "slug",
         "specs",
         "stdout",
-        "transition",
-        "withTargetTask"
+        "transition"
       ]
     },
     {
@@ -5360,6 +5376,7 @@
       "language": "typescript",
       "references": [
         "actions",
+        "built",
         "characters",
         "message",
         "none",
@@ -5368,8 +5385,8 @@
       ]
     },
     {
-      "byteLength": 5709,
-      "contentHash": "8ee4bbfedb2973c38ba42682dcee2e1296d99740918cb54387eed16dc7e018fc",
+      "byteLength": 5882,
+      "contentHash": "e8d645b6ba7db1d92ab5d54602421115829afe818760e7deb9f4fc4a0e142d03",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5410,6 +5427,7 @@
         "flags",
         "goal",
         "inspect",
+        "lint",
         "listFlags",
         "met",
         "mitigation",
@@ -5419,6 +5437,7 @@
         "note",
         "other",
         "own",
+        "prd",
         "rationale",
         "read",
         "rejected",
@@ -5435,8 +5454,8 @@
       ]
     },
     {
-      "byteLength": 11788,
-      "contentHash": "6e8c85bd8fabc243c15bdd21e5e25689ee3976c46423b47144177973d6ff28ce",
+      "byteLength": 11851,
+      "contentHash": "5958a7f160b83f54a1132f1723d1e8b9c75cb1bd597034182c34c6aa9e444b7f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5493,6 +5512,7 @@
         "decision",
         "digest",
         "does",
+        "exitCode",
         "fail",
         "finish",
         "finishing",
@@ -5514,7 +5534,6 @@
         "rationale",
         "reads",
         "relevant",
-        "rest",
         "set",
         "severity",
         "slot",
@@ -5609,8 +5628,8 @@
       ]
     },
     {
-      "byteLength": 11110,
-      "contentHash": "d17e0fd46b0b1adeb97396d0be4145c94f5db9a2bf54bc2007c4eaf7339f1025",
+      "byteLength": 11151,
+      "contentHash": "0a202a9232f2ae91f2c970590ccd72f6f87208a1b76d533fceecefc2834c16ab",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5701,8 +5720,8 @@
       ]
     },
     {
-      "byteLength": 4286,
-      "contentHash": "c4ee43316edb0eb7e80b326dd84700f6dbec2b9b4d0bd60eaccb63178f097e71",
+      "byteLength": 5018,
+      "contentHash": "0e65b42ceb825d4d96e1ba93666a02a130b5b03d9fe8f4b8b013efcd78227bb0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5713,19 +5732,24 @@
         "filePayload",
         "item",
         "loadInitFilePayload",
+        "optionalFile",
         "rawList",
         "resolveChecks",
         "resolveCriteria",
         "resolveInput",
         "stringList",
-        "task"
+        "task",
+        "taskDir"
       ],
       "importTargets": [
+        "node:path",
         "src/commands/internal-workflow.js",
         "src/commands/workflow-handler-utils.js",
         "src/commands/workflow-handlers.js",
+        "src/core/tasks/task-location.js",
         "src/core/tasks/task.js",
         "src/core/workflow/init-spec.js",
+        "src/utils/paths.js",
         "type"
       ],
       "kind": "source",
@@ -5749,6 +5773,8 @@
         "handler",
         "handlers",
         "initTaskWorkflow",
+        "lint",
+        "location",
         "mode",
         "must",
         "none",
@@ -5758,9 +5784,12 @@
         "parseJson",
         "payload",
         "pnpm",
+        "prd",
         "presentTask",
         "process",
         "readBoundedFile",
+        "resolveSafeHarnixPath",
+        "resolveTaskDirectory",
         "setBaselineWorkflow",
         "setEpicOrderWorkflow",
         "shape",
@@ -5815,8 +5844,8 @@
       ]
     },
     {
-      "byteLength": 4860,
-      "contentHash": "0e460ed3c939431649db1f2db3d08449cc7988eaeac9a5b5e35cea35eb8a3987",
+      "byteLength": 4871,
+      "contentHash": "9cc55b82571c7eeaeaf3138d63f2a8f1251575083708130d01751aac021dc5a5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6123,6 +6152,7 @@
         "format",
         "full",
         "legacyStackIds",
+        "lint",
         "mode",
         "number",
         "older",
@@ -6216,6 +6246,7 @@
         "isValidTimeZone",
         "languageIds",
         "legacyIds",
+        "lint",
         "mode",
         "must",
         "normalizeRepositoryPath",
@@ -7150,6 +7181,7 @@
         "PROJECT_FINDING_CODES",
         "RepoMapHealth",
         "appended",
+        "built",
         "catalog",
         "codes",
         "finding",
@@ -7282,6 +7314,7 @@
         "inspected",
         "inspection",
         "installed",
+        "invalid",
         "isMissingPathError",
         "kind",
         "linked",
@@ -7290,7 +7323,6 @@
         "managed",
         "matched",
         "memberMatchers",
-        "message",
         "obsolete",
         "override",
         "preserveUnownedRoot",
@@ -7474,6 +7506,7 @@
         "omitted",
         "pending",
         "registry",
+        "tests",
         "unavailable",
         "version"
       ]
@@ -7720,6 +7753,7 @@
         "runGit",
         "split",
         "stdout",
+        "tests",
         "warning"
       ]
     },
@@ -8436,7 +8470,6 @@
         "Array",
         "are",
         "array",
-        "declared",
         "more",
         "must",
         "order",
@@ -8784,6 +8817,7 @@
         "resolveSafeGlobalPath",
         "setup",
         "stable",
+        "tests",
         "unchanged",
         "updated",
         "warning"
@@ -9409,10 +9443,10 @@
         "globalTargets",
         "healthyReadiness",
         "hook",
+        "label",
         "launcher",
         "lock",
         "managed",
-        "message",
         "must",
         "options",
         "outcome",
@@ -9685,7 +9719,6 @@
         "managed",
         "matchers",
         "memberMatchers",
-        "message",
         "namespaced",
         "number",
         "obsolete",
@@ -9706,6 +9739,7 @@
         "rollback",
         "scoped",
         "selector",
+        "setup",
         "signature",
         "stable",
         "unchanged",
@@ -10532,6 +10566,7 @@
         "rule",
         "split",
         "statement",
+        "tests",
         "todo",
         "word"
       ]
@@ -11176,8 +11211,8 @@
       ]
     },
     {
-      "byteLength": 3968,
-      "contentHash": "b9202703be8d86479d23dc07f3b287809d402635621b233f153a0ec576e5dfc2",
+      "byteLength": 3979,
+      "contentHash": "263a14de9beca7de03a206aebc09441871e2be32d655e5951c54cb858638767e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11360,12 +11395,10 @@
         "cursor",
         "diagnostics",
         "duplicate",
-        "empty",
         "event",
         "facts",
         "finding",
         "fixture",
-        "flag",
         "healthyReadiness",
         "hook",
         "install",
@@ -11387,9 +11420,11 @@
         "order",
         "override",
         "payload",
+        "pending",
         "plain",
         "preserveUnownedRoot",
         "process",
+        "read",
         "readiness",
         "registry",
         "set",
@@ -11494,9 +11529,9 @@
         "child",
         "cli",
         "codex",
+        "commands",
         "complete",
         "display",
-        "empty",
         "env",
         "escapes",
         "fail",
@@ -11594,7 +11629,8 @@
         "score",
         "slice",
         "symbol",
-        "symbols"
+        "symbols",
+        "tests"
       ]
     },
     {
@@ -11785,6 +11821,7 @@
         "spec",
         "specs",
         "split",
+        "tests",
         "topic",
         "topics",
         "val",
@@ -11978,7 +12015,8 @@
         "slice",
         "spec",
         "specs",
-        "symbols"
+        "symbols",
+        "tests"
       ]
     },
     {
@@ -12664,7 +12702,6 @@
         "are",
         "compareCodeUnits",
         "count",
-        "declared",
         "dependency",
         "extracted",
         "generic",
@@ -12724,8 +12761,8 @@
       ]
     },
     {
-      "byteLength": 8271,
-      "contentHash": "4757a4fa7a038570dd0e29387d6bf1d7fa64f0674dbb2259b0744302bcf6949c",
+      "byteLength": 8383,
+      "contentHash": "76ec26ec1bc527b68a8fbfa18d21bdb4ea6f600acf3f346fe09c937a4004e319",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12819,12 +12856,15 @@
         "number",
         "options",
         "order",
+        "phrase",
         "ready",
         "repoMapRefreshHint",
         "resolve",
         "size",
         "slice",
-        "split"
+        "split",
+        "tests",
+        "word"
       ]
     },
     {
@@ -13034,7 +13074,6 @@
         "createUnavailableRepoMapImpact",
         "createUnavailableRepoMapRefs",
         "createUnavailableRepoMapTests",
-        "declared",
         "defaultRepoMapLimits",
         "does",
         "extension",
@@ -13067,6 +13106,7 @@
         "slice",
         "store",
         "symbol",
+        "tests",
         "used",
         "values",
         "writeRepoMap"
@@ -13207,6 +13247,8 @@
         "spec",
         "specs",
         "split",
+        "tests",
+        "trees",
         "unit",
         "words",
         "written"
@@ -13296,6 +13338,7 @@
         "set",
         "slice",
         "symbol",
+        "tests",
         "written"
       ]
     },
@@ -13336,7 +13379,6 @@
         "contentHash",
         "count",
         "cut",
-        "declared",
         "endLine",
         "extension",
         "extracted",
@@ -13597,6 +13639,7 @@
         "format",
         "hasTests",
         "isMissingPathError",
+        "lint",
         "managed",
         "more",
         "none",
@@ -13870,6 +13913,7 @@
         "ignores",
         "isDirectory",
         "language",
+        "lint",
         "loadHarnixIgnore",
         "lock",
         "number",
@@ -13892,8 +13936,8 @@
       ]
     },
     {
-      "byteLength": 4523,
-      "contentHash": "59113bd7f5fe2b769130e442122a75b4620e6e88dd49c02febd8716e57aff347",
+      "byteLength": 5032,
+      "contentHash": "da6a0ce8baac7646bb65e3c33648e1119c02c5761219ff3e836cdc47aaa3a473",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13908,6 +13952,7 @@
         "Set",
         "TEST_PROJECT",
         "anyTestProject",
+        "dir",
         "entries",
         "entry",
         "file",
@@ -13918,12 +13963,15 @@
         "isDotnetTestProject",
         "isSolutionFile",
         "leavesTheRepository",
+        "listed",
         "nestedProjectFiles",
         "projectFiles",
         "solution",
+        "solutionHasTestProject",
         "solutionProjectPaths",
         "solutions",
         "target",
+        "text",
         "visit"
       ],
       "importTargets": [
@@ -13945,7 +13993,6 @@
         "compareCodeUnits",
         "count",
         "dependency",
-        "dir",
         "does",
         "dotnet",
         "filesystem",
@@ -13964,7 +14011,8 @@
         "runs",
         "scan",
         "skipped",
-        "slice"
+        "slice",
+        "tests"
       ]
     },
     {
@@ -14221,6 +14269,7 @@
         "invalid",
         "isDotnetProjectFile",
         "isSolutionFile",
+        "lint",
         "lock",
         "mod",
         "outside",
@@ -14231,7 +14280,8 @@
         "readTextInside",
         "relativePackagePath",
         "resolve",
-        "safe"
+        "safe",
+        "tests"
       ]
     },
     {
@@ -14366,6 +14416,7 @@
         "slice",
         "split",
         "store",
+        "tests",
         "time",
         "top",
         "values",
@@ -14475,6 +14526,7 @@
         "isDotnetProjectFile",
         "isSolutionFile",
         "loadHarnixIgnore",
+        "manifests",
         "matchesSafeGlob",
         "modules",
         "nested",
@@ -15578,8 +15630,8 @@
       ]
     },
     {
-      "byteLength": 9380,
-      "contentHash": "a99850eaa6f98f7974fe453fd4c005f512cbc2bb7bd643f4ded570dc3770f7d5",
+      "byteLength": 9535,
+      "contentHash": "7d3c69728c451477733907538a187a6b524e023cb9847265514d005d157e9a81",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15645,19 +15697,17 @@
       "path": "src/core/tasks/task-schema.ts",
       "language": "typescript",
       "references": [
-        "acceptanceCriteria",
         "accepts",
         "added",
         "allowUnsafeCompletedEvidenceArtifacts",
         "assertExactKeys",
         "cancellation",
         "cancelled",
-        "checkId",
         "completed",
         "contract",
-        "criterionIds",
         "decision",
         "digest",
+        "durationMs",
         "exitCode",
         "fail",
         "field",
@@ -15674,10 +15724,13 @@
         "met",
         "nextAction",
         "number",
+        "older",
         "optional",
         "outside",
         "pending",
         "planning",
+        "process",
+        "ran",
         "rationale",
         "read",
         "ready",
@@ -15691,7 +15744,6 @@
         "title",
         "top",
         "updatedAt",
-        "validateTask",
         "waived"
       ]
     },
@@ -16046,13 +16098,13 @@
         "duplicates",
         "exact",
         "exitCode",
-        "expected",
         "fail",
         "format",
         "glob",
         "inputDigest",
         "isInputDigest",
         "isSortedUnique",
+        "lint",
         "migrated",
         "must",
         "none",
@@ -16139,11 +16191,12 @@
       ]
     },
     {
-      "byteLength": 11390,
-      "contentHash": "d9efa3524176559b49bf2399c6c43fe6365d65323decd8a8bf17b86dd706099b",
+      "byteLength": 11835,
+      "contentHash": "e172c24f5bc6927123a395b6e976705cc919e15722f274e2fb83833386f8af1e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "MAX_DURATION_MS",
         "Map",
         "Set",
         "TaskObject",
@@ -16171,6 +16224,7 @@
         "evidenceIds",
         "finding",
         "id",
+        "inDurationRange",
         "isEvidenceShape",
         "item",
         "key",
@@ -16194,14 +16248,11 @@
       "language": "typescript",
       "references": [
         "AcceptanceCriterion",
-        "Array",
         "TaskValidationOptions",
         "acceptance",
         "acceptanceCriterionKeys",
-        "are",
         "assertBlocker",
         "assertCancellation",
-        "assertExactKeys",
         "assertStatusCheckpointAndCompletion",
         "assertValidationCheckExtras",
         "checkScopes",
@@ -16209,6 +16260,7 @@
         "common",
         "completed",
         "criterionStatuses",
+        "durationMs",
         "ensureUnique",
         "evidenceFindingKeys",
         "evidenceResults",
@@ -16224,8 +16276,10 @@
         "isIsoTimestamp",
         "isOneOf",
         "met",
+        "number",
         "per",
         "replan",
+        "runs",
         "severity",
         "slug",
         "taskModes",
@@ -16293,6 +16347,7 @@
         "focused",
         "isIsoTimestamp",
         "loadTask",
+        "manifests",
         "residualRiskKeys",
         "resolveActiveTask",
         "saveTaskArtifacts",
@@ -16308,8 +16363,7 @@
         "unknownFieldsMessage",
         "updateTaskCheckpoint",
         "validate",
-        "validateTaskArtifacts",
-        "validationCheckV2Keys"
+        "validateTaskArtifacts"
       ]
     },
     {
@@ -16856,8 +16910,8 @@
       ]
     },
     {
-      "byteLength": 3092,
-      "contentHash": "a5e9689d4bdbd3231ee545226ebf348051c5d31d9d96c5e0b9b97c332ed5fb68",
+      "byteLength": 3091,
+      "contentHash": "aa99b31aed3507cea89b7c1d751a54414264c21a61ef0e56c9b0c76f221ea772",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16894,6 +16948,7 @@
         "plus",
         "slice",
         "spec",
+        "tests",
         "transition"
       ]
     },
@@ -16938,6 +16993,7 @@
         "guides",
         "pnpm",
         "spec",
+        "tag",
         "template",
         "title"
       ]
@@ -16987,7 +17043,6 @@
         "before",
         "cancelled",
         "completed",
-        "declared",
         "fail",
         "full",
         "instead",
@@ -17082,7 +17137,6 @@
         "checkId",
         "contract",
         "currentInstant",
-        "declared",
         "digest",
         "empty",
         "fail",
@@ -17558,8 +17612,51 @@
       ]
     },
     {
-      "byteLength": 2934,
-      "contentHash": "9ace629d3ae74f47304fa564400d324d61bfcbdc6216489d27de14e163c4a528",
+      "byteLength": 1618,
+      "contentHash": "222ebdcac9217245134bf3b6b6aca66f1ff0a9e7ae12f48b34ec7ed4c34404ef",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Map",
+        "OrderedCheck",
+        "RecordedRun",
+        "durations",
+        "inScope",
+        "known",
+        "latestDurations",
+        "orderChecks",
+        "ordered",
+        "scope"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/check-order.ts",
+      "language": "typescript",
+      "references": [
+        "before",
+        "checkId",
+        "declaration",
+        "duration",
+        "durationMs",
+        "failed",
+        "focused",
+        "full",
+        "number",
+        "order",
+        "ran",
+        "recorded",
+        "runs",
+        "set",
+        "starts",
+        "suite",
+        "time",
+        "where"
+      ]
+    },
+    {
+      "byteLength": 3923,
+      "contentHash": "16352d8059c5b3b7e3308039fe513e094d200bc9d6dd8d31963b511ecd1b336a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17569,7 +17666,9 @@
         "LAUNCHER_ERRORS",
         "MAX_ITEMS",
         "MAX_SUMMARY",
+        "NO_TESTS_RAN",
         "POSIX_PATH",
+        "TESTS_PASSED",
         "WINDOWS_PATH",
         "clean",
         "extra",
@@ -17579,6 +17678,7 @@
         "match",
         "message",
         "names",
+        "noTestsRan",
         "summarizeCheckOutput"
       ],
       "importTargets": [],
@@ -17587,24 +17687,35 @@
       "path": "src/core/workflow/check-output.ts",
       "language": "typescript",
       "references": [
+        "available",
         "cannot",
         "characters",
+        "discovered",
         "does",
+        "dotnet",
         "errors",
         "exitCode",
         "launcher",
+        "matched",
         "more",
+        "none",
         "number",
         "pattern",
         "persisted",
         "pnpm",
+        "proved",
         "ran",
         "removed",
         "report",
+        "reported",
+        "runner",
         "safe",
         "slice",
+        "solution",
         "split",
-        "terminal"
+        "terminal",
+        "tests",
+        "where"
       ]
     },
     {
@@ -17661,7 +17772,6 @@
         "cmd",
         "comparison",
         "declaration",
-        "declared",
         "dropped",
         "exact",
         "form",
@@ -17909,7 +18019,6 @@
         "criterionId",
         "criterionIds",
         "currentInstant",
-        "declared",
         "digest",
         "digestMatches",
         "does",
@@ -17994,7 +18103,6 @@
         "compareCodeUnits",
         "context",
         "contextDrift",
-        "declared",
         "does",
         "epicMembers",
         "expected",
@@ -18230,7 +18338,6 @@
         "compareCodeUnits",
         "covering",
         "criterionIds",
-        "declared",
         "does",
         "evidenceIds",
         "fresh",
@@ -18248,8 +18355,8 @@
       ]
     },
     {
-      "byteLength": 5330,
-      "contentHash": "e216931c6b70ba12537932ec89e36aa1395c3c545e7e498aa90709247138d5ac",
+      "byteLength": 5524,
+      "contentHash": "c11b9ba88684e20b54d1f8320540ee5707554698c0b8a68e35f4df4e60b382b6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18301,14 +18408,15 @@
       "references": [
         "are",
         "assertMarkableBy",
+        "built",
         "cannot",
         "capture",
         "checkId",
         "clock",
         "computeInputDigest",
         "currentInstant",
-        "declared",
         "digest",
+        "durationMs",
         "empty",
         "evidenceId",
         "fail",
@@ -18322,6 +18430,7 @@
         "needs",
         "noActiveTaskError",
         "number",
+        "ran",
         "recordedAt",
         "resolveActiveTask",
         "resolveSafeHarnixPath",
@@ -18689,6 +18798,41 @@
       ]
     },
     {
+      "byteLength": 946,
+      "contentHash": "4ace4b86f3965a3dae600ea10e4760e353ccf7657bd1526dd85218775beef4f8",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Error",
+        "InitArtifactText",
+        "initArtifacts",
+        "task"
+      ],
+      "importTargets": [
+        "./artifact-templates.js",
+        "src/core/tasks/task.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/init-artifacts.ts",
+      "language": "typescript",
+      "references": [
+        "TaskMode",
+        "artifact",
+        "dropped",
+        "full",
+        "given",
+        "instead",
+        "mode",
+        "prd",
+        "renderPlanTemplate",
+        "renderPrdTemplate",
+        "starts",
+        "template"
+      ]
+    },
+    {
       "byteLength": 1414,
       "contentHash": "ba36ffb1477d4146cc4f7b64aa01ea6e0908c45e3b459b2576f2ecf9c0ff7b33",
       "extension": "ts",
@@ -18713,7 +18857,6 @@
       "references": [
         "autoId",
         "created",
-        "declared",
         "equivalentCommand",
         "full",
         "marked",
@@ -18723,6 +18866,59 @@
         "suite",
         "time",
         "warning"
+      ]
+    },
+    {
+      "byteLength": 2588,
+      "contentHash": "c2b85476ed1c038cbc2de50600739056eabf46959e56969eed12be0c118bdb1f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CONFIG_FILES",
+        "MANIFESTS",
+        "SOURCE_TREE",
+        "Set",
+        "TEST_TREES",
+        "defaultCheckInputs",
+        "entries",
+        "entry",
+        "found",
+        "manifests",
+        "prefix",
+        "tests",
+        "trees"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/init-default-inputs.ts",
+      "language": "typescript",
+      "references": [
+        "changelog",
+        "compareCodeUnits",
+        "dependency",
+        "does",
+        "isDirectory",
+        "layout",
+        "lock",
+        "matched",
+        "mod",
+        "order",
+        "other",
+        "overrides",
+        "pnpm",
+        "pyproject",
+        "runner",
+        "set",
+        "setup",
+        "solution",
+        "spec",
+        "suite",
+        "workspace"
       ]
     },
     {
@@ -18813,6 +19009,60 @@
       ]
     },
     {
+      "byteLength": 2751,
+      "contentHash": "c9f44f564a4a2c8bd244a62e98cf8e01cba1897d4ab023b68186e8f00d45b529",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "LINT_CHECK_ID",
+        "LintCheckInput",
+        "SEPARATORS",
+        "Set",
+        "WRITE_SHORT_FLAG_TOOLS",
+        "WRITING_FLAGS",
+        "buildLintCheck",
+        "isReadOnlyCommand",
+        "lint",
+        "tokens",
+        "toolName",
+        "writesWithShortFlag"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/init-lint-check.ts",
+      "language": "typescript",
+      "references": [
+        "cmd",
+        "compareCodeUnits",
+        "criterionIds",
+        "detected",
+        "focused",
+        "formatter",
+        "full",
+        "gate",
+        "glob",
+        "lower",
+        "must",
+        "none",
+        "notice",
+        "order",
+        "part",
+        "pnpm",
+        "quoted",
+        "read",
+        "ready",
+        "segment",
+        "skipped",
+        "split",
+        "workspace"
+      ]
+    },
+    {
       "byteLength": 2604,
       "contentHash": "18901551f3f4109cc1bd8433cad977b90dddae4bf99c602732b96741033fb0df",
       "extension": "ts",
@@ -18866,8 +19116,8 @@
       ]
     },
     {
-      "byteLength": 8522,
-      "contentHash": "fcaf74be7f4d687b4a5dde0b4f33a6609fd45fa2a2ee29b7837f163c8ec2df0c",
+      "byteLength": 10010,
+      "contentHash": "814110cbc169b9362ee6e889f19fd3552c8e899509884493af2c4364f5020d7c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18877,11 +19127,15 @@
         "Set",
         "artifacts",
         "autoId",
+        "base",
         "buildCriteria",
+        "buildLintCheck",
+        "built",
         "candidate",
         "command",
         "criteria",
         "cwd",
+        "declared",
         "declaredCheck",
         "defaultCheck",
         "given",
@@ -18892,15 +19146,18 @@
         "isSuite",
         "issue",
         "issues",
+        "lint",
         "mode",
         "notice",
         "now",
         "packageDirectory",
         "plan",
         "prefix",
+        "projectLintCommand",
         "projectTest",
         "projectTestCommand",
         "resolveCheckTarget",
+        "resolveLintCheck",
         "resolveSlug",
         "resolved",
         "saved",
@@ -18911,12 +19168,14 @@
         "trimmed"
       ],
       "importTargets": [
-        "./artifact-templates.js",
         "./command-match.js",
         "./flag-issues.js",
+        "./init-artifacts.js",
         "./init-checks-notice.js",
+        "./init-default-inputs.js",
         "./init-issues.js",
         "./init-lineage.js",
+        "./init-lint-check.js",
         "./init-spec.js",
         "./save.js",
         "./similar-tasks.js",
@@ -18936,10 +19195,10 @@
       "references": [
         "Array",
         "InitCheckSpec",
+        "LINT_CHECK_ID",
         "TaskMode",
         "absent",
         "acceptance",
-        "artifact",
         "asciiFold",
         "buildVerifyPlan",
         "checksNotice",
@@ -18947,14 +19206,14 @@
         "cmd",
         "compareCodeUnits",
         "currentInstant",
+        "defaultCheckInputs",
         "dot",
-        "empty",
         "equivalentCommand",
-        "flag",
         "flagIssueError",
         "focused",
         "followUpOf",
         "idPrefix",
+        "initArtifacts",
         "loadSimilarTasks",
         "must",
         "none",
@@ -18967,10 +19226,9 @@
         "prd",
         "problem",
         "process",
+        "read",
         "readProjectTimezone",
         "recursive",
-        "renderPlanTemplate",
-        "renderPrdTemplate",
         "resolveLineage",
         "resolveSafeHarnixPath",
         "runs",
@@ -18980,6 +19238,7 @@
         "spec",
         "specs",
         "suite",
+        "template",
         "texts",
         "updatedAt"
       ]
@@ -19232,7 +19491,6 @@
         "contract",
         "createTaskV3MigrationEvidence",
         "criterionIds",
-        "declared",
         "exact",
         "finished",
         "must",
@@ -19530,9 +19788,7 @@
         "compareCodeUnits",
         "contract",
         "currentInstant",
-        "empty",
         "emptyInputs",
-        "flag",
         "flagIssueError",
         "focused",
         "goal",
@@ -19554,6 +19810,7 @@
         "plus",
         "process",
         "reads",
+        "ready",
         "relevant",
         "replan",
         "reported",
@@ -19565,6 +19822,7 @@
         "semanticJsonEqual",
         "set",
         "setCheckExample",
+        "spec",
         "specs",
         "stage",
         "unknownIdError",
@@ -19633,17 +19891,20 @@
       ]
     },
     {
-      "byteLength": 6195,
-      "contentHash": "e0d35418aec1e2203cf3b6f2b3e674c9fb79d31f4f922b9690189125e8242bd1",
+      "byteLength": 8095,
+      "contentHash": "3d2510453caf9c248e300148d9c8a45d8a5f9ace5e913273b1c65775c7adf38e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ANY_ITEM",
         "CHECK_UNCHECKED",
         "Error",
+        "ID_SELECTOR",
         "RegExp",
         "Set",
         "TickPlanResult",
         "WorkflowTickResult",
+        "allItemIndices",
         "changed",
         "content",
         "escapeRegex",
@@ -19651,18 +19912,21 @@
         "harnixRoot",
         "i",
         "idx",
+        "items",
+        "leadingTagMatches",
         "lines",
         "lower",
         "match",
+        "matches",
         "newLines",
         "parts",
         "planPath",
         "pos",
         "remaining",
         "restOfLine",
-        "result",
         "syncPlanChecklistPass",
         "syncPlanChecklistPassLocked",
+        "tag",
         "tagPattern",
         "task",
         "taskDirectory",
@@ -19694,10 +19958,13 @@
         "all",
         "atomicWriteFile",
         "before",
+        "brief",
         "cannot",
+        "characters",
         "checkId",
         "does",
         "empty",
+        "exact",
         "gate",
         "instead",
         "location",
@@ -19705,6 +19972,7 @@
         "matched",
         "noActiveTaskError",
         "number",
+        "options",
         "pattern",
         "recorded",
         "resolveActiveTask",
@@ -19715,8 +19983,11 @@
         "selector",
         "size",
         "skipped",
+        "slice",
         "split",
+        "starts",
         "taskId",
+        "visible",
         "withWorkflowLock"
       ]
     },
@@ -19802,11 +20073,11 @@
         "FACTS_HINT",
         "LearningSummaryItem",
         "baselineHint",
+        "best",
         "branch",
         "cancelled",
         "cannot",
         "checkFactsStale",
-        "clock",
         "commit",
         "compareCodeUnits",
         "completed",
@@ -20055,8 +20326,8 @@
       ]
     },
     {
-      "byteLength": 5803,
-      "contentHash": "f06c0654d6ff16c5340d5a581f75615d387e7ac2e4e66f2d7dc4b56eb5c96ba8",
+      "byteLength": 6463,
+      "contentHash": "794c7c1b8489ad8ee45a0c7a4caeb1ac4b9f3dfa690fb787f8ca1b7825742342",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20079,14 +20350,17 @@
         "latest",
         "list",
         "matches",
+        "message",
         "obligationIssues",
         "projectRootOf",
         "readyFindings",
         "suiteGateIssues",
+        "suiteWithoutTestsAdvisories",
         "unbaselined"
       ],
       "importTargets": [
         "./ready-artifacts.js",
+        "./suite-command.js",
         "./suite-gate.js",
         "globby",
         "node:path",
@@ -20100,6 +20374,7 @@
       "language": "typescript",
       "references": [
         "Array",
+        "Check",
         "TaskArtifacts",
         "acceptance",
         "acceptanceCriteria",
@@ -20115,22 +20390,25 @@
         "decision",
         "does",
         "dot",
+        "dotnet",
         "empty",
         "evaluated",
         "fail",
         "failed",
         "form",
+        "full",
         "gate",
         "glob",
         "ignore",
         "invalid",
-        "message",
         "needs",
         "order",
         "prd",
         "projectRoot",
         "ready",
+        "solution",
         "suite",
+        "suiteWithoutTests",
         "targetedSegments",
         "transition",
         "unbaselinedChecks",
@@ -20220,7 +20498,6 @@
         "criterionId",
         "criterionIds",
         "currentInstant",
-        "declared",
         "duplicate",
         "needs",
         "options",
@@ -20289,7 +20566,6 @@
         "compareCodeUnits",
         "criterionIds",
         "currentInstant",
-        "declared",
         "equivalentCommand",
         "must",
         "options",
@@ -20487,8 +20763,8 @@
       ]
     },
     {
-      "byteLength": 6376,
-      "contentHash": "af200c4c3901b534c9717f3343291cc96a0cb9ff2e9faa577b3dbf3e41c2e888",
+      "byteLength": 7085,
+      "contentHash": "33a108caf14f97ee13848bcfe0dd63a34490c7e8319dcaffa286b457ad37d2fc",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20503,8 +20779,11 @@
         "assertDeclaredCommand",
         "before",
         "beforeSnapshot",
+        "clock",
         "declared",
         "declaredCwd",
+        "durationMs",
+        "empty",
         "harnixRoot",
         "launcher",
         "requestedCwd",
@@ -20514,6 +20793,7 @@
         "runCheckWorkflow",
         "runCwd",
         "safeCwd",
+        "startedAt",
         "task"
       ],
       "importTargets": [
@@ -20538,29 +20818,28 @@
       "references": [
         "Check",
         "appendEvidenceFlagsWorkflow",
-        "args",
         "argv",
         "assertRetryAllowed",
         "cache",
         "cannot",
         "cmd",
         "computeInputDigest",
-        "could",
         "dependencies",
         "describeCommand",
         "digest",
+        "duration",
         "evidenceId",
-        "exitCode",
         "fail",
         "finish",
         "inputDigest",
         "launcherFailure",
+        "max",
         "must",
         "noActiveTaskError",
+        "noTestsRan",
         "normalizeCheckCwd",
         "notice",
         "number",
-        "persisted",
         "planning",
         "process",
         "ran",
@@ -20571,14 +20850,15 @@
         "resolveSafeProjectPath",
         "retryOnTaskConflict",
         "runCheckProcess",
-        "runner",
         "runs",
         "safe",
         "sameCommand",
         "saveInputDigestSnapshot",
         "set",
+        "solution",
         "splitCommand",
         "summarizeCheckOutput",
+        "tests",
         "tied",
         "time",
         "unchanged",
@@ -20587,8 +20867,8 @@
       ]
     },
     {
-      "byteLength": 3550,
-      "contentHash": "e7cbd0421bd555797771642925512687e64d5f6f0fa49c078f95e52e7f120b77",
+      "byteLength": 3854,
+      "contentHash": "83d74915554fec9e1590d9fe0bd40d76110c27182dae4ba86020e66025ef52d5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20609,6 +20889,7 @@
         "todo"
       ],
       "importTargets": [
+        "./check-order.js",
         "./command-match.js",
         "./completion.js",
         "./run-check.js",
@@ -20628,8 +20909,10 @@
         "before",
         "computeInputDigest",
         "declaration",
-        "declared",
         "dependencies",
+        "duration",
+        "durationMs",
+        "durations",
         "exitCode",
         "fail",
         "failed",
@@ -20641,6 +20924,7 @@
         "noActiveTaskError",
         "number",
         "order",
+        "orderChecks",
         "report",
         "resolveActiveTask",
         "resolveSafeHarnixPath",
@@ -20882,8 +21166,8 @@
       ]
     },
     {
-      "byteLength": 14176,
-      "contentHash": "1032482c043eb57130ee6f9af1860b92d50c4a7beaf451cc47ca9fa31af5fac2",
+      "byteLength": 14916,
+      "contentHash": "7ccd77e3b9ce4dc031ebf5979c1af11f92f64837069f9d475c592c8d947f0a8e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20917,19 +21201,22 @@
         "block",
         "blockerKeys",
         "briefFlagNames",
+        "built",
         "cancellation",
         "cancelled",
         "cannot",
         "captured",
         "checkScopes",
-        "clock",
         "cmd",
         "completed",
+        "contains",
         "contract",
         "criterionStatuses",
         "decisionKeys",
+        "declaration",
         "does",
         "duplicate",
+        "durationMs",
         "epicIdPattern",
         "epicMembers",
         "evidenceResults",
@@ -20940,6 +21227,7 @@
         "focused",
         "followUpOf",
         "form",
+        "formatter",
         "fresh",
         "given",
         "glob",
@@ -20947,14 +21235,10 @@
         "inspect",
         "launcher",
         "layout",
+        "manifests",
         "met",
         "migrated",
-        "mitigation",
-        "more",
-        "needs",
-        "nextStage",
-        "none",
-        "old"
+        "mitigation"
       ]
     },
     {
@@ -21255,20 +21539,25 @@
       ]
     },
     {
-      "byteLength": 4302,
-      "contentHash": "de0e0ff3daac94a7e8f90448e82ef5750629736ecfd71aa8faf91e151a66da2b",
+      "byteLength": 6373,
+      "contentHash": "15acdac0f6a88a786031a3b4a3a265b7633b630ab68f4c39660dcb8e5cbd6413",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "SuitePackage",
         "UNSAFE_CHARACTERS",
         "acceptsSuiteCommand",
+        "cwd",
         "directory",
         "isDotnetTestDirectory",
         "isSafeSolutionArgument",
         "joinedPath",
+        "normalizeSuiteCwd",
         "path",
+        "posix",
         "runsPackageTest",
+        "segments",
+        "suiteWithoutTests",
         "unquote"
       ],
       "importTargets": [
@@ -21276,6 +21565,7 @@
         "node:fs/promises",
         "node:path",
         "src/core/stack/dotnet-projects.js",
+        "src/core/tasks/check-cwd.js",
         "src/utils/paths.js"
       ],
       "kind": "source",
@@ -21284,6 +21574,7 @@
       "language": "typescript",
       "references": [
         "absolute",
+        "accepts",
         "are",
         "bare",
         "cmd",
@@ -21291,14 +21582,18 @@
         "detected",
         "dotnet",
         "equivalentCommand",
+        "finding",
         "form",
         "gate",
         "hasTests",
         "inspectDotnetDirectory",
         "isSolutionFile",
+        "issue",
         "link",
         "location",
         "must",
+        "normalizeCheckCwd",
+        "other",
         "own",
         "part",
         "projectRoot",
@@ -21308,9 +21603,13 @@
         "safe",
         "segment",
         "solution",
+        "solutionHasTestProject",
         "split",
         "splitCommand",
         "suite",
+        "tests",
+        "unchanged",
+        "warning",
         "word"
       ]
     },
@@ -21422,7 +21721,6 @@
         "runs",
         "safe",
         "scripts",
-        "segment",
         "selectLatestEvidence",
         "set",
         "slice",
@@ -21431,6 +21729,7 @@
         "specs",
         "split",
         "suite",
+        "tests",
         "transition",
         "via"
       ]
@@ -22728,7 +23027,7 @@
     },
     {
       "byteLength": 3587,
-      "contentHash": "8ee81e9fc0d1117c0897ba290d7040689ed39944d6c189405c079a02d7b8f1e5",
+      "contentHash": "65b2bb05c165f9d6e56f301140976ba08fa8e664ee8052f8516cc6d13ebebcb5",
       "extension": "md",
       "headings": [
         "Architecture design review",
@@ -22799,7 +23098,7 @@
     },
     {
       "byteLength": 2023,
-      "contentHash": "b9f73de8e95ed9309f0b01fc3c938e1a449acc4ad932c97aa5f4257c1a33fcc2",
+      "contentHash": "2d560ee64454ffee2434f1095c879546ec8a9b91a6b22c826d9a919733ae53f0",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -22838,7 +23137,7 @@
     },
     {
       "byteLength": 4741,
-      "contentHash": "7ce1cc5023b93a68e98c067bc753c06454c44f77d5b53f102a5ab9b7bdf83df7",
+      "contentHash": "2609e4b3fc8eeeb153dac64c50bcae82807111c10605e19291e9d0bed212b085",
       "extension": "md",
       "headings": [
         "Capture",
@@ -22877,7 +23176,7 @@
     },
     {
       "byteLength": 2566,
-      "contentHash": "5dcb2739f930cee8f6247361b510cc1af024f7b879daef1898d6eae1dbea5599",
+      "contentHash": "178fdc56c7b25772108a32897b1a5c2888b29edd0660cbf80e3aaf7c66a9f3b0",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -22921,8 +23220,8 @@
       "path": "src/skills/harnix-flaky-test/references/concurrency-isolation.md"
     },
     {
-      "byteLength": 6781,
-      "contentHash": "2dd22ddf3ceae67ac4112e381e5fd2c8c6a82200a7b5eba448190035cbd20579",
+      "byteLength": 6893,
+      "contentHash": "8fe534cb328830fc0560f55ac6e6e01c624a4f2789b3bc41c725e332c0324ddd",
       "extension": "md",
       "headings": [
         "Documentation synchronization",
@@ -23045,7 +23344,7 @@
     },
     {
       "byteLength": 3130,
-      "contentHash": "c1f0a64d081dcb5b69dc2658c427e97b17e43e07e4d6b386fe436404d6c8a24a",
+      "contentHash": "cd3dd2d00bc502fa39c07b8dff6cbea0ecda0cae76ecd28b1ff6947ef1b8c355",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23088,7 +23387,7 @@
     },
     {
       "byteLength": 6291,
-      "contentHash": "9b3459a1e708ac9c938e06c759e8473caee2fc4c9371fc0e2745ecece161a452",
+      "contentHash": "1cee5509b1a8d978089b2d5ef8e922b044b57c473af006ee1d67f9ff5c75e55c",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -23262,7 +23561,7 @@
     },
     {
       "byteLength": 3974,
-      "contentHash": "62a68f2476b0243886e2cf6a2c95dca7213fdb3f81dcc535f36363113359fc15",
+      "contentHash": "d4ba9ce68f32e321621b4d79c8291c97207e0295f01feaa52d5f971162ae4283",
       "extension": "md",
       "headings": [
         "Decide",
@@ -23300,7 +23599,7 @@
     },
     {
       "byteLength": 4374,
-      "contentHash": "acf183c923012084b9aea71d8c5af97b35523f684d92340b66351e428a3696fc",
+      "contentHash": "6b1f1cb3c8074305953320993b29c56b1f78669b8f472abbfc5c50064f0428eb",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -23360,7 +23659,7 @@
     },
     {
       "byteLength": 3211,
-      "contentHash": "c0f59809eb4817a054ac9103633926e29c47bf18d606930e9756eb5c2ef88aa1",
+      "contentHash": "ee0e4f4a0b8707b520d73bacfd73c07798292f5b3cef378a4ca5fd88eda7a233",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -23402,7 +23701,7 @@
     },
     {
       "byteLength": 2642,
-      "contentHash": "bdc053f8749dcbf839f1ba143b885880e0ed852e33386641f6d48625ee9579ca",
+      "contentHash": "7ec7cb83de113eb728ac9babb33146f38c8e0ab7ad04562b42aba8f75e3994ec",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23440,7 +23739,7 @@
     },
     {
       "byteLength": 3378,
-      "contentHash": "a8d0f5ff016977a77aee8e2ce8cc7139af20942d507a2f807d007b1190bce4eb",
+      "contentHash": "81d123901a99376bdcf3c006238989be86ec62b23c11362addc8258a5ba222d6",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -23475,7 +23774,7 @@
     },
     {
       "byteLength": 6653,
-      "contentHash": "784685e449d758f65e5ab9c1dda6ad99729f1ae037390056d0a66ba8d165a501",
+      "contentHash": "8615465ce99b3b51e8271f7469ff7b8c7e8a5ea91c953cd48cf3fd679cf4dfd0",
       "extension": "md",
       "headings": [
         "Finish",
@@ -23513,8 +23812,8 @@
       "path": "src/skills/harnix-verify/references/agent-transport.md"
     },
     {
-      "byteLength": 2711,
-      "contentHash": "8a2859bf6cd04400eb7ed6af0349e33bae2517156c0cf21f4837034014167424",
+      "byteLength": 2939,
+      "contentHash": "cfdc1b9587a225a6c03b799abdf5a80ffb4a5faaada5a90433974645700da8d6",
       "extension": "md",
       "headings": [
         "Less common commands and command details"
@@ -23794,7 +24093,6 @@
         "outside",
         "per",
         "prune",
-        "recursive",
         "refs",
         "runs",
         "scripts",
@@ -23803,6 +24101,7 @@
         "spans",
         "stage",
         "suite",
+        "tests",
         "transition",
         "unchanged",
         "unsafe",
@@ -23854,6 +24153,7 @@
         "guides",
         "live",
         "load",
+        "manifests",
         "packageVersion",
         "profile",
         "read",
@@ -23862,7 +24162,8 @@
         "seed",
         "skill",
         "skills",
-        "spec"
+        "spec",
+        "tests"
       ]
     },
     {
@@ -23945,8 +24246,8 @@
       ]
     },
     {
-      "byteLength": 9016,
-      "contentHash": "a7682371206a5736cc05e13a9aa0314b7de2d9e460fc139b22594b9d33532aae",
+      "byteLength": 9030,
+      "contentHash": "2fe0b91d9df3f14411a9d915d3942bf4d10b661b3b7c7aac857f4c70ddfb73ca",
       "extension": "md",
       "headings": [
         "Agent transport",
@@ -24200,6 +24501,7 @@
         "are",
         "array",
         "bare",
+        "built",
         "byte",
         "cannot",
         "children",
@@ -24213,7 +24515,6 @@
         "detached",
         "does",
         "dotnet",
-        "empty",
         "env",
         "ext",
         "fixed",
@@ -24438,6 +24739,7 @@
         "satisfies",
         "signature",
         "staleAfterMs",
+        "startedAt",
         "unsafe"
       ]
     },
@@ -24558,6 +24860,7 @@
         "safe",
         "setup",
         "stable",
+        "startedAt",
         "unique",
         "version"
       ]
@@ -24727,6 +25030,7 @@
         "options",
         "process",
         "runCheckProcess",
+        "tests",
         "timeoutMs",
         "used",
         "version"
@@ -25186,6 +25490,7 @@
       "language": "typescript",
       "references": [
         "Uint8Array",
+        "built",
         "cannot",
         "clean",
         "label",
@@ -25318,8 +25623,7 @@
         "stdout",
         "terminal",
         "terminalTask",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -25409,7 +25713,6 @@
         "title",
         "total",
         "updatedAt",
-        "useTemporaryRepositories",
         "waived",
         "withPassingEvidence"
       ]
@@ -25479,16 +25782,17 @@
         "digest",
         "exitCode",
         "fail",
+        "failed",
         "focused",
         "gate",
         "goal",
         "initializeProject",
         "inputDigest",
+        "invalid",
         "kind",
         "legacy",
         "limits",
         "malformed",
-        "message",
         "number",
         "pending",
         "process",
@@ -25508,8 +25812,7 @@
         "title",
         "total",
         "unavailable",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -25586,6 +25889,7 @@
         "malformed",
         "maxEntries",
         "number",
+        "persisted",
         "process",
         "program",
         "reasonCodes",
@@ -25604,7 +25908,6 @@
         "taskMonth",
         "title",
         "unavailable",
-        "useTemporaryRepositories",
         "visible",
         "walk"
       ]
@@ -25689,7 +25992,6 @@
         "legacy",
         "legacyTaskRecord",
         "malformed",
-        "message",
         "met",
         "migrated",
         "override",
@@ -25698,12 +26000,13 @@
         "ready",
         "recordedAt",
         "recursive",
+        "report",
         "retained",
         "severity",
+        "sourceTaskIds",
         "taskMonth",
         "terminal",
         "unsafe",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "warning",
         "workspace"
@@ -25795,8 +26098,7 @@
         "stdout",
         "title",
         "total",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -25944,11 +26246,11 @@
         "skills",
         "spec",
         "stage",
+        "startedAt",
         "technologies",
         "template",
         "unchanged",
         "updated",
-        "useTemporaryRepositories",
         "validate",
         "version",
         "workspace"
@@ -26018,6 +26320,7 @@
         "blocks",
         "buildLearningEntry",
         "buildTaskV3",
+        "built",
         "bulk",
         "cannot",
         "cli",
@@ -26033,7 +26336,6 @@
         "initializeProject",
         "learning",
         "listing",
-        "message",
         "number",
         "outside",
         "process",
@@ -26044,6 +26346,7 @@
         "recordedAt",
         "recursive",
         "rejected",
+        "removed",
         "retired",
         "runCli",
         "saveTask",
@@ -26052,7 +26355,6 @@
         "spec",
         "stdout",
         "unit",
-        "useTemporaryRepositories",
         "workspace",
         "writeJournalFile"
       ]
@@ -26106,7 +26408,6 @@
         "sourceTaskIds",
         "statement",
         "summary",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -26209,7 +26510,6 @@
         "snapshotTree",
         "stdout",
         "title",
-        "useTemporaryRepositories",
         "withWorkflowLock"
       ]
     },
@@ -26284,9 +26584,9 @@
         "dependents",
         "developer",
         "digest",
+        "distance",
         "endLine",
         "exact",
-        "flag",
         "format",
         "handler",
         "initializeProject",
@@ -26310,8 +26610,8 @@
         "stdout",
         "store",
         "symbols",
+        "tests",
         "unit",
-        "useTemporaryRepositories",
         "via",
         "walk",
         "workspace"
@@ -26391,6 +26691,7 @@
         "all",
         "allowed",
         "app",
+        "args",
         "before",
         "buildEpic",
         "buildGatedTask",
@@ -26432,7 +26733,6 @@
         "unavailable",
         "updatedAt",
         "upsertEpic",
-        "useTemporaryRepositories",
         "waived",
         "walk"
       ]
@@ -26604,10 +26904,12 @@
         "done",
         "fail",
         "finish",
+        "fixture",
         "focused",
         "gate",
         "goal",
         "initializeProject",
+        "inputDigest",
         "met",
         "nextAction",
         "number",
@@ -26618,13 +26920,11 @@
         "program",
         "progress",
         "proven",
-        "recursive",
         "runCli",
         "running",
         "setActiveTask",
         "snapshotTree",
         "stdout",
-        "useTemporaryRepositories",
         "via",
         "waived"
       ]
@@ -26704,6 +27004,7 @@
         "malformed",
         "matched",
         "message",
+        "mode",
         "nested",
         "number",
         "old",
@@ -26724,8 +27025,7 @@
         "taskMonth",
         "title",
         "unavailable",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -26769,8 +27069,7 @@
         "recursive",
         "removed",
         "skills",
-        "uninstallProject",
-        "useTemporaryRepositories"
+        "uninstallProject"
       ]
     },
     {
@@ -26855,7 +27154,6 @@
         "unchanged",
         "updateProject",
         "updated",
-        "useTemporaryRepositories",
         "version",
         "workspace",
         "writeConfig",
@@ -26937,6 +27235,7 @@
         "hasTests",
         "identity",
         "initializeProject",
+        "lint",
         "main",
         "pnpm",
         "process",
@@ -26945,7 +27244,6 @@
         "runCli",
         "scripts",
         "stdout",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -27035,7 +27333,6 @@
         "filePath",
         "filesystem",
         "fixture",
-        "flag",
         "focused",
         "goal",
         "implementingTaskV3",
@@ -27047,14 +27344,16 @@
         "main",
         "met",
         "migrated",
+        "nested",
         "nextStage",
         "optional",
         "outside",
+        "overrides",
         "payload",
+        "planning",
         "pnpm",
         "process",
         "program",
-        "recursive",
         "runCli",
         "runs",
         "set",
@@ -27067,7 +27366,6 @@
         "terminal",
         "transition",
         "updatedTask",
-        "useTemporaryRepositories",
         "via"
       ]
     },
@@ -27120,8 +27418,7 @@
         "split",
         "stdout",
         "summary",
-        "title",
-        "useTemporaryRepositories"
+        "title"
       ]
     },
     {
@@ -27223,7 +27520,6 @@
         "program",
         "rationale",
         "reads",
-        "recursive",
         "relevant",
         "replan",
         "runCli",
@@ -27235,12 +27531,13 @@
         "starts",
         "stdout",
         "taskV3",
-        "transition"
+        "transition",
+        "upsertEpic"
       ]
     },
     {
-      "byteLength": 14876,
-      "contentHash": "f1858711521f300c578cc18d0037c8cc0bf4bf654730efc38634cf3b83d51114",
+      "byteLength": 14930,
+      "contentHash": "706f3930f135b06222dfcc09a2a039e7e69a15a6bb0254f5d23d8411ae77bb3c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -27312,6 +27609,7 @@
         "completed",
         "does",
         "done",
+        "durationMs",
         "extra",
         "fail",
         "finish",
@@ -27331,7 +27629,6 @@
         "program",
         "rationale",
         "reads",
-        "recursive",
         "runCli",
         "running",
         "runs",
@@ -27342,12 +27639,69 @@
         "slug",
         "stdout",
         "suite",
+        "taskDir",
         "taskMonth",
         "terminal",
         "transition",
         "unchanged",
-        "useTemporaryRepositories",
         "waived"
+      ]
+    },
+    {
+      "byteLength": 3307,
+      "contentHash": "bae34fbd0048ee9f8c6701efe9189620fe91efbc71d56547f48ad2e0d0364f58",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "code",
+        "fixture",
+        "lite",
+        "originalCwd",
+        "originalExitCode",
+        "outside",
+        "parsed",
+        "project",
+        "result",
+        "root",
+        "run",
+        "stderr",
+        "stdout"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "test/support/integration-fixtures.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/commands/workflow-lifecycle-handlers.test.ts",
+      "language": "typescript",
+      "references": [
+        "argv",
+        "brief",
+        "cli",
+        "exitCode",
+        "fixture",
+        "full",
+        "initializeUtcProject",
+        "instead",
+        "mode",
+        "notes",
+        "outside",
+        "pnpm",
+        "prd",
+        "process",
+        "program",
+        "recursive",
+        "runCli",
+        "slice",
+        "stdout",
+        "taskDir",
+        "title"
       ]
     },
     {
@@ -27435,7 +27789,6 @@
         "rule",
         "runCli",
         "stdout",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "users"
       ]
@@ -27504,14 +27857,13 @@
         "stdout",
         "technologies",
         "unavailable",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "warning"
       ]
     },
     {
-      "byteLength": 3548,
-      "contentHash": "fe27d7b37f0a4ea9dd365fcd73a5b1952c13730e294adbdce17ff230488c4fd0",
+      "byteLength": 3612,
+      "contentHash": "53f8078703bde8c7cba1d23c8cd935823811e9060d21c44a87dceb3dd5f72900",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -27556,6 +27908,7 @@
         "could",
         "created",
         "developer",
+        "durationMs",
         "exitCode",
         "fail",
         "fixture",
@@ -27574,8 +27927,7 @@
         "slug",
         "starts",
         "stdout",
-        "title",
-        "useTemporaryRepositories"
+        "title"
       ]
     },
     {
@@ -27662,7 +28014,6 @@
         "timezone",
         "title",
         "updatedAt",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes"
       ]
     },
@@ -27807,7 +28158,6 @@
         "severity",
         "stdout",
         "summary",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes"
       ]
     },
@@ -27882,7 +28232,6 @@
         "setupPlatforms",
         "severity",
         "summary",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "version",
         "warning"
@@ -27955,7 +28304,6 @@
         "skill",
         "skills",
         "template",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "warning",
         "writeManifest"
@@ -28038,7 +28386,6 @@
         "title",
         "total",
         "upsertEpic",
-        "useTemporaryRepositories",
         "work"
       ]
     },
@@ -28304,7 +28651,6 @@
         "process",
         "skills",
         "updateProject",
-        "useTemporaryRepositories",
         "writeConfig"
       ]
     },
@@ -28358,8 +28704,7 @@
         "scripts",
         "snapshotTree",
         "stdout",
-        "summary",
-        "useTemporaryRepositories"
+        "summary"
       ]
     },
     {
@@ -28455,7 +28800,6 @@
         "summary",
         "taskMonth",
         "transition",
-        "useTemporaryRepositories",
         "walk"
       ]
     },
@@ -28500,8 +28844,7 @@
         "recursive",
         "refreshRepoMap",
         "severity",
-        "sources",
-        "useTemporaryRepositories"
+        "sources"
       ]
     },
     {
@@ -28568,7 +28911,7 @@
         "refs",
         "removed",
         "runRepoMapCommand",
-        "useTemporaryRepositories",
+        "tests",
         "workspace"
       ]
     },
@@ -28606,8 +28949,7 @@
         "rebuild",
         "recursive",
         "refresh",
-        "refreshRepoMap",
-        "useTemporaryRepositories"
+        "refreshRepoMap"
       ]
     },
     {
@@ -28652,7 +28994,6 @@
         "runCli",
         "stdout",
         "sub",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -28714,7 +29055,6 @@
         "taskFilePath",
         "title",
         "transition",
-        "useTemporaryRepositories",
         "version"
       ]
     },
@@ -28825,7 +29165,6 @@
         "summary",
         "table",
         "upstream",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -28885,8 +29224,7 @@
         "runCli",
         "scripts",
         "stdout",
-        "technologies",
-        "useTemporaryRepositories"
+        "technologies"
       ]
     },
     {
@@ -28978,8 +29316,7 @@
         "removes",
         "title",
         "updateProject",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -29050,6 +29387,7 @@
         "developer",
         "diagnoseProject",
         "digest",
+        "epics",
         "finding",
         "fixed",
         "flat",
@@ -29083,7 +29421,6 @@
         "skipped",
         "spec",
         "updateProject",
-        "useTemporaryRepositories",
         "walk",
         "warning",
         "where"
@@ -29145,7 +29482,6 @@
         "title",
         "unchanged",
         "updatedAt",
-        "useTemporaryRepositories",
         "versions",
         "written"
       ]
@@ -29242,7 +29578,7 @@
         "severity",
         "store",
         "taskId",
-        "useTemporaryRepositories",
+        "tests",
         "useTemporaryUserHomes",
         "version",
         "warning",
@@ -29250,8 +29586,8 @@
       ]
     },
     {
-      "byteLength": 6844,
-      "contentHash": "646765d4c453b1e8691676de41708399b7f99384ed25efe8ebf309218d1e33d0",
+      "byteLength": 6855,
+      "contentHash": "e82f49f1dc249be333924f47e539a5571b252fd327aa97653ec9b6d1c3f626c5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -29303,6 +29639,7 @@
         "hook",
         "hooks",
         "kind",
+        "lint",
         "managed",
         "matcher",
         "matchesClaudeGlobalContextHookGroup",
@@ -29876,8 +30213,8 @@
       ]
     },
     {
-      "byteLength": 6102,
-      "contentHash": "eba00d99b077471bfe5b81cf6d0d78c9c13e1bf25b5b3f53d22775c1b8d9c15e",
+      "byteLength": 6146,
+      "contentHash": "5e148e78366635be0f8e9eb3e5cbe20390a6106caf16c38d713841ac07f3e2c4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -29951,7 +30288,6 @@
         "temporaryRoot",
         "unchanged",
         "updated",
-        "useTemporaryRepositories",
         "warning"
       ]
     },
@@ -30081,7 +30417,6 @@
         "skills",
         "unchanged",
         "updated",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "version"
       ]
@@ -30440,8 +30775,7 @@
         "skills",
         "split",
         "stdout",
-        "temporaryRoot",
-        "useTemporaryRepositories"
+        "temporaryRoot"
       ]
     },
     {
@@ -30510,6 +30844,8 @@
         "commit",
         "context",
         "contextFastPathArguments",
+        "dependencies",
+        "extra",
         "hook",
         "hooks",
         "link",
@@ -30520,7 +30856,6 @@
         "p95",
         "plain",
         "pnpm",
-        "recursive",
         "registry",
         "release",
         "resolution",
@@ -30535,7 +30870,6 @@
         "stdout",
         "style",
         "unsafe",
-        "useTemporaryRepositories",
         "used",
         "workspace"
       ]
@@ -30732,11 +31066,11 @@
         "shape",
         "shared",
         "style",
+        "tests",
         "time",
         "timezone",
         "title",
         "updatedAt",
-        "useTemporaryRepositories",
         "validateTask",
         "version",
         "writeConfig"
@@ -30876,11 +31210,11 @@
         "reads",
         "recordedAt",
         "reported",
-        "rest",
         "retired",
         "sha256",
         "shape",
         "stdout",
+        "tests",
         "title",
         "updatedAt",
         "used",
@@ -30959,6 +31293,7 @@
         "sourceTaskIds",
         "statement",
         "summary",
+        "tests",
         "transitionWorkflow",
         "unique",
         "updatedAt"
@@ -31049,7 +31384,8 @@
         "set",
         "solution",
         "split",
-        "style"
+        "style",
+        "tests"
       ]
     },
     {
@@ -31086,7 +31422,6 @@
         "commands",
         "context",
         "createRepoMap",
-        "declared",
         "destroyWarehouseCode",
         "developer",
         "epics",
@@ -31147,7 +31482,8 @@
       "references": [
         "bucket",
         "monthBucket",
-        "slice"
+        "slice",
+        "tests"
       ]
     },
     {
@@ -31190,6 +31526,7 @@
         "pnpm",
         "specs",
         "store",
+        "tests",
         "title",
         "unit",
         "updatedAt"
@@ -31216,8 +31553,7 @@
       "references": [
         "createVerifiedUserRoot",
         "logicalPath",
-        "managed",
-        "useTemporaryRepositories"
+        "managed"
       ]
     },
     {
@@ -31272,6 +31608,7 @@
         "recursive",
         "resolution",
         "splice",
+        "tests",
         "used"
       ]
     },
@@ -31360,6 +31697,7 @@
         "specs",
         "summary",
         "taskMonth",
+        "tests",
         "timezone",
         "title",
         "updatedAt",
@@ -31550,13 +31888,14 @@
       ]
     },
     {
-      "byteLength": 5737,
-      "contentHash": "639fc825b42204cbf69a9e8f8bb1bfc95cf067acf4cb0fbe4d8eb8bb0dece098",
+      "byteLength": 6160,
+      "contentHash": "ea7654c42d5473b20f142f66576c9f8ea0c3efb6de11d00537efaa807402301d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Error",
         "bad",
+        "command",
         "errorResult",
         "flags",
         "path",
@@ -31580,24 +31919,21 @@
         "cannot",
         "characters",
         "cli",
+        "contains",
         "days",
         "defaultDeveloperId",
         "developer",
-        "dir",
+        "dotnet",
         "events",
         "exact",
         "exitCode",
         "flag",
-        "flags",
         "format",
         "impact",
         "integer",
-        "invalid",
         "kiro",
         "limits",
-        "message",
         "messages",
-        "mode",
         "modes",
         "must",
         "options",
@@ -31618,8 +31954,11 @@
         "redactPublicErrorMessage",
         "refresh",
         "refs",
+        "segment",
         "set",
-        "validateRepoMapOptions"
+        "tests",
+        "validateRepoMapOptions",
+        "work"
       ]
     },
     {
@@ -31939,7 +32278,6 @@
         "slot",
         "stdout",
         "symbol",
-        "useTemporaryRepositories",
         "words",
         "work"
       ]
@@ -32001,7 +32339,6 @@
         "setActiveTask",
         "title",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeConfig"
       ]
     },
@@ -32070,13 +32407,12 @@
         "skills",
         "template",
         "unchanged",
-        "unsafe",
-        "useTemporaryRepositories"
+        "unsafe"
       ]
     },
     {
-      "byteLength": 4926,
-      "contentHash": "f569d10e539785746352b8683390f0d8658ea9d360616c75f8e25fc10c74e435",
+      "byteLength": 6524,
+      "contentHash": "9c26d5d55f3db9ceb99df6ec3480ec4f2f4f43874d49516792aca6d2c06e1ce5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -32085,6 +32421,7 @@
         "named",
         "out",
         "parsed",
+        "powershell",
         "text",
         "value"
       ],
@@ -32111,6 +32448,7 @@
         "other",
         "pattern",
         "pretoolHintFor",
+        "recursive",
         "refs",
         "symbol",
         "words"
@@ -32169,17 +32507,19 @@
       ]
     },
     {
-      "byteLength": 8394,
-      "contentHash": "63b968321c38f94b60f7c9b8baea077d80374f7976508af7670707b53dcd9f14",
+      "byteLength": 8958,
+      "contentHash": "25d477e065571e93fc56cca8fc29e7f791a1a92cea2d3c8d639d4c58199a85a7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "active",
+        "base",
         "epic",
         "execFileAsync",
         "explain",
         "noActive",
         "result",
+        "retired",
         "root",
         "run",
         "status",
@@ -32229,6 +32569,7 @@
         "nextAction",
         "nextTask",
         "noActive",
+        "old",
         "other",
         "outside",
         "payload",
@@ -32237,6 +32578,7 @@
         "position",
         "read",
         "reportProjectCriteria",
+        "retired",
         "saveWorkflow",
         "summarizeProjectStatus",
         "summary",
@@ -32246,7 +32588,6 @@
         "title",
         "total",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -32285,8 +32626,7 @@
         "restoreDeleted",
         "template",
         "unit",
-        "updateProject",
-        "useTemporaryRepositories"
+        "updateProject"
       ]
     },
     {
@@ -32324,7 +32664,7 @@
         "recursive",
         "scripts",
         "split",
-        "useTemporaryRepositories"
+        "tests"
       ]
     },
     {
@@ -32372,6 +32712,7 @@
         "Command",
         "IDs",
         "TextDecoder",
+        "acceptanceCriteria",
         "action",
         "actions",
         "brief",
@@ -32412,7 +32753,6 @@
         "transition",
         "unit",
         "updatedAt",
-        "useTemporaryRepositories",
         "via",
         "writeProjectSource",
         "written"
@@ -32478,8 +32818,7 @@
         "risk",
         "saveWorkflow",
         "taskV3",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -32503,7 +32842,6 @@
         "after",
         "characters",
         "commands",
-        "declared",
         "expected",
         "field",
         "finish",
@@ -32666,13 +33004,14 @@
         "inspected",
         "instead",
         "loadPersistedTask",
-        "message",
         "met",
         "mitigation",
         "note",
+        "options",
         "order",
         "payload",
         "per",
+        "persisted",
         "planning",
         "pnpm",
         "presentTask",
@@ -32686,7 +33025,6 @@
         "title",
         "transition",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -32737,7 +33075,6 @@
         "planning",
         "pnpm",
         "title",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -32770,6 +33107,7 @@
         "kiro",
         "languageIds",
         "legacyIds",
+        "lint",
         "message",
         "pattern",
         "platformIds",
@@ -32808,6 +33146,7 @@
         "invalid",
         "kiro",
         "legacy",
+        "lint",
         "optional",
         "pnpm",
         "technologies",
@@ -32864,6 +33203,7 @@
         "format",
         "invalid",
         "kiro",
+        "lint",
         "migrateConfig",
         "migrated",
         "override",
@@ -32877,7 +33217,6 @@
         "technologies",
         "timezone",
         "unchanged",
-        "useTemporaryRepositories",
         "validateConfig",
         "values",
         "writeConfig",
@@ -33056,8 +33395,9 @@
         "other",
         "oversized",
         "planning",
+        "profile",
         "rankContext",
-        "recursive",
+        "ranked",
         "resolvePath",
         "safe",
         "saveContextManifest",
@@ -33071,7 +33411,6 @@
         "split",
         "unavailable",
         "unsafe",
-        "useTemporaryRepositories",
         "validateContextSelectionSnapshot"
       ]
     },
@@ -33168,7 +33507,7 @@
         "spec",
         "stage",
         "title",
-        "useTemporaryRepositories",
+        "updatedAt",
         "workspace",
         "writeJournalFile"
       ]
@@ -33248,8 +33587,7 @@
         "running",
         "shouldElideContext",
         "slot",
-        "time",
-        "useTemporaryRepositories"
+        "time"
       ]
     },
     {
@@ -33292,8 +33630,7 @@
         "readArchivedTasks",
         "recursive",
         "size",
-        "taskMonth",
-        "useTemporaryRepositories"
+        "taskMonth"
       ]
     },
     {
@@ -33403,7 +33740,6 @@
         "step",
         "summary",
         "updated",
-        "useTemporaryRepositories",
         "useTemporaryUserHomes",
         "warning"
       ]
@@ -33524,7 +33860,7 @@
         "report",
         "size",
         "table",
-        "useTemporaryRepositories",
+        "tests",
         "useTemporaryUserHomes",
         "warning"
       ]
@@ -33860,8 +34196,7 @@
         "reads",
         "recursive",
         "severity",
-        "unsafe",
-        "useTemporaryRepositories"
+        "unsafe"
       ]
     },
     {
@@ -33972,7 +34307,6 @@
         "summary",
         "taskId",
         "taskMonth",
-        "useTemporaryRepositories",
         "warning",
         "workspace"
       ]
@@ -34028,7 +34362,6 @@
         "severity",
         "skew",
         "unchanged",
-        "useTemporaryRepositories",
         "version",
         "warning"
       ]
@@ -34072,8 +34405,7 @@
         "restore",
         "restoreFullArtifacts",
         "saveTask",
-        "taskMonth",
-        "useTemporaryRepositories"
+        "taskMonth"
       ]
     },
     {
@@ -34109,7 +34441,6 @@
         "buildTaskV3",
         "cancellation",
         "cancelled",
-        "declared",
         "duplicate",
         "finished",
         "goal",
@@ -34188,8 +34519,7 @@
         "restore",
         "roadmap",
         "sortEpicIdsNewestFirst",
-        "stable",
-        "useTemporaryRepositories"
+        "stable"
       ]
     },
     {
@@ -34263,6 +34593,7 @@
         "done",
         "duplicate",
         "empty",
+        "epics",
         "field",
         "finished",
         "finishing",
@@ -34290,7 +34621,6 @@
         "title",
         "updatedAt",
         "upsertEpic",
-        "useTemporaryRepositories",
         "validateEpic",
         "waived",
         "writeConfig"
@@ -34363,8 +34693,7 @@
         "seed",
         "size",
         "slice",
-        "taskFilePath",
-        "useTemporaryRepositories"
+        "taskFilePath"
       ]
     },
     {
@@ -34409,8 +34738,7 @@
         "page",
         "preserved",
         "recursive",
-        "removes",
-        "useTemporaryRepositories"
+        "removes"
       ]
     },
     {
@@ -34742,6 +35070,7 @@
         "kiro",
         "malformed",
         "managed",
+        "manifests",
         "marker",
         "must",
         "named",
@@ -35394,8 +35723,7 @@
         "sourceTaskIds",
         "statement",
         "summary",
-        "taskId",
-        "useTemporaryRepositories"
+        "taskId"
       ]
     },
     {
@@ -35449,7 +35777,6 @@
         "crlf",
         "decision",
         "digest",
-        "dir",
         "does",
         "duplicates",
         "field",
@@ -35458,6 +35785,7 @@
         "impact",
         "learnedPathPrefixes",
         "learning",
+        "lint",
         "marker",
         "mitigation",
         "named",
@@ -35548,7 +35876,6 @@
         "spec",
         "specPath",
         "store",
-        "useTemporaryRepositories",
         "workspace",
         "writeJournalFile"
       ]
@@ -35608,7 +35935,6 @@
         "spec",
         "split",
         "statement",
-        "useTemporaryRepositories",
         "used"
       ]
     },
@@ -35674,7 +36000,6 @@
         "does",
         "dropped",
         "duplicates",
-        "empty",
         "evidenceId",
         "extractObservations",
         "finishing",
@@ -35694,6 +36019,7 @@
         "rationale",
         "readLearningStates",
         "reads",
+        "recordedAt",
         "rejected",
         "residualRisks",
         "runs",
@@ -35701,10 +36027,10 @@
         "shared",
         "size",
         "split",
+        "tests",
         "threshold",
         "unchanged",
         "unit",
-        "useTemporaryRepositories",
         "writeJournalFile"
       ]
     },
@@ -35810,7 +36136,6 @@
         "rule",
         "statement",
         "store",
-        "useTemporaryRepositories",
         "writeJournalFile"
       ]
     },
@@ -35937,7 +36262,7 @@
         "statement",
         "store",
         "summary",
-        "useTemporaryRepositories",
+        "tests",
         "writeJournalFile"
       ]
     },
@@ -36130,8 +36455,7 @@
         "recursive",
         "relevant",
         "sources",
-        "taskMonth",
-        "useTemporaryRepositories"
+        "taskMonth"
       ]
     },
     {
@@ -36183,7 +36507,6 @@
         "store",
         "sub",
         "summary",
-        "useTemporaryRepositories",
         "writeJournalFile"
       ]
     },
@@ -36237,6 +36560,7 @@
         "before",
         "block",
         "buildLearningEntry",
+        "built",
         "cannot",
         "characters",
         "does",
@@ -36271,7 +36595,6 @@
         "split",
         "statement",
         "summarizeLearning",
-        "useTemporaryRepositories",
         "writeJournalFile"
       ]
     },
@@ -36409,6 +36732,7 @@
         "fixed",
         "generatedHash",
         "managed",
+        "manifests",
         "obsolete",
         "obsoleteState",
         "old",
@@ -36420,7 +36744,6 @@
         "replacement",
         "sha256",
         "unchanged",
-        "useTemporaryRepositories",
         "validateManifest",
         "writeManifest"
       ]
@@ -36629,7 +36952,6 @@
       "language": "typescript",
       "references": [
         "RepoMapImpactResultV1",
-        "RepoMapOutlineResultV1",
         "RepoMapQueryResult",
         "RepoMapRefsResultV1",
         "RepoMapTestsResultV1",
@@ -36675,6 +36997,7 @@
         "store",
         "symbols",
         "term",
+        "tests",
         "writeRepoMap"
       ]
     },
@@ -36799,7 +37122,6 @@
         "topic",
         "topics",
         "updated",
-        "useTemporaryRepositories",
         "users",
         "variable",
         "wrappers"
@@ -36900,7 +37222,6 @@
         "technologies",
         "topic",
         "topics",
-        "useTemporaryRepositories",
         "validateRepoMapOptions",
         "values",
         "worker",
@@ -37078,6 +37399,7 @@
         "language",
         "load",
         "main",
+        "manifests",
         "method",
         "modules",
         "named",
@@ -37087,13 +37409,12 @@
         "packagePath",
         "plain",
         "reads",
-        "recursive",
         "scan",
         "scripts",
         "selection",
         "size",
+        "tests",
         "typeScriptFiles",
-        "useTemporaryRepositories",
         "writeFixtureFiles"
       ]
     },
@@ -37165,7 +37486,6 @@
         "suspects",
         "time",
         "unchanged",
-        "useTemporaryRepositories",
         "written"
       ]
     },
@@ -37247,10 +37567,10 @@
         "searchRepoMap",
         "shared",
         "store",
+        "tests",
         "total",
         "typeScriptFiles",
         "unchanged",
-        "useTemporaryRepositories",
         "users",
         "writeFixtureFiles"
       ]
@@ -37422,8 +37742,7 @@
         "per",
         "recursive",
         "skipped",
-        "unit",
-        "useTemporaryRepositories"
+        "unit"
       ]
     },
     {
@@ -37513,7 +37832,6 @@
         "total",
         "unchanged",
         "unquoted",
-        "useTemporaryRepositories",
         "waiver",
         "writeFixtureFiles"
       ]
@@ -37647,8 +37965,7 @@
         "spans",
         "symbol",
         "symbols",
-        "total",
-        "useTemporaryRepositories"
+        "total"
       ]
     },
     {
@@ -37686,7 +38003,6 @@
         "attachReferences",
         "common",
         "count",
-        "declared",
         "field",
         "fixtureRecord",
         "ignores",
@@ -37695,6 +38011,7 @@
         "number",
         "other",
         "slice",
+        "tests",
         "used",
         "users"
       ]
@@ -37731,11 +38048,13 @@
       ]
     },
     {
-      "byteLength": 5169,
-      "contentHash": "4d39d0cb78669b9c80e5b30b971330076fbd37bfaa8bc5eb939251179732fbf9",
+      "byteLength": 5900,
+      "contentHash": "2548fe6c2e6e4cd18efa46e2e354f65f7c03adc56507e4a4ba3075a6cd553a5b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CODE",
+        "OTHER",
         "app",
         "chargeInvoice",
         "notFound",
@@ -37763,10 +38082,12 @@
       "path": "test/unit/core/repo-map/refs.test.ts",
       "language": "typescript",
       "references": [
+        "accepts",
         "app",
         "bad",
         "createUnavailableRepoMapRefs",
         "declaration",
+        "errors",
         "exact",
         "findRepoMapReferences",
         "imports",
@@ -37781,9 +38102,9 @@
         "refreshRepoMap",
         "refs",
         "scoped",
+        "starts",
         "symbol",
-        "unit",
-        "useTemporaryRepositories"
+        "unit"
       ]
     },
     {
@@ -37930,6 +38251,7 @@
         "order",
         "outlineRepoMap",
         "packagePath",
+        "persisted",
         "queryRepoMap",
         "ready",
         "reasons",
@@ -37944,7 +38266,6 @@
         "store",
         "symbols",
         "unit",
-        "useTemporaryRepositories",
         "used",
         "words"
       ]
@@ -38036,6 +38357,7 @@
         "reads",
         "spec",
         "store",
+        "tests",
         "unit"
       ]
     },
@@ -38132,11 +38454,11 @@
         "split",
         "store",
         "symbols",
+        "tests",
         "top",
         "transitive",
         "typeScriptFiles",
         "unit",
-        "useTemporaryRepositories",
         "users",
         "via",
         "writeFixtureFiles",
@@ -38197,7 +38519,6 @@
         "refreshWorkspaceRepoMap",
         "skipped",
         "store",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -38241,7 +38562,6 @@
         "score",
         "shared",
         "sub",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -38285,6 +38605,7 @@
         "detected",
         "facts",
         "hasTests",
+        "lint",
         "more",
         "none",
         "per",
@@ -38293,9 +38614,9 @@
         "renderProjectFacts",
         "spec",
         "technologies",
+        "tests",
         "unchanged",
         "updated",
-        "useTemporaryRepositories",
         "version",
         "writeProjectFacts"
       ]
@@ -38355,7 +38676,6 @@
         "skill",
         "skills",
         "spec",
-        "useTemporaryRepositories",
         "version"
       ]
     },
@@ -38471,7 +38791,6 @@
         "dependency",
         "detectProject",
         "detection",
-        "dir",
         "does",
         "dotnet",
         "env",
@@ -38483,9 +38802,11 @@
         "kiro",
         "language",
         "linked",
+        "lint",
         "live",
         "lock",
         "main",
+        "manifests",
         "mod",
         "must",
         "native",
@@ -38500,8 +38821,7 @@
         "scripts",
         "solution",
         "split",
-        "technologies",
-        "useTemporaryRepositories",
+        "trees",
         "workspace"
       ]
     },
@@ -38560,8 +38880,8 @@
         "solutions",
         "split",
         "started",
-        "time",
-        "useTemporaryRepositories"
+        "tests",
+        "time"
       ]
     },
     {
@@ -38594,8 +38914,7 @@
         "loadHarnixIgnore",
         "parseHarnixIgnore",
         "patterns",
-        "sub",
-        "useTemporaryRepositories"
+        "sub"
       ]
     },
     {
@@ -38780,6 +39099,7 @@
         "ecosystems",
         "format",
         "hasTests",
+        "lint",
         "lock",
         "main",
         "mod",
@@ -38791,7 +39111,7 @@
         "scripts",
         "solution",
         "split",
-        "useTemporaryRepositories",
+        "tests",
         "version"
       ]
     },
@@ -38838,7 +39158,6 @@
       "path": "test/unit/core/stack/verify-plan.test.ts",
       "language": "typescript",
       "references": [
-        "absolute",
         "app",
         "auto",
         "brief",
@@ -38858,6 +39177,7 @@
         "hasTests",
         "impact",
         "kiro",
+        "lint",
         "lock",
         "main",
         "marker",
@@ -38882,7 +39202,7 @@
         "split",
         "sub",
         "technologies",
-        "useTemporaryRepositories",
+        "tests",
         "verdict",
         "warning",
         "workspace"
@@ -38937,7 +39257,9 @@
         "duplicate",
         "hasTests",
         "ignores",
+        "lint",
         "lock",
+        "manifests",
         "mod",
         "modules",
         "nearest",
@@ -38953,7 +39275,6 @@
         "solutions",
         "split",
         "sub",
-        "useTemporaryRepositories",
         "work",
         "workspace"
       ]
@@ -39007,6 +39328,7 @@
         "done",
         "evidenceIds",
         "expected",
+        "failed",
         "finish",
         "finishing",
         "fixed",
@@ -39014,7 +39336,6 @@
         "goal",
         "inventory",
         "kind",
-        "message",
         "met",
         "nextAction",
         "order",
@@ -39120,8 +39441,9 @@
         "openTask",
         "planArchive",
         "planning",
+        "read",
+        "reasons",
         "recent",
-        "recursive",
         "replan",
         "resolveTaskDirectory",
         "restore",
@@ -39131,8 +39453,7 @@
         "setActiveTask",
         "terminal",
         "terminalTask",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -39336,7 +39657,6 @@
         "inspectRequiredChecks",
         "kind",
         "mapped",
-        "message",
         "met",
         "pending",
         "planning",
@@ -39349,6 +39669,7 @@
         "sha256",
         "shared",
         "title",
+        "total",
         "unavailable",
         "updatedAt",
         "waived"
@@ -39515,8 +39836,7 @@
         "stable",
         "taskFilePath",
         "taskLogicalPath",
-        "unsafe",
-        "useTemporaryRepositories"
+        "unsafe"
       ]
     },
     {
@@ -39791,7 +40111,7 @@
         "split",
         "systemTimezone",
         "taskMonth",
-        "useTemporaryRepositories",
+        "tests",
         "verdict"
       ]
     },
@@ -39833,6 +40153,7 @@
         "legal",
         "legalCheckpoints",
         "limits",
+        "manifests",
         "nested",
         "nextAction",
         "optional",
@@ -39932,7 +40253,6 @@
         "transitionTask",
         "transitions",
         "upstream",
-        "useTemporaryRepositories",
         "validateTask",
         "waived"
       ]
@@ -40023,8 +40343,7 @@
         "taskFixture",
         "taskMonth",
         "terminal",
-        "transitionTask",
-        "useTemporaryRepositories"
+        "transitionTask"
       ]
     },
     {
@@ -40114,7 +40433,6 @@
         "setActiveTask",
         "taskFixture",
         "unsafe",
-        "useTemporaryRepositories",
         "validId",
         "validate",
         "validateTask",
@@ -40122,15 +40440,18 @@
       ]
     },
     {
-      "byteLength": 11217,
-      "contentHash": "5040ec39cdfb67b315ae7db2889ccfc5b4e1aaede033e8bdc3a9bc6ce40b0d35",
+      "byteLength": 12300,
+      "contentHash": "884d4e99cbcdeb5d0a65c39791c363d5e3ccc0580a774516f29e4a6765a0c381",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "bad",
         "baseEvidence",
         "baseline",
+        "build",
         "check",
         "criterion",
+        "evidence",
         "failedEvidence",
         "fixture",
         "fixtureV2",
@@ -40166,6 +40487,7 @@
         "createTaskV2MigrationEvidence",
         "criterionIds",
         "digest",
+        "durationMs",
         "empty",
         "evidenceIds",
         "exitCode",
@@ -40177,6 +40499,7 @@
         "finding",
         "fixture",
         "inputDigest",
+        "integer",
         "invalid",
         "kind",
         "legacy",
@@ -40338,7 +40661,6 @@
         "inputDigest",
         "instead",
         "malformed",
-        "message",
         "must",
         "optional",
         "other",
@@ -40354,6 +40676,7 @@
         "severity",
         "suite",
         "taskRecordFieldManifest",
+        "tests",
         "title",
         "unchanged",
         "unsafe",
@@ -40550,8 +40873,7 @@
         "unchanged",
         "unit",
         "updatedAt",
-        "usage",
-        "useTemporaryRepositories"
+        "usage"
       ]
     },
     {
@@ -40629,7 +40951,6 @@
         "digest",
         "digestMatches",
         "does",
-        "empty",
         "fields",
         "focused",
         "glob",
@@ -40638,6 +40959,7 @@
         "info",
         "inputDigest",
         "legacyDigest",
+        "lint",
         "main",
         "marker",
         "other",
@@ -40658,8 +40980,8 @@
         "split",
         "taskContractHash",
         "taskFixture",
+        "tests",
         "unchanged",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -40703,8 +41025,7 @@
         "old",
         "recursive",
         "replacement",
-        "segment",
-        "useTemporaryRepositories"
+        "segment"
       ]
     },
     {
@@ -40793,7 +41114,6 @@
         "unchanged",
         "unit",
         "updatedAt",
-        "useTemporaryRepositories",
         "validate"
       ]
     },
@@ -40835,8 +41155,7 @@
         "sha256",
         "snapshots",
         "taskId",
-        "unchanged",
-        "useTemporaryRepositories"
+        "unchanged"
       ]
     },
     {
@@ -40901,8 +41220,7 @@
         "recursive",
         "targeted",
         "targetedSegments",
-        "updated",
-        "useTemporaryRepositories"
+        "updated"
       ]
     },
     {
@@ -41109,6 +41427,7 @@
         "given",
         "implementingTaskV3",
         "instead",
+        "lint",
         "outcome",
         "planning",
         "pnpm",
@@ -41128,7 +41447,6 @@
         "taskV3",
         "terminal",
         "updatedAt",
-        "useTemporaryRepositories",
         "waived"
       ]
     },
@@ -41181,8 +41499,7 @@
         "proved",
         "recorded",
         "setBaselineWorkflow",
-        "suite",
-        "useTemporaryRepositories"
+        "suite"
       ]
     },
     {
@@ -41244,7 +41561,6 @@
         "contract",
         "covering",
         "criterionIds",
-        "declared",
         "empty",
         "exitCode",
         "fail",
@@ -41269,8 +41585,7 @@
         "set",
         "setBaselineWorkflow",
         "skipped",
-        "suite",
-        "useTemporaryRepositories"
+        "suite"
       ]
     },
     {
@@ -41315,6 +41630,7 @@
         "fresh",
         "given",
         "ignores",
+        "lint",
         "merged",
         "must",
         "other",
@@ -41447,7 +41763,6 @@
         "unchanged",
         "updated",
         "updatedAt",
-        "useTemporaryRepositories",
         "validateWorkflowBatchEnvelope",
         "values",
         "waived",
@@ -41562,6 +41877,7 @@
         "checkId",
         "contextDrift",
         "done",
+        "evidenceIds",
         "exitCode",
         "fail",
         "finished",
@@ -41591,7 +41907,6 @@
         "taskV3",
         "terminal",
         "updatedAt",
-        "useTemporaryRepositories",
         "withTargetTask",
         "workspace"
       ]
@@ -41700,14 +42015,52 @@
         "pnpm",
         "replacement",
         "setCheckWorkflow",
-        "useTemporaryRepositories",
         "validateCheckInputs",
         "workspace"
       ]
     },
     {
-      "byteLength": 3726,
-      "contentHash": "d417af9f10e8e273e616f4fa6619e2a127bb3ba245adab80a0107f5cb9b29cb6",
+      "byteLength": 2494,
+      "contentHash": "90a4cb7df0ec9f47a3f4e40a0a461f9a63426e9f9754147cacf1a160343a9c85",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "check",
+        "ordered",
+        "run"
+      ],
+      "importTargets": [
+        "src/core/workflow/check-order.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/check-order.test.ts",
+      "language": "typescript",
+      "references": [
+        "before",
+        "checkId",
+        "declaration",
+        "duration",
+        "durationMs",
+        "fail",
+        "failed",
+        "focused",
+        "full",
+        "ignores",
+        "lint",
+        "number",
+        "order",
+        "orderChecks",
+        "recorded",
+        "runs",
+        "suite",
+        "where"
+      ]
+    },
+    {
+      "byteLength": 4661,
+      "contentHash": "22907facdad222099db32065bddc04ccebc8f6b1e165c8124e70e6a0aa2f43d7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -41727,10 +42080,15 @@
         "ANSI",
         "Array",
         "absolute",
+        "app",
+        "are",
+        "available",
         "characters",
         "codes",
+        "collected",
         "does",
         "dotnet",
+        "empty",
         "expected",
         "failed",
         "failures",
@@ -41738,6 +42096,8 @@
         "launcher",
         "launcherFailure",
         "message",
+        "noTestsRan",
+        "plain",
         "pnpm",
         "read",
         "seed",
@@ -41745,6 +42105,7 @@
         "suite",
         "summarizeCheckOutput",
         "summary",
+        "tests",
         "unit"
       ]
     },
@@ -41776,13 +42137,13 @@
         "bin",
         "cmd",
         "commands",
-        "declared",
         "describeCommand",
         "does",
         "equivalentCommand",
         "exact",
         "expected",
         "extra",
+        "lint",
         "normalizeCommand",
         "other",
         "pnpm",
@@ -41849,7 +42210,6 @@
         "complete",
         "contract",
         "criterionIds",
-        "declared",
         "digest",
         "does",
         "done",
@@ -41875,6 +42235,7 @@
         "skipped",
         "suite",
         "summary",
+        "tests",
         "unit",
         "verificationRetryDisposition",
         "waived"
@@ -41950,8 +42311,7 @@
         "taskV3",
         "tracked",
         "unavailable",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -42004,7 +42364,6 @@
         "contract",
         "covering",
         "criterionIds",
-        "declared",
         "digest",
         "done",
         "evidenceIds",
@@ -42035,7 +42394,6 @@
         "taskV3",
         "unchanged",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -42105,7 +42463,6 @@
         "taskV3",
         "top",
         "updatedAt",
-        "useTemporaryRepositories",
         "written"
       ]
     },
@@ -42151,8 +42508,7 @@
         "taskId",
         "taskV3",
         "title",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -42224,7 +42580,6 @@
         "shape",
         "taskMonth",
         "taskV3",
-        "useTemporaryRepositories",
         "writeEpicMembers"
       ]
     },
@@ -42294,8 +42649,7 @@
         "taskMonth",
         "title",
         "updatedAt",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -42351,8 +42705,7 @@
         "taskMonth",
         "taskV3",
         "title",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -42439,8 +42792,8 @@
         "saved",
         "skipped",
         "summary",
-        "taskMonth",
-        "useTemporaryRepositories"
+        "tag",
+        "taskMonth"
       ]
     },
     {
@@ -42522,8 +42875,7 @@
         "saveWorkflow",
         "summary",
         "taskV3",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -42568,8 +42920,7 @@
         "preflightWorkflow",
         "recorded",
         "recursive",
-        "spec",
-        "useTemporaryRepositories"
+        "spec"
       ]
     },
     {
@@ -42649,7 +43000,6 @@
         "bare",
         "captured",
         "carried",
-        "clock",
         "completed",
         "computeInputDigest",
         "confidence",
@@ -42677,7 +43027,6 @@
         "old",
         "promotable",
         "rationale",
-        "recursive",
         "resolveActiveTask",
         "routingTask",
         "safe",
@@ -42689,7 +43038,9 @@
         "split",
         "supporting",
         "taskMonth",
-        "taskV3"
+        "taskV3",
+        "tests",
+        "transition"
       ]
     },
     {
@@ -42783,6 +43134,47 @@
       ]
     },
     {
+      "byteLength": 2125,
+      "contentHash": "d751c997225fa0b7251c58f33846409e3a81e697fcfc987b16e58044304b0219",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "directory",
+        "root",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/tasks/task-location.js",
+        "src/core/workflow/init-task.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/init-artifacts.test.ts",
+      "language": "typescript",
+      "references": [
+        "artifact",
+        "full",
+        "given",
+        "initTaskWorkflow",
+        "initializeUtcProject",
+        "instead",
+        "location",
+        "mode",
+        "pnpm",
+        "prd",
+        "resolveTaskDirectory",
+        "slug",
+        "template",
+        "title"
+      ]
+    },
+    {
       "byteLength": 1256,
       "contentHash": "2a89345cda43370cd0f8eb0f6d1306b3fc17a514bf15d5b1151db91e6e48883e",
       "extension": "ts",
@@ -42805,7 +43197,6 @@
         "auto",
         "buildCheck",
         "checksNotice",
-        "declared",
         "does",
         "duplicate",
         "focused",
@@ -42815,6 +43206,56 @@
         "runs",
         "suite",
         "warning"
+      ]
+    },
+    {
+      "byteLength": 4394,
+      "contentHash": "61173ead8babd2d7f6d554ec15996598c6c75b7b0c336d638a183a62dccb34b0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "configs",
+        "directory",
+        "file",
+        "inputs",
+        "layout",
+        "neither",
+        "onlySource",
+        "onlyTests",
+        "root",
+        "temporaryRepository",
+        "tests"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/workflow/init-default-inputs.js",
+        "src/core/workflow/suite-gate.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/init-default-inputs.test.ts",
+      "language": "typescript",
+      "references": [
+        "accepts",
+        "coversSourceAndTest",
+        "defaultCheckInputs",
+        "gate",
+        "layout",
+        "lock",
+        "manifests",
+        "notes",
+        "pnpm",
+        "prefixes",
+        "recursive",
+        "solution",
+        "spec",
+        "suite",
+        "tests",
+        "trees",
+        "workspace"
       ]
     },
     {
@@ -42902,8 +43343,71 @@
         "saveWorkflow",
         "store",
         "taskV3",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
+      ]
+    },
+    {
+      "byteLength": 6689,
+      "contentHash": "5275ab61660f6c28b0a597c10875856a5a3eae5cc4be6239a62377ff7bfc8665",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "command",
+        "criteria",
+        "root",
+        "task",
+        "temporaryRepository",
+        "writeLintProject"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/commands/workflow-flags.js",
+        "src/core/workflow/init-lint-check.js",
+        "src/core/workflow/init-task.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/init-lint-check.test.ts",
+      "language": "typescript",
+      "references": [
+        "accepts",
+        "assertFlagGroups",
+        "basename",
+        "before",
+        "bin",
+        "buildLintCheck",
+        "cmd",
+        "commands",
+        "covering",
+        "criterionIds",
+        "does",
+        "done",
+        "fail",
+        "flag",
+        "flags",
+        "form",
+        "formatter",
+        "full",
+        "initTaskWorkflow",
+        "initializeUtcProject",
+        "inspect",
+        "isReadOnlyCommand",
+        "lint",
+        "notice",
+        "part",
+        "plain",
+        "pnpm",
+        "quoted",
+        "read",
+        "recursive",
+        "scripts",
+        "suite",
+        "title",
+        "workspace"
       ]
     },
     {
@@ -42947,8 +43451,8 @@
       ]
     },
     {
-      "byteLength": 18761,
-      "contentHash": "c7dd0a755b3943b4d18058afe8cb89101b9e44e3436a06eeb81258792b501cbd",
+      "byteLength": 18741,
+      "contentHash": "7fc760f0072e85a3e3362a8e2cf624e36fb9a062fc68bf8eb629f67df1176933",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -43013,9 +43517,7 @@
         "does",
         "dotnet",
         "duplicate",
-        "empty",
         "ends",
-        "flag",
         "focused",
         "followUpOf",
         "goal",
@@ -43026,14 +43528,16 @@
         "malformed",
         "needs",
         "none",
+        "order",
+        "other",
         "page",
         "per",
         "plain",
+        "planning",
         "pnpm",
         "prd",
         "prdPath",
         "quiet",
-        "recursive",
         "resolveActiveTask",
         "routes",
         "saveWorkflow",
@@ -43042,9 +43546,9 @@
         "slug",
         "suite",
         "taskMonth",
+        "tests",
         "unsafe",
-        "upsertEpic",
-        "useTemporaryRepositories"
+        "upsertEpic"
       ]
     },
     {
@@ -43083,8 +43587,7 @@
         "saveWorkflow",
         "saved",
         "selectionChanges",
-        "unchanged",
-        "useTemporaryRepositories"
+        "unchanged"
       ]
     },
     {
@@ -43157,7 +43660,6 @@
         "taskV3",
         "threshold",
         "updatedAt",
-        "useTemporaryRepositories",
         "workspace",
         "writeProjectSource"
       ]
@@ -43230,8 +43732,7 @@
         "saveTask",
         "setActiveTask",
         "summary",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -43309,7 +43810,6 @@
         "transition",
         "transitionWorkflow",
         "updatedAt",
-        "useTemporaryRepositories",
         "waived"
       ]
     },
@@ -43346,8 +43846,7 @@
         "snapshotWorkflow",
         "split",
         "transition",
-        "transitionWorkflow",
-        "useTemporaryRepositories"
+        "transitionWorkflow"
       ]
     },
     {
@@ -43445,7 +43944,7 @@
         "taskV3",
         "unchanged",
         "unit",
-        "useTemporaryRepositories",
+        "updatedAt",
         "waived",
         "waiver"
       ]
@@ -43509,8 +44008,7 @@
         "set",
         "setCriterionWorkflow",
         "slug",
-        "title",
-        "useTemporaryRepositories"
+        "title"
       ]
     },
     {
@@ -43622,7 +44120,7 @@
         "transitionWorkflow",
         "unit",
         "unsafe",
-        "useTemporaryRepositories"
+        "writeProjectSource"
       ]
     },
     {
@@ -43688,24 +44186,27 @@
         "setCheckWorkflow",
         "snapshotWorkflow",
         "taskV3",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
     {
-      "byteLength": 10314,
-      "contentHash": "5232f1b016a1b6d68b9874ebb9d798ae1988c29e7b6471ba6c88ba6e3f2b5aaa",
+      "byteLength": 14044,
+      "contentHash": "79c13cab9659864af9a438e6b53b629e1ab4976c863e50b2c8d5115c0ce8805d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Promise",
         "attempt",
+        "byId",
+        "bySubstring",
         "content",
         "entered",
+        "first",
         "harnixRoot",
         "held",
         "initialPlan",
         "inside",
+        "plan",
         "planPath",
         "planProject",
         "release",
@@ -43738,7 +44239,13 @@
         "Index",
         "after",
         "all",
+        "brief",
+        "byId",
+        "context",
         "does",
+        "done",
+        "exact",
+        "flag",
         "held",
         "idx",
         "initializeUtcProject",
@@ -43758,15 +44265,17 @@
         "setActiveTask",
         "settled",
         "syncPlanChecklistPass",
+        "tag",
+        "taskDir",
         "taskId",
         "taskMonth",
         "taskV3",
+        "tests",
         "tickPlanChecklist",
         "tickWorkflow",
         "total",
         "unit",
         "updated",
-        "useTemporaryRepositories",
         "withWorkflowLock",
         "written"
       ]
@@ -43830,9 +44339,10 @@
       "references": [
         "acceptance",
         "after",
+        "before",
         "buildEpic",
         "buildLearningEntry",
-        "clock",
+        "built",
         "complete",
         "computeInputDigest",
         "contentHash",
@@ -43870,7 +44380,6 @@
         "taskV3",
         "template",
         "tracked",
-        "useTemporaryRepositories",
         "versions",
         "via",
         "workspace",
@@ -43942,7 +44451,6 @@
         "suite",
         "taskV3",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -43989,7 +44497,6 @@
         "criteriaWithoutFocusedCheck",
         "criterionIds",
         "decision",
-        "declared",
         "does",
         "done",
         "fence",
@@ -44016,6 +44523,7 @@
         "sensitive",
         "slice",
         "suite",
+        "tag",
         "todo",
         "unknownCheckReferences",
         "waived",
@@ -44093,7 +44601,6 @@
         "transition",
         "transitionWorkflow",
         "transitions",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -44169,7 +44676,6 @@
         "contract",
         "count",
         "done",
-        "empty",
         "fail",
         "fixture",
         "focused",
@@ -44185,11 +44691,13 @@
         "needs",
         "none",
         "order",
+        "planning",
         "pnpm",
         "prd",
         "readiness",
+        "ready",
         "readyAgain",
-        "recursive",
+        "recordedAt",
         "replan",
         "resumed",
         "saveWorkflow",
@@ -44200,7 +44708,6 @@
         "transition",
         "unbaselined",
         "unbaselinedChecks",
-        "useTemporaryRepositories",
         "waived",
         "waiver",
         "work",
@@ -44302,8 +44809,7 @@
         "setCheckWorkflow",
         "suite",
         "summary",
-        "taskV3",
-        "useTemporaryRepositories"
+        "taskV3"
       ]
     },
     {
@@ -44341,7 +44847,6 @@
         "checkId",
         "computeInputDigest",
         "criterionIds",
-        "declared",
         "digest",
         "does",
         "exitCode",
@@ -44351,6 +44856,7 @@
         "implementingTaskV3",
         "inputDigest",
         "invalid",
+        "lint",
         "newCheck",
         "oldCheck",
         "other",
@@ -44364,8 +44870,7 @@
         "saveWorkflow",
         "setCheckWorkflow",
         "summary",
-        "unit",
-        "useTemporaryRepositories"
+        "unit"
       ]
     },
     {
@@ -44455,7 +44960,6 @@
         "summary",
         "taskV3",
         "updatedAt",
-        "useTemporaryRepositories",
         "via"
       ]
     },
@@ -44537,8 +45041,8 @@
       ]
     },
     {
-      "byteLength": 12778,
-      "contentHash": "3b7625dd810b7b85293ae46b64e4c5916ed8189728405fe7e04570b63c9ec3b4",
+      "byteLength": 13940,
+      "contentHash": "8c2856311a1fda07e4151264516e06e5fa7b842f660fc0ca09eb4c94a1e93437",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -44567,6 +45071,7 @@
         "taskFile",
         "temporaryRepository",
         "text",
+        "ticks",
         "updatedPlan"
       ],
       "importTargets": [
@@ -44593,9 +45098,10 @@
         "accepts",
         "after",
         "argv",
+        "available",
         "commandlessImplementingTaskV3",
         "digest",
-        "empty",
+        "durationMs",
         "escapes",
         "evidenceId",
         "fail",
@@ -44607,6 +45113,7 @@
         "launcher",
         "link",
         "linked",
+        "lint",
         "none",
         "number",
         "other",
@@ -44617,8 +45124,6 @@
         "process",
         "ran",
         "read",
-        "recordedAt",
-        "recursive",
         "replan",
         "resolveActiveTask",
         "runCheckWorkflow",
@@ -44631,16 +45136,16 @@
         "stage",
         "taskMonth",
         "taskV3",
+        "tests",
         "time",
         "trackTaskReads",
-        "useTemporaryRepositories",
         "work",
         "writeProjectSource"
       ]
     },
     {
-      "byteLength": 5839,
-      "contentHash": "09f45d5d80595fc5ccfadb144f3028955ac8186387a43708e4d67ba80df3c858",
+      "byteLength": 5935,
+      "contentHash": "113beb1aaadf1c2b30893bc47453763a4dd93c0b96dde69ec6f672e49fed0815",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -44688,6 +45193,7 @@
         "buildCriterion",
         "criterionIds",
         "done",
+        "durationMs",
         "exitCode",
         "fail",
         "failed",
@@ -44711,7 +45217,6 @@
         "suite",
         "taskV3",
         "updatedAt",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -44808,6 +45313,7 @@
         "order",
         "other",
         "pair",
+        "persisted",
         "planning",
         "plans",
         "prd",
@@ -44823,8 +45329,7 @@
         "taskPath",
         "taskV3",
         "time",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -44885,7 +45390,6 @@
         "contextDrift",
         "does",
         "done",
-        "empty",
         "exact",
         "fail",
         "finish",
@@ -44908,10 +45412,12 @@
         "outcomes",
         "outside",
         "pending",
+        "planning",
         "pnpm",
         "pointerPath",
         "prd",
         "readiness",
+        "ready",
         "rejected",
         "reverseObjectKeys",
         "saveWorkflow",
@@ -44922,8 +45428,7 @@
         "taskPath",
         "taskV3",
         "transition",
-        "unit",
-        "useTemporaryRepositories"
+        "unit"
       ]
     },
     {
@@ -44996,7 +45501,7 @@
         "taskRecordFieldManifest",
         "taskStatuses",
         "transition",
-        "useTemporaryRepositories",
+        "validateTask",
         "validationCheckV2Keys",
         "waived",
         "workflowCheckpoints",
@@ -45122,7 +45627,6 @@
         "secretAdvisory",
         "started",
         "unchanged",
-        "useTemporaryRepositories",
         "waiver"
       ]
     },
@@ -45189,8 +45693,7 @@
         "saveWorkflow",
         "set",
         "setCriterionWorkflow",
-        "taskV3",
-        "useTemporaryRepositories"
+        "taskV3"
       ]
     },
     {
@@ -45259,8 +45762,7 @@
         "slug",
         "store",
         "threshold",
-        "title",
-        "useTemporaryRepositories"
+        "title"
       ]
     },
     {
@@ -45295,7 +45797,6 @@
         "buildTaskV3",
         "computeInputDigest",
         "createTestProject",
-        "declared",
         "digest",
         "inputDigest",
         "legacy",
@@ -45304,16 +45805,16 @@
         "setActiveTask",
         "snapshotWorkflow",
         "taskContractHash",
-        "useTemporaryRepositories",
         "visible"
       ]
     },
     {
-      "byteLength": 5580,
-      "contentHash": "0bc3524a585b28b1bc772701ca2cd6e3ed55f4f798042569b1ca75e61e5742b9",
+      "byteLength": 8560,
+      "contentHash": "03881d40c9a378b9189b260f78d50b15fcfdb6ec7bfe81ed723bfd4a640eab4d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "cwd",
         "known",
         "monorepo",
         "outside",
@@ -45337,9 +45838,12 @@
         "absolute",
         "accepts",
         "acceptsSuiteCommand",
+        "after",
         "bare",
+        "before",
         "commands",
         "detected",
+        "dot",
         "dotnet",
         "extension",
         "fileSymlinksSupported",
@@ -45348,6 +45852,7 @@
         "isSafeSolutionArgument",
         "link",
         "linked",
+        "normalizeSuiteCwd",
         "other",
         "outside",
         "own",
@@ -45358,10 +45863,12 @@
         "segment",
         "separator",
         "solution",
+        "stream",
         "substitution",
         "suite",
-        "unsafe",
-        "useTemporaryRepositories"
+        "suiteWithoutTests",
+        "tests",
+        "unsafe"
       ]
     },
     {
@@ -45416,13 +45923,11 @@
         "commands",
         "composer",
         "computeInputDigest",
-        "covering",
         "coversSourceAndTest",
         "detected",
         "digest",
         "dotnet",
         "duplicates",
-        "exitCode",
         "extra",
         "finish",
         "finishing",
@@ -45432,6 +45937,7 @@
         "inputDigest",
         "knownTestCommands",
         "level",
+        "lint",
         "lock",
         "modules",
         "must",
@@ -45451,8 +45957,9 @@
         "split",
         "suite",
         "suiteCheck",
-        "unit",
-        "useTemporaryRepositories"
+        "tests",
+        "trees",
+        "unit"
       ]
     },
     {
@@ -45502,7 +46009,6 @@
         "saveTask",
         "timezone",
         "upsertEpic",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -45559,6 +46065,7 @@
         "buildCriterion",
         "cancelTask",
         "cancelled",
+        "commands",
         "does",
         "done",
         "extra",
@@ -45591,7 +46098,6 @@
         "title",
         "touch",
         "transition",
-        "useTemporaryRepositories",
         "withTargetTask",
         "writeProjectSource"
       ]
@@ -45692,7 +46198,6 @@
         "statuses",
         "transition",
         "transitionWorkflow",
-        "useTemporaryRepositories",
         "where",
         "word"
       ]
@@ -45746,6 +46251,7 @@
         "acceptance",
         "advisories",
         "are",
+        "built",
         "cancelled",
         "complete",
         "completed",
@@ -45765,7 +46271,6 @@
         "kind",
         "locked",
         "nextAction",
-        "persisted",
         "planning",
         "pnpm",
         "prd",
@@ -45773,7 +46278,6 @@
         "recordedAt",
         "recursive",
         "replan",
-        "report",
         "resumed",
         "routingTask",
         "running",
@@ -45781,14 +46285,15 @@
         "saveWorkflow",
         "setActiveTask",
         "shape",
+        "taskDir",
         "taskMonth",
         "taskV3",
+        "tests",
         "transition",
         "transitionTask",
         "transitionWorkflow",
         "unbaselined",
         "updatedAt",
-        "useTemporaryRepositories",
         "validate",
         "waiver"
       ]
@@ -45880,7 +46385,6 @@
         "summary",
         "taskV3",
         "terminal",
-        "useTemporaryRepositories",
         "withWorkflowLock"
       ]
     },
@@ -45954,7 +46458,6 @@
         "resolve",
         "running",
         "upstream",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
@@ -45991,12 +46494,11 @@
         "resolve",
         "resolveWorkspaceRoot",
         "sub",
-        "useTemporaryRepositories",
         "workspace"
       ]
     },
     {
-      "byteLength": 3300,
+      "byteLength": 3240,
       "contentHash": "30a0133aa69973fccfd581f5d82902654d20383582028460e5d1586a5464168a",
       "extension": "ts",
       "headings": [],
@@ -46110,6 +46612,7 @@
         "sources",
         "spec",
         "technologies",
+        "tests",
         "title",
         "top",
         "topic",
@@ -46471,6 +46974,7 @@
         "allowed",
         "are",
         "before",
+        "built",
         "cancellation",
         "cmd",
         "contract",
@@ -46499,9 +47003,7 @@
         "optional",
         "packageName",
         "packageVersion",
-        "posix",
         "process",
-        "read",
         "readme",
         "release",
         "scan",
@@ -46514,6 +47016,7 @@
         "starts",
         "suite",
         "suites",
+        "tests",
         "unit",
         "validate"
       ]
@@ -46565,8 +47068,7 @@
         "process",
         "randomSuffix",
         "renameRetryDelaysMs",
-        "replacement",
-        "useTemporaryRepositories"
+        "replacement"
       ]
     },
     {
@@ -46679,7 +47181,9 @@
         "array",
         "bad",
         "bare",
+        "built",
         "cannot",
+        "child",
         "close",
         "cmd",
         "comparison",
@@ -46689,6 +47193,7 @@
         "dotnet",
         "ends",
         "env",
+        "events",
         "extensions",
         "findOnPath",
         "fixed",
@@ -46704,10 +47209,8 @@
         "outside",
         "plain",
         "pnpm",
-        "posix",
         "process",
         "quoted",
-        "recursive",
         "resolve",
         "resolveInvocation",
         "routes",
@@ -46719,8 +47222,7 @@
         "starts",
         "stdout",
         "timeoutMs",
-        "unsafe",
-        "useTemporaryRepositories"
+        "unsafe"
       ]
     },
     {
@@ -46936,7 +47438,6 @@
         "bounded",
         "clock",
         "does",
-        "empty",
         "filesystem",
         "fresh",
         "identity",
@@ -46955,6 +47456,7 @@
         "overrides",
         "own",
         "ownerInspector",
+        "packageVersion",
         "parseHarnixFileLockRecord",
         "partial",
         "process",
@@ -46963,12 +47465,12 @@
         "reads",
         "recordName",
         "recordPath",
-        "recursive",
         "release",
         "removes",
         "replaced",
         "retryDelayMs",
         "staleAfterMs",
+        "startedAt",
         "timeoutMs",
         "tokenPath",
         "unavailable",
@@ -47031,8 +47533,7 @@
         "reads",
         "removes",
         "shared",
-        "unchanged",
-        "useTemporaryRepositories"
+        "unchanged"
       ]
     },
     {
@@ -47114,7 +47615,6 @@
         "starts",
         "stdout",
         "subcommand",
-        "useTemporaryRepositories",
         "used",
         "version"
       ]
@@ -47231,8 +47731,7 @@
         "resolveSafeProjectPath",
         "safe",
         "separator",
-        "unsafe",
-        "useTemporaryRepositories"
+        "unsafe"
       ]
     },
     {
@@ -47320,7 +47819,6 @@
         "recursive",
         "requireInitializedProject",
         "snapshotTree",
-        "useTemporaryRepositories",
         "workspace",
         "workspacePaths"
       ]
@@ -47426,8 +47924,7 @@
         "resolvesInside",
         "safe",
         "scripts",
-        "shared",
-        "useTemporaryRepositories"
+        "shared"
       ]
     },
     {
@@ -47479,7 +47976,6 @@
         "Check",
         "are",
         "closestMatch",
-        "declared",
         "empty",
         "glob",
         "lock",
@@ -47571,7 +48067,6 @@
       "path": "test/unit/version.test.ts",
       "language": "typescript",
       "references": [
-        "declared",
         "packageVersion",
         "process",
         "version"
@@ -47822,8 +48317,8 @@
       ]
     },
     {
-      "byteLength": 52698,
-      "contentHash": "ebbe7ae4a77814fee637e83e3bb5f29272ec3e8af82a05d0c5f031fd9b557dcf",
+      "byteLength": 53486,
+      "contentHash": "0107ca075df1034db21e503344b12938f87739122418ef47868d6ff3134e80b9",
       "extension": "json",
       "headings": [],
       "identifiers": [
@@ -47918,6 +48413,7 @@
         "child",
         "comparison",
         "detailPublicEpic",
+        "digest",
         "env",
         "epicMembers",
         "fields",
@@ -47943,14 +48439,13 @@
         "process",
         "progress",
         "readConfig",
-        "recursive",
         "replan",
         "saveWorkflow",
         "set",
         "snapshotWorkflow",
         "snapshots",
+        "tests",
         "transitionWorkflow",
-        "useTemporaryRepositories",
         "workflowEnvelopeSchema",
         "workspace",
         "writeConfig"
@@ -48075,7 +48570,6 @@
         "setCheckWorkflow",
         "summary",
         "unchanged",
-        "useTemporaryRepositories",
         "used"
       ]
     },
@@ -48122,13 +48616,12 @@
         "setCheckWorkflow",
         "summary",
         "transition",
-        "transitionWorkflow",
-        "useTemporaryRepositories"
+        "transitionWorkflow"
       ]
     },
     {
-      "byteLength": 10463,
-      "contentHash": "d14fdac386c01a72ade2283d4aa4c628272504a4cc4b228090670f929f908495",
+      "byteLength": 10525,
+      "contentHash": "b985eb644f40626847134a4646af2e4b16e4f12566badf592f252f579a976a77",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -48162,9 +48655,7 @@
       "language": "typescript",
       "references": [
         "PublicCliErrorV1",
-        "action",
         "archived",
-        "args",
         "bare",
         "brief",
         "codex",
@@ -48183,6 +48674,7 @@
         "hints",
         "implementingTaskV3",
         "inspect",
+        "lint",
         "met",
         "mitigation",
         "nested",
@@ -48190,6 +48682,7 @@
         "order",
         "outside",
         "pnpm",
+        "prd",
         "process",
         "program",
         "rationale",
@@ -48205,9 +48698,9 @@
         "slug",
         "spec",
         "stdout",
-        "title",
+        "tests",
         "transition",
-        "useTemporaryRepositories",
+        "trees",
         "workspace"
       ]
     },
@@ -48272,8 +48765,7 @@
         "month",
         "own",
         "recursive",
-        "stored",
-        "useTemporaryRepositories"
+        "stored"
       ]
     },
     {
@@ -48349,8 +48841,8 @@
         "audit",
         "block",
         "bounded",
+        "capture",
         "changelog",
-        "clock",
         "contract",
         "definition",
         "does",
@@ -48451,7 +48943,6 @@
         "skills",
         "template",
         "unsafe",
-        "useTemporaryRepositories",
         "writeManifest"
       ]
     },
@@ -48608,6 +49099,7 @@
         "legacy",
         "linked",
         "met",
+        "mode",
         "note",
         "other",
         "planning",
@@ -48620,7 +49112,6 @@
         "taskId",
         "title",
         "updatedAt",
-        "useTemporaryRepositories",
         "work",
         "workspace"
       ]
@@ -48742,7 +49233,6 @@
         "summary",
         "taskV3",
         "transition",
-        "useTemporaryRepositories",
         "writeProjectSource"
       ]
     },
@@ -48782,6 +49272,7 @@
         "set",
         "skill",
         "skills",
+        "tests",
         "workflowTemplate"
       ]
     },
@@ -49015,7 +49506,6 @@
       "references": [
         "byId",
         "cmd",
-        "declared",
         "extra",
         "initTaskWorkflow",
         "initializeUtcProject",
@@ -49030,8 +49520,7 @@
         "slug",
         "spec",
         "suite",
-        "title",
-        "useTemporaryRepositories"
+        "title"
       ]
     },
     {
@@ -49166,6 +49655,7 @@
         "buildTaskV1",
         "cache",
         "codex",
+        "commands",
         "configured",
         "context",
         "createConfig",
@@ -49198,7 +49688,6 @@
         "split",
         "title",
         "updatedAt",
-        "useTemporaryRepositories",
         "workspace",
         "workspacePaths",
         "writeConfig"
@@ -49284,6 +49773,7 @@
         "invocation",
         "invocationNum",
         "kiro",
+        "options",
         "other",
         "payload",
         "prefixes",
@@ -49300,7 +49790,6 @@
         "unchanged",
         "unsafe",
         "updatedAt",
-        "useTemporaryRepositories",
         "workspacePaths",
         "writeConfig"
       ]
@@ -49380,8 +49869,7 @@
         "summary",
         "taskV3",
         "title",
-        "updatedAt",
-        "useTemporaryRepositories"
+        "updatedAt"
       ]
     },
     {
@@ -49533,8 +50021,8 @@
         "spec",
         "specPath",
         "split",
-        "transitionWorkflow",
-        "useTemporaryRepositories"
+        "tests",
+        "transitionWorkflow"
       ]
     },
     {
@@ -49580,7 +50068,7 @@
         "kind",
         "learning",
         "taskMonth",
-        "useTemporaryRepositories",
+        "tests",
         "worker",
         "workspace"
       ]
@@ -49716,6 +50204,7 @@
       "references": [
         "TaskRecordV1",
         "after",
+        "all",
         "appendEvidenceWorkflow",
         "before",
         "buildCriterion",
@@ -49759,7 +50248,6 @@
         "title",
         "transitionWorkflow",
         "updatedAt",
-        "useTemporaryRepositories",
         "waived",
         "workspace"
       ]
@@ -49786,6 +50274,7 @@
       "language": "typescript",
       "references": [
         "assertBuilt",
+        "built",
         "byte",
         "cli",
         "measure",
@@ -49873,7 +50362,7 @@
         "plus",
         "reads",
         "ready",
-        "recursive",
+        "recordedAt",
         "runs",
         "scripts",
         "seedLearningLines",
@@ -49938,6 +50427,7 @@
         "git",
         "hooks",
         "isDirectory",
+        "lint",
         "measure",
         "packageJson",
         "part",
@@ -49959,7 +50449,6 @@
         "transitive",
         "unit",
         "updateConfig",
-        "useTemporaryRepositories",
         "version",
         "workspace"
       ]
@@ -50038,7 +50527,6 @@
         "does",
         "exact",
         "finish",
-        "flag",
         "idPrefix",
         "inputDigest",
         "instead",
@@ -50052,6 +50540,7 @@
         "per",
         "phrase",
         "prd",
+        "problem",
         "program",
         "renderHarnixRules",
         "replan",
@@ -50124,8 +50613,7 @@
         "set",
         "specs",
         "taskSwitched",
-        "taskV3",
-        "useTemporaryRepositories"
+        "taskV3"
       ]
     },
     {
@@ -50195,6 +50683,7 @@
         "selection",
         "sources",
         "stage",
+        "tests",
         "values",
         "version",
         "work"
@@ -50301,6 +50790,7 @@
         "git",
         "install",
         "label",
+        "lint",
         "measure",
         "number",
         "order",
@@ -50510,7 +51000,6 @@
         "syncSelfHost",
         "template",
         "updated",
-        "useTemporaryRepositories",
         "version"
       ]
     },
@@ -50656,7 +51145,6 @@
         "phrase",
         "pnpm",
         "preserve",
-        "recursive",
         "release",
         "removes",
         "replan",
@@ -50666,6 +51154,7 @@
         "split",
         "stage",
         "template",
+        "tests",
         "time"
       ]
     },
@@ -50791,9 +51280,9 @@
         "solution",
         "suite",
         "suiteGateProblem",
+        "tests",
         "transition",
-        "transitionWorkflow",
-        "useTemporaryRepositories"
+        "transitionWorkflow"
       ]
     },
     {
@@ -50858,7 +51347,6 @@
         "createTestProject",
         "digest",
         "does",
-        "empty",
         "finish",
         "finishWorkflow",
         "finished",
@@ -50879,6 +51367,7 @@
         "pnpm",
         "prd",
         "ready",
+        "recordedAt",
         "recursive",
         "rejected",
         "replan",
@@ -50890,8 +51379,8 @@
         "taskMonth",
         "taskRecordFieldManifest",
         "taskV3",
+        "title",
         "transitionWorkflow",
-        "useTemporaryRepositories",
         "workflowEnvelopeSchema"
       ]
     },
@@ -50948,6 +51437,7 @@
         "context",
         "contextDrift",
         "diagnostics",
+        "effective",
         "exact",
         "finish",
         "guides",
@@ -50976,7 +51466,6 @@
         "stage",
         "unchanged",
         "updateProject",
-        "useTemporaryRepositories",
         "workflowGuidance",
         "workflowSkills",
         "workflowTemplate"
@@ -51014,7 +51503,8 @@
         "suite",
         "suites",
         "summarizeFailures",
-        "summary"
+        "summary",
+        "tests"
       ]
     },
     {
@@ -51090,7 +51580,6 @@
         "format",
         "formatted",
         "formatter",
-        "frontmatter",
         "generatedHash",
         "guide",
         "guides",
@@ -51113,6 +51602,7 @@
         "summaries",
         "syncVersion",
         "template",
+        "tests",
         "used",
         "versions",
         "via",
@@ -51120,7 +51610,7 @@
       ]
     },
     {
-      "byteLength": 645,
+      "byteLength": 622,
       "contentHash": "2b7f220d871a6b96004eef51c83cd5c46760da080b66bd978160e47024dc705a",
       "extension": "json",
       "headings": [],
@@ -51193,6 +51683,7 @@
         "safe",
         "suite",
         "summary",
+        "tests",
         "time",
         "worker"
       ]

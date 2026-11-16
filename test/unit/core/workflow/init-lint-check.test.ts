@@ -34,6 +34,17 @@ describe("isReadOnlyCommand", () => {
       expect(isReadOnlyCommand(command)).toBe(false);
   });
 
+  it("recognizes a formatter by its basename, with a path or an .exe/.cmd suffix", () => {
+    for (const command of [
+      "./node_modules/.bin/prettier -w .",
+      "node_modules/.bin/prettier.cmd -w src",
+      "/usr/local/go/bin/gofmt -w .",
+      "C:/tools/gofmt.exe -w .",
+    ])
+      expect(isReadOnlyCommand(command)).toBe(false);
+    expect(isReadOnlyCommand("./node_modules/.bin/prettier --check .")).toBe(true);
+  });
+
   it("keeps a chained read-only script read-only", () => {
     for (const command of ["eslint . && prettier --check .", "bash -c 'tsc --noEmit && eslint .'"])
       expect(isReadOnlyCommand(command)).toBe(true);

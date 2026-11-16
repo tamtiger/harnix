@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-153941-review-followups-cwd-lint-inputs",
+  "title": "Sửa ba điểm Low từ review epic upstream-review-fixes",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Dùng lại normalizeCheckCwd cho cwd của suite, nhận diện formatter theo basename trong check-lint chỉ đọc, và thêm pnpm-workspace.yaml cùng *.slnx vào input mặc định.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "normalizeSuiteCwd dùng lại normalizeCheckCwd và giữ nguyên cwd gốc khi nó ném lỗi, nên .. và đường dẫn tuyệt đối vẫn bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh như ./node_modules/.bin/prettier -w . bị coi là ghi file (so basename của token formatter), còn pnpm -w run lint vẫn chỉ đọc.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Sửa pnpm-workspace.yaml hoặc một file *.slnx ở gốc làm đổi digest của check suite mặc định.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-focused",
+      "description": "Test tập trung của ba điểm review",
+      "command": "pnpm exec vitest run test/unit/core/workflow/suite-command.test.ts test/unit/core/workflow/init-lint-check.test.ts test/unit/core/workflow/init-default-inputs.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-focused-1",
+      "checkId": "check-focused",
+      "recordedAt": "2026-11-16T16:04:44.839+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-command.test.ts test/unit/core/workflow/init-lint-check.test.ts test/unit/core/workflow/init-default-inputs.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "06fb18580c236d3bfddea022650372694fcbbe927893add9ef8daf90a83c0339",
+      "durationMs": 3585
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-16T16:06:18.480+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "91e77ee06d91d2a576cd76f7abb0521db599e17e27813e4192354f8775509186",
+      "durationMs": 93253
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/init-default-inputs.ts",
+    "src/core/workflow/init-lint-check.ts",
+    "src/core/workflow/suite-command.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-16T15:39:41.898+07:00",
+  "updatedAt": "2026-11-16T16:06:23.210+07:00",
+  "completedAt": "2026-11-16T16:06:23.210+07:00"
+}

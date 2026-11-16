@@ -1,6 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { win32 } from "node:path";
 
+import { normalizeCheckCwd } from "src/core/tasks/check-cwd.js";
 import { inspectDotnetDirectory, isSolutionFile, solutionHasTestProject } from "src/core/stack/dotnet-projects.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { equivalentCommand, splitCommand } from "./command-match.js";
@@ -16,14 +17,20 @@ const UNSAFE_CHARACTERS = /[;&|<>`$()^%!*?{}\r\n\0\\]/u;
 
 /**
  * `./`, `./.`, `pkg/.` and `a//b` name the same directory as `.`, `pkg` and `a/b`. An absolute or drive path and any
- * `..` segment are returned unchanged, so every later check still refuses them.
+ * `..` segment are returned unchanged, so every later check still refuses them. It is `normalizeCheckCwd`, the form
+ * the task validator already uses, so both agree on what a cwd means.
  */
 export function normalizeSuiteCwd(cwd: string | undefined): string | undefined {
   if (cwd === undefined) return undefined;
   const posix = cwd.replace(/\\/gu, "/");
-  if (posix.startsWith("/") || /^[A-Za-z]:/u.test(posix)) return cwd;
-  const segments = posix.split("/").filter((segment) => segment !== "" && segment !== ".");
-  return segments.length === 0 ? "." : segments.join("/");
+  const segments = posix.split("/");
+  // `./` and `./.` are the root spelled out, which `normalizeCheckCwd` only accepts as a lone `.`.
+  if (!posix.startsWith("/") && segments.every((segment) => segment === "" || segment === ".")) return ".";
+  try {
+    return normalizeCheckCwd(cwd);
+  } catch {
+    return cwd;
+  }
 }
 
 function joinedPath(argument: string, cwd: string | undefined): string {

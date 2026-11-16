@@ -2,7 +2,12 @@ import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { acceptsSuiteCommand, isSafeSolutionArgument, suiteWithoutTests } from "src/core/workflow/suite-command.js";
+import {
+  acceptsSuiteCommand,
+  isSafeSolutionArgument,
+  normalizeSuiteCwd,
+  suiteWithoutTests,
+} from "src/core/workflow/suite-command.js";
 import { fileSymlinksSupported } from "test/support/symlink-support.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -121,6 +126,16 @@ describe("acceptsSuiteCommand", () => {
     expect(await acceptsSuiteCommand(root, "pnpm --filter a test", "./packages//a/./", known, packages)).toBe(true);
     expect(await acceptsSuiteCommand(root, "dotnet test", "svc/.", known)).toBe(true);
     expect(await acceptsSuiteCommand(root, "dotnet test App.sln", "./svc/.", known)).toBe(true);
+  });
+
+  it("normalizes a drive-relative or stream cwd the same way as the task validator, and still refuses it", async () => {
+    const root = await monorepo();
+    const known = ["pnpm test"];
+    for (const cwd of ["D:foo", "svc/a:b", "svc\\..\\.."])
+      expect(await acceptsSuiteCommand(root, "dotnet test", cwd, known)).toBe(false);
+    expect(normalizeSuiteCwd("svc\\tests\\.")).toBe("svc/tests");
+    expect(normalizeSuiteCwd("D:foo")).toBe("D:foo");
+    expect(["/", "\\"].map((cwd) => normalizeSuiteCwd(cwd))).toEqual(["/", "\\"]);
   });
 
   it("keeps refusing a cwd with .. or an absolute path after normalizing", async () => {

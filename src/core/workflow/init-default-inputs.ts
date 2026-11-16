@@ -23,7 +23,8 @@ const CONFIG_FILES = [
   /^(?:pnpm-lock\.yaml|package-lock\.json|yarn\.lock|Cargo\.lock|go\.sum|poetry\.lock|uv\.lock)$/u,
   /^(?:pytest\.ini|tox\.ini|setup\.cfg|global\.json|nuget\.config)$/iu,
   /^Directory\.(?:Build|Packages)\.(?:props|targets)$/u,
-  /\.sln$/u,
+  /\.slnx?$/u,
+  /^pnpm-workspace\.yaml$/u,
 ];
 
 async function entries(directory: string): Promise<{ directories: Set<string>; files: Set<string> }> {
