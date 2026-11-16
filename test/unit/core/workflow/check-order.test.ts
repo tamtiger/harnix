@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import { orderChecks } from "src/core/workflow/check-order.js";
 
 const check = (id: string, scope: "focused" | "full") => ({ id, scope });
-const run = (checkId: string, durationMs?: number) => ({
+const run = (checkId: string, durationMs?: number, result: "pass" | "fail" = "pass") => ({
   checkId,
+  result,
   ...(durationMs === undefined ? {} : { durationMs }),
 });
 
@@ -40,5 +41,21 @@ describe("orderChecks", () => {
       [run("quick", 1), run("long", 99999)],
     );
     expect(ordered.map(({ id }) => id)).toEqual(["long", "quick"]);
+  });
+
+  it("ignores the duration of a failed run, so a fast crash never ranks a slow check first", () => {
+    const ordered = orderChecks(
+      [check("slow", "focused"), check("crashy", "focused")],
+      [run("slow", 5000), run("crashy", 40, "fail")],
+    );
+    expect(ordered.map(({ id }) => id)).toEqual(["slow", "crashy"]);
+  });
+
+  it("uses the last passing duration even when a later run failed", () => {
+    const ordered = orderChecks(
+      [check("a", "full"), check("b", "full")],
+      [run("a", 900), run("b", 500), run("a", 1, "fail")],
+    );
+    expect(ordered.map(({ id }) => id)).toEqual(["b", "a"]);
   });
 });

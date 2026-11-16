@@ -110,6 +110,30 @@ describe("acceptsSuiteCommand", () => {
     expect(await acceptsSuiteCommand(root, "pnpm test", ".", known, packages)).toBe(true);
   });
 
+  it("normalizes a ./ or trailing-dot cwd before comparing it with the root and the packages", async () => {
+    const root = await monorepo();
+    const packages = [{ path: "packages/a", hasTests: true, commands: { test: "pnpm --filter a test" } }];
+    const known = ["pnpm test", "pnpm --filter a test"];
+
+    expect(await acceptsSuiteCommand(root, "pnpm test", "./", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm test", "./.", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm --filter a test", "packages/a/.", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "pnpm --filter a test", "./packages//a/./", known, packages)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "dotnet test", "svc/.", known)).toBe(true);
+    expect(await acceptsSuiteCommand(root, "dotnet test App.sln", "./svc/.", known)).toBe(true);
+  });
+
+  it("keeps refusing a cwd with .. or an absolute path after normalizing", async () => {
+    const root = await monorepo();
+    const packages = [{ path: "packages/a", hasTests: true, commands: { test: "pnpm --filter a test" } }];
+    const known = ["pnpm test", "pnpm --filter a test"];
+
+    for (const cwd of ["..", "./..", "packages/a/..", "packages/../..", "/", "/packages/a", "C:/packages/a"])
+      expect(await acceptsSuiteCommand(root, "pnpm test", cwd, known, packages)).toBe(false);
+    expect(await acceptsSuiteCommand(root, "dotnet test", "svc/../svc", known)).toBe(false);
+    expect(await acceptsSuiteCommand(root, "dotnet test", "../svc", known)).toBe(false);
+  });
+
   it("judges only the inputs when no test command is detected", async () => {
     expect(await acceptsSuiteCommand(await monorepo(), "anything", undefined, [])).toBe(true);
     expect(known).toHaveLength(1);

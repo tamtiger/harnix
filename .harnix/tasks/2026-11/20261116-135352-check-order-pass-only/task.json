@@ -1,0 +1,101 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-135352-check-order-pass-only",
+  "title": "Thứ tự check chỉ dựa trên thời lượng của lần chạy pass",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thời lượng dùng để xếp check rẻ trước chỉ lấy từ lần chạy pass, và durationMs trong task.json phải là số nguyên không âm trong giới hạn hợp lý.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một check crash nhanh (evidence fail với durationMs nhỏ) không làm check đắt bị xếp trước check rẻ: chỉ evidence pass được tính thời lượng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "durationMs không phải số nguyên không âm hoặc vượt giới hạn trên bị task-validate từ chối, kể cả khi đến từ payload --save.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/check-order.ts",
+    "src/core/workflow/run-check.ts",
+    "src/core/tasks/task-validate.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của check-order-pass-only",
+      "command": "pnpm exec vitest run test/unit/core/workflow/check-order.test.ts test/unit/core/workflow/run-checks.test.ts test/unit/core/tasks",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/tasks/**",
+        "src/core/workflow/**",
+        "test/unit/core/tasks/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T14:53:31.348+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/check-order.test.ts test/unit/core/workflow/run-checks.test.ts test/unit/core/tasks — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "35347602c911e488cf81ef934ffa612c5ebd874fd82db24ebea5a7ff524c1fbf",
+      "durationMs": 5880
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T14:54:58.940+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb1addf79118a390c0439b22b55f04dd07a096b4209f79611fcf912039872dff",
+      "durationMs": 87174
+    }
+  ],
+  "epicId": "20261116-135351-upstream-review-fixes",
+  "createdAt": "2026-11-16T13:53:51.810+07:00",
+  "updatedAt": "2026-11-16T14:55:25.353+07:00",
+  "completedAt": "2026-11-16T14:55:25.353+07:00"
+}

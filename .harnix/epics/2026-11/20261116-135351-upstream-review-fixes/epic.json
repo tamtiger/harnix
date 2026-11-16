@@ -1,0 +1,12 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261116-135351-upstream-review-fixes",
+  "title": "Sửa các điểm yếu rút ra từ review upstream",
+  "goal": "Xử lý bốn lỗi hành vi mà review đã chỉ ra ở các commit upstream: thứ tự check theo thời lượng, input mặc định thiếu file cấu hình, check-lint nhận nhầm cờ ghi file và chuẩn hóa cwd của lệnh suite.",
+  "nonGoals": [
+    "Không đổi ranh giới link của platform root và hành vi uninstall; hai việc đó cần quyết định riêng."
+  ],
+  "createdAt": "2026-11-16T13:53:51.810+07:00",
+  "updatedAt": "2026-11-16T13:53:51.810+07:00"
+}

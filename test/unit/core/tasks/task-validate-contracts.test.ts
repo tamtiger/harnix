@@ -150,7 +150,7 @@ describe("task validation contracts", () => {
     ).toThrow(/digest/iu);
   });
 
-  it("accepts an optional non-negative finite durationMs on v2 evidence and rejects any other value", () => {
+  it("accepts an optional non-negative integer durationMs of at most one day on v2 evidence and rejects any other value", () => {
     const evidence = {
       id: "e",
       checkId: "check",
@@ -168,8 +168,9 @@ describe("task validation contracts", () => {
     });
     expect(() => validateTask(build({ durationMs: 0 }))).not.toThrow();
     expect(() => validateTask(build({ durationMs: 1234 }))).not.toThrow();
+    expect(() => validateTask(build({ durationMs: 86_400_000 }))).not.toThrow();
     expect(() => validateTask(build({}))).not.toThrow();
-    for (const bad of [-1, Number.NaN, Number.POSITIVE_INFINITY, "5", 1.5e300 * 1e300])
+    for (const bad of [-1, Number.NaN, Number.POSITIVE_INFINITY, "5", 1.5e300 * 1e300, 1.5, 86_400_001])
       expect(() => validateTask(build({ durationMs: bad }))).toThrow(/Evidence is invalid/iu);
   });
 

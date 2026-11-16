@@ -14,6 +14,18 @@ export interface SuitePackage {
 // A solution path becomes an argument of a spawned command, so anything a shell or an option parser reads is refused.
 const UNSAFE_CHARACTERS = /[;&|<>`$()^%!*?{}\r\n\0\\]/u;
 
+/**
+ * `./`, `./.`, `pkg/.` and `a//b` name the same directory as `.`, `pkg` and `a/b`. An absolute or drive path and any
+ * `..` segment are returned unchanged, so every later check still refuses them.
+ */
+export function normalizeSuiteCwd(cwd: string | undefined): string | undefined {
+  if (cwd === undefined) return undefined;
+  const posix = cwd.replace(/\\/gu, "/");
+  if (posix.startsWith("/") || /^[A-Za-z]:/u.test(posix)) return cwd;
+  const segments = posix.split("/").filter((segment) => segment !== "" && segment !== ".");
+  return segments.length === 0 ? "." : segments.join("/");
+}
+
 function joinedPath(argument: string, cwd: string | undefined): string {
   return cwd === undefined || cwd === "." ? argument : `${cwd}/${argument}`;
 }
@@ -72,10 +84,11 @@ const unquote = (word: string): string => word.replace(/["']/gu, "");
 export async function acceptsSuiteCommand(
   projectRoot: string,
   command: string | undefined,
-  cwd: string | undefined,
+  rawCwd: string | undefined,
   known: readonly string[],
   packages: readonly SuitePackage[] = [],
 ): Promise<boolean> {
+  const cwd = normalizeSuiteCwd(rawCwd);
   if (known.length === 0) return true;
   if (command === undefined) return false;
   if (known.some((candidate) => equivalentCommand(candidate, command))) {
@@ -94,8 +107,9 @@ export async function acceptsSuiteCommand(
 export async function suiteWithoutTests(
   projectRoot: string,
   command: string | undefined,
-  cwd: string | undefined,
+  rawCwd: string | undefined,
 ): Promise<string | undefined> {
+  const cwd = normalizeSuiteCwd(rawCwd);
   if (command === undefined) return undefined;
   const [executable, verb, ...rest] = splitCommand(command).map(unquote);
   if (executable?.replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase() !== "dotnet" || verb !== "test") return undefined;

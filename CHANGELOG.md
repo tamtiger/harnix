@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.35.0] - 2026-11-16
+
+### Fixed
+
+- Thứ tự --run-checks chỉ dựa trên thời lượng của lần chạy pass; durationMs phải là số nguyên trong 0..86400000
+- Input mặc định của check suite gồm file cấu hình, lockfile và solution ở thư mục gốc
+- check-lint chỉ đọc nhận diện -w của formatter và cờ ghi file trong script nối
+- cwd của check suite dạng ./ hoặc pkg/. được chuẩn hóa trước khi so khớp lệnh
+
 ## [2.34.0] - 2026-11-16
 
 ### Added

@@ -58,4 +58,49 @@ describe("defaultCheckInputs", () => {
     await layout(root, ["pkg"], ["pkg/package.json"]);
     expect(await defaultCheckInputs(root, "pkg")).toEqual(["pkg/**"]);
   });
+
+  it("adds the root config, lock and solution files that change what the tests do", async () => {
+    const root = await temporaryRepository();
+    const configs = [
+      "vitest.config.ts",
+      "jest.config.js",
+      "eslint.config.mjs",
+      ".eslintrc.json",
+      "pnpm-lock.yaml",
+      "package-lock.json",
+      "App.sln",
+      "Directory.Build.props",
+      "Directory.Packages.props",
+      "global.json",
+      "pytest.ini",
+    ];
+    await layout(root, ["src", "test"], [...configs, "README.md", "CHANGELOG.md", "notes.txt"]);
+
+    const inputs = await defaultCheckInputs(root, undefined);
+
+    expect(inputs).toEqual([...configs, "src/**", "test/**"].sort());
+    expect(coversSourceAndTest(inputs)).toBe(true);
+  });
+
+  it("stays narrow: no wildcard, no build or data directory, no unrelated root file", async () => {
+    const root = await temporaryRepository();
+    await layout(root, ["src", "test", "dist", "data", "coverage"], ["vitest.config.ts", "notes.md", "LICENSE"]);
+
+    const inputs = await defaultCheckInputs(root, undefined);
+
+    expect(inputs).toEqual(["src/**", "test/**", "vitest.config.ts"]);
+    expect(inputs.some((input) => input === "**" || input.includes("dist") || input.includes("data"))).toBe(false);
+  });
+
+  it("looks for the config files inside the --cwd package only", async () => {
+    const root = await temporaryRepository();
+    await layout(root, ["pkg/src", "pkg/test"], ["vitest.config.ts", "pkg/vitest.config.ts", "pkg/App.sln"]);
+
+    expect(await defaultCheckInputs(root, "pkg")).toEqual([
+      "pkg/App.sln",
+      "pkg/src/**",
+      "pkg/test/**",
+      "pkg/vitest.config.ts",
+    ]);
+  });
 });

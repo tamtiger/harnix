@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-135354-lint-check-write-flags",
+  "title": "Check-lint chỉ đọc nhận diện cờ ghi file viết tắt",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Lệnh lint có cờ ghi file như -w hoặc --fix nằm trong script được nối không được khai báo thành check-lint chỉ đọc.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lệnh như `prettier -w .` bị coi là ghi file và không được khai báo thành check-lint chỉ đọc.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cờ --fix hoặc --write nằm trong một script được nối bằng && hoặc ; cũng loại cả lệnh khỏi check-lint chỉ đọc.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/init-lint-check.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của lint-check-write-flags",
+      "command": "pnpm exec vitest run test/unit/core/workflow/init-lint-check.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T15:01:43.933+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/init-lint-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a7243068939e3f1f661bcf92343f39239215dcb0305d01bff180c50d684a4a69",
+      "durationMs": 3934
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T15:03:23.859+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1af458eca19bd17d209b6f624f40f89caec42291a9673a066521b1d3db0c853c",
+      "durationMs": 99420
+    }
+  ],
+  "epicId": "20261116-135351-upstream-review-fixes",
+  "createdAt": "2026-11-16T13:53:51.810+07:00",
+  "updatedAt": "2026-11-16T15:03:28.695+07:00",
+  "completedAt": "2026-11-16T15:03:28.695+07:00"
+}

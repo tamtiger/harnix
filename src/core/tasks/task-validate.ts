@@ -163,9 +163,16 @@ function isEvidenceShape(item: unknown, allowUnsafeArtifacts: boolean): boolean 
   );
 }
 
+/** One day in milliseconds: no check a person waits for runs longer, so a larger value is a corrupt record. */
+const MAX_DURATION_MS = 86_400_000;
+const inDurationRange = (value: number): boolean => value >= 0 && value <= MAX_DURATION_MS;
+
 function assertEvidenceFindings(value: TaskObject): void {
   for (const item of value.evidence as Record<string, unknown>[]) {
-    if (item.durationMs !== undefined && !(Number.isFinite(item.durationMs) && (item.durationMs as number) >= 0))
+    if (
+      item.durationMs !== undefined &&
+      !(Number.isInteger(item.durationMs) && inDurationRange(item.durationMs as number))
+    )
       throw new TaskValidationError("Evidence is invalid.");
     if (item.findings === undefined) continue;
     if (!Array.isArray(item.findings)) throw new TaskValidationError("Evidence finding is invalid.");

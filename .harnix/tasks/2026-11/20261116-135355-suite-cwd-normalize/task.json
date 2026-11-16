@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-135355-suite-cwd-normalize",
+  "title": "Chuẩn hóa cwd khi so khớp lệnh suite với package",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "cwd của check suite dạng ./ hoặc pkg/. được chuẩn hóa trước khi so với đường dẫn package và so với '.', để lệnh test hợp lệ không bị từ chối.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "cwd `./` được hiểu là thư mục gốc và `packages/a/.` được hiểu là `packages/a` khi kiểm tra lệnh suite.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Việc chuẩn hóa không nới lỏng kiểm tra an toàn: cwd có `..` hoặc đường dẫn tuyệt đối vẫn bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/suite-command.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của suite-cwd-normalize",
+      "command": "pnpm exec vitest run test/unit/core/workflow/suite-command.test.ts test/unit/core/workflow/suite-gate.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T15:05:06.560+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-command.test.ts test/unit/core/workflow/suite-gate.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fc4899397c64d50f3d46e0ddf4933e3b4e15da86932f8afb466eca872e0c464b",
+      "durationMs": 2962
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T15:06:43.367+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3a7014875bd683cc8de49cb802decbc34425855aa2a7aa7c222f7752d09adf99",
+      "durationMs": 96398
+    }
+  ],
+  "epicId": "20261116-135351-upstream-review-fixes",
+  "createdAt": "2026-11-16T13:53:51.810+07:00",
+  "updatedAt": "2026-11-16T15:07:12.283+07:00",
+  "completedAt": "2026-11-16T15:07:12.283+07:00"
+}

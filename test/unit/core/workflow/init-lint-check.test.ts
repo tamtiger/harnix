@@ -15,6 +15,30 @@ describe("isReadOnlyCommand", () => {
       expect(isReadOnlyCommand(command)).toBe(true);
   });
 
+  it("rejects -w of a formatter that rewrites files, but not pnpm's -w workspace flag", () => {
+    for (const command of ["prettier -w .", "pnpm exec prettier -w src", "npx prettier -w .", "gofmt -w ."])
+      expect(isReadOnlyCommand(command)).toBe(false);
+    for (const command of ["pnpm -w run lint", "pnpm -w exec eslint .", "prettier --check ."])
+      expect(isReadOnlyCommand(command)).toBe(true);
+  });
+
+  it("rejects a writing flag in any part of a chained or quoted script", () => {
+    for (const command of [
+      "eslint . && prettier -w .",
+      "tsc --noEmit; eslint --fix .",
+      "eslint .&&prettier --write .",
+      "bash -c 'eslint . && eslint --fix .'",
+      "eslint . || prettier -w src; echo done",
+      'bash -c "ruff check . --fix"',
+    ])
+      expect(isReadOnlyCommand(command)).toBe(false);
+  });
+
+  it("keeps a chained read-only script read-only", () => {
+    for (const command of ["eslint . && prettier --check .", "bash -c 'tsc --noEmit && eslint .'"])
+      expect(isReadOnlyCommand(command)).toBe(true);
+  });
+
   it("rejects --fix and --write in any form", () => {
     for (const command of ["eslint . --fix", "eslint --fix=true .", "prettier --write .", "prettier --write=true ."])
       expect(isReadOnlyCommand(command)).toBe(false);

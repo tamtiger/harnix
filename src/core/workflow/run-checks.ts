@@ -31,7 +31,7 @@ export interface RunChecksResult {
 }
 
 /**
- * Runs every required check that is not currently passing, focused before full and, inside a scope, shortest recorded
+ * Runs every required check that is not currently passing, focused before full and, inside a scope, shortest passing
  * duration first (declaration order without durations; see `orderChecks`), each exactly like `--run-check` with its declared command and cwd, and stops at the first failure. Nothing runs
  * when any of them is at the circuit breaker or has no command to run.
  */

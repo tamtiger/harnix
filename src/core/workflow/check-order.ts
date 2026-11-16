@@ -5,14 +5,15 @@ interface OrderedCheck {
 
 interface RecordedRun {
   checkId?: string | undefined;
+  result?: string | undefined;
   durationMs?: number | undefined;
 }
 
-/** The latest recorded duration of every check that has one. */
+/** The latest recorded duration of every check, taken from passing runs only: a failed run stops early and says nothing about cost. */
 function latestDurations(evidence: readonly RecordedRun[]): Map<string, number> {
   const durations = new Map<string, number>();
-  for (const { checkId, durationMs } of evidence)
-    if (checkId !== undefined && durationMs !== undefined) durations.set(checkId, durationMs);
+  for (const { checkId, durationMs, result } of evidence)
+    if (checkId !== undefined && durationMs !== undefined && result === "pass") durations.set(checkId, durationMs);
   return durations;
 }
 

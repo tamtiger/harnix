@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-135353-default-inputs-config-files",
+  "title": "Input mặc định của check suite gồm các file cấu hình gốc",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Input mặc định đã thu hẹp của check suite và check-lint phải đổi digest khi sửa file cấu hình test, lint, lockfile hoặc solution ở thư mục gốc.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Sửa vitest.config.ts, eslint.config.mjs, pnpm-lock.yaml, một file *.sln hoặc Directory.Build.props ở gốc làm đổi digest của check suite mặc định.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Các input mặc định vẫn thu hẹp: không quay về wildcard toàn repository và không kéo thêm thư mục build hoặc dữ liệu.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/init-default-inputs.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của default-inputs-config-files",
+      "command": "pnpm exec vitest run test/unit/core/workflow/init-default-inputs.test.ts test/unit/core/workflow/init-task.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T14:58:06.649+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/init-default-inputs.test.ts test/unit/core/workflow/init-task.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8e6275f6b9c80d63618f2d959ada0fe90c1c43e2ef7fbc3b59a73567d837b889",
+      "durationMs": 6674
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T14:59:41.699+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a11572dadf9428ae785cc07c65ea278c104b669943c6233ecb2610bc5d5cbd2f",
+      "durationMs": 94620
+    }
+  ],
+  "epicId": "20261116-135351-upstream-review-fixes",
+  "createdAt": "2026-11-16T13:53:51.810+07:00",
+  "updatedAt": "2026-11-16T14:59:46.790+07:00",
+  "completedAt": "2026-11-16T14:59:46.790+07:00"
+}
