@@ -144,6 +144,8 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   taskOwner,
   initOwner("--title", (f) => f.title),
   initOwner("--slug", (f) => f.slug),
+  initOwner("--prd-file", (f) => f.prdFile),
+  initOwner("--plan-file", (f) => f.planFile),
   initOwner("--mode", (f) => f.mode),
   initOwner("--goal", (f) => f.goal),
   {

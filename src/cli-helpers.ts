@@ -145,7 +145,10 @@ export function redactPublicErrorMessage(error: unknown): string {
   return `${message}${rollbackDetail}`
     .replaceAll(process.cwd(), "[PROJECT]")
     .replace(/(['"])(?:[A-Za-z]:[\\/]|\/|\\\\)[^'"\r\n]+\1/gu, "'[PROJECT]'")
-    .replace(/(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu, "[PATH]")
+    .replace(
+      /(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|(?<![\w.~-])\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu,
+      "[PATH]",
+    )
     .replace(/(?<![\w.:/~-])\/[\w.@~-]+(?:\/[\w.@~-]*)+/gu, "[PATH]")
     .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]");
 }

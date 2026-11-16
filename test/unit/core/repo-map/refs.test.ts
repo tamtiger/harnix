@@ -8,6 +8,20 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-repo-map-refs-");
 
+describe("repository map symbol references of a numeric code", () => {
+  it("accepts a token that starts with a digit, such as an error code", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "errors.ts"), "export const CODE = 'ERR-00908';\nexport const OTHER = 00908;\n");
+    const { map } = await refreshRepoMap({ root });
+
+    const result = await findRepoMapReferences(map, { limit: 20, root, symbol: "00908" });
+
+    expect(result.references.map((reference) => reference.line)).toEqual([1, 2]);
+    await expect(findRepoMapReferences(map, { limit: 20, root, symbol: "a b" })).rejects.toThrow(/identifier/u);
+  });
+});
+
 describe("repository map symbol references", () => {
   it("finds declarations, imports and call references across the repository and scopes by target path", async () => {
     const root = await temporaryRepository();

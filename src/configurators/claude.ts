@@ -44,7 +44,7 @@ export const claudeGlobalPretoolHookGroup: JsonValue = {
       type: "command",
     },
   ],
-  matcher: "Grep|Bash",
+  matcher: "Grep|Bash|PowerShell",
 };
 
 export const claudeGlobalMemoryContent = `## Harnix

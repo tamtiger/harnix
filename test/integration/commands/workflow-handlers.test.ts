@@ -137,7 +137,7 @@ describe.sequential("workflow --init with repeated --text and --with-check", () 
     const briefDefault = await run(["--init", "--title", "Default Brief"]);
     expect(briefDefault.code).toBe(0);
     const parsedDefault = JSON.parse(briefDefault.out) as Record<string, unknown>;
-    expect(Object.keys(parsedDefault).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
+    expect(Object.keys(parsedDefault).sort()).toEqual(["checkpoint", "id", "status", "taskDir", "updatedAt"]);
     expect(parsedDefault.status).toBe("planning");
 
     await runCli(["node", "harnix", "pause"]);
@@ -145,7 +145,7 @@ describe.sequential("workflow --init with repeated --text and --with-check", () 
     const briefExplicit = await run(["--init", "--title", "Explicit Brief", "--brief"]);
     expect(briefExplicit.code).toBe(0);
     const parsedExplicit = JSON.parse(briefExplicit.out) as Record<string, unknown>;
-    expect(Object.keys(parsedExplicit).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
+    expect(Object.keys(parsedExplicit).sort()).toEqual(["checkpoint", "id", "status", "taskDir", "updatedAt"]);
   });
 
   it("names the flag to fix and creates nothing when a check spec is wrong", async () => {

@@ -200,7 +200,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--cancel":
         "Terminal cancellation; the only cancellation transport. Add --task <task-id> to cancel another unfinished task (the active pointer is cleared only if it names that task). It accepts --brief for uniformity but always prints the cancelled record with its cancellation, so a script that adds --brief to every write does not fail here.",
       "--tick":
-        "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item can be 1-based index '1', 'all', or substring pattern).",
+        "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item is a check id such as 'chk-3' matched exactly against its [chk-3] tag, a 1-based index among the still unchecked items, 'all', or a substring pattern); --brief omits the ticked item names.",
       "--learn":
         'Record one hand-authored learning candidate from stdin { "candidate": { id, statement, sourceTaskIds, evidenceIds } } (no --text or --rationale flags); needs an active verifying/finishing task whose required checks are fresh, and the candidate must cite its evidence. Without a stdin body, --add-decision or --add-risk on the active task is captured at --finish.',
     },

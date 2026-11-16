@@ -1,0 +1,130 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-165312-robustness-batch",
+  "title": "Gom các lỗi độ bền nhỏ của CLI và hook",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa các lỗi nhỏ đã repro: đường dẫn tương đối bị che trong lệnh, repo-map --refs với mã số, coveredBy sau replace-check, hook lấy nhầm task repo khác và lộ secret khi xem diff cấu hình.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này.",
+    "Không chặn lệnh của agent; chỉ nhắc hoặc cảnh báo."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Thông báo lỗi giữ nguyên đường dẫn tương đối của lệnh check (ví dụ `.harnix/tmp/...`) thay vì thay bằng `[PATH]`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`harnix repo-map --refs` nhận mã định danh toàn số như `00908` mà vẫn giữ giới hạn độ dài.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "`coveredBy` của tiêu chí không liệt kê check đã bị thay bởi --replace-check.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-helpers.ts",
+    "src/commands/status.ts",
+    "src/core/repo-map/refs.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của robustness-batch",
+      "command": "pnpm exec vitest run test/unit/cli-helpers.test.ts test/unit/core/repo-map/refs.test.ts test/unit/commands/status.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/commands/status.ts",
+        "src/core/repo-map/**",
+        "test/unit/cli-helpers.test.ts",
+        "test/unit/commands/status.test.ts",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-13T17:34:53.131+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/cli-helpers.test.ts test/unit/core/repo-map/refs.test.ts test/unit/commands/status.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c14bcd67dde1aab2e9aa2d66a89c27cb7a295b685a736084fa71a695d3196191"
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-13T17:36:25.372+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "840697c80fdc4bbe2ade1e43ad99deb278d85425a39ebaa887e1e52fd2ba493a"
+    },
+    {
+      "id": "ev-chk-2-2",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-13T17:41:56.275+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb1510b338feb9d336e8a44f66b929dcf5bb8bdd6cfe4d88853068d6a567d306"
+    }
+  ],
+  "epicId": "20261113-165307-agent-feedback-hardening",
+  "createdAt": "2026-11-13T16:53:07.711+07:00",
+  "updatedAt": "2026-11-13T17:42:01.070+07:00",
+  "decisions": [
+    {
+      "id": "d-hook-context-dropped",
+      "text": "Bỏ mục hook lấy nhầm task repo khác và mục cảnh báo secret khi xem diff cấu hình khỏi member này.",
+      "rationale": "Không repro được trong repo này (hook chỉ đọc task của root đích theo cwd sự kiện) và việc in secret là hành vi của agent chứ không phải lỗi sản phẩm; nếu gặp lại sẽ mở task riêng kèm bằng chứng."
+    }
+  ],
+  "completedAt": "2026-11-13T17:42:01.070+07:00"
+}

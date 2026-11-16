@@ -9,6 +9,21 @@ import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 /** One unchecked checklist item of `plan.md` (`- [ ]` or `* [ ]`); the gate before `verifying` reuses it. */
 export const CHECK_UNCHECKED = /^(\s*[-*]\s+)\[\s*\](\s+.*)$/u;
 
+/** A check id such as `chk-3` (optionally in brackets): matched by its exact `[chk-3]` tag, never as a substring. */
+const ID_SELECTOR = /^(?:\[[A-Za-z][\w-]*\]|chk-[\w-]+)$/u;
+
+function allItemIndices(lines: readonly string[]): number[] {
+  return lines.flatMap((line, index) => (ANY_ITEM.test(line) ? [index] : []));
+}
+
+const ANY_ITEM = /^(\s*[-*]\s+)\[[ xX]\](\s+.*)$/u;
+
+/** Items among `indices` whose text starts with the `[id]` tag. */
+function leadingTagMatches(lines: readonly string[], indices: readonly number[], selector: string): number[] {
+  const tag = `[${selector.replace(/^\[|\]$/gu, "").toLowerCase()}]`;
+  return indices.filter((idx) => (ANY_ITEM.exec(lines[idx]!)?.[2] ?? "").trim().toLowerCase().startsWith(tag));
+}
+
 function escapeRegex(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
@@ -17,6 +32,8 @@ export interface TickPlanResult {
   updated: number;
   remaining: number;
   total: number;
+  /** Text of each ticked item (at most 80 characters), so a wrong selector is visible at once. */
+  items: string[];
 }
 
 /**
@@ -24,6 +41,7 @@ export interface TickPlanResult {
  * selector có thể là:
  * - "all": tick toàn bộ checklist item chưa tick
  * - index số 1-based (ví dụ "1", "2" hoặc "1,2"): tick theo thứ tự item chưa tick
+ * - id check dạng `chk-3` hoặc `[chk-3]`: khớp chính xác thẻ `[chk-3]` (`chk-1` không chạm `chk-10`), mơ hồ thì từ chối
  * - text pattern (substring không phân biệt hoa thường): tick các item khớp nội dung
  */
 export function tickPlanChecklist(harnixRoot: string, taskId: string, selector: string): Promise<TickPlanResult> {
@@ -55,7 +73,7 @@ async function tickPlanChecklistLocked(harnixRoot: string, taskId: string, selec
 
   if (uncheckedIndices.length === 0) {
     const total = lines.filter((l) => /^\s*[-*]\s+\[[ xX]\]/u.test(l)).length;
-    return { updated: 0, remaining: 0, total };
+    return { updated: 0, remaining: 0, total, items: [] };
   }
 
   const toTickIndices = new Set<number>();
@@ -69,6 +87,15 @@ async function tickPlanChecklistLocked(harnixRoot: string, taskId: string, selec
       }
       toTickIndices.add(uncheckedIndices[pos - 1]!);
     }
+  } else if (ID_SELECTOR.test(trimmed) && leadingTagMatches(lines, allItemIndices(lines), trimmed).length > 0) {
+    // The id tags an item: it is exact from here on, so an already ticked item never falls back to `chk-10`.
+    const tag = `[${trimmed.replace(/^\[|\]$/gu, "").toLowerCase()}]`;
+    const matches = leadingTagMatches(lines, uncheckedIndices, trimmed);
+    if (matches.length === 0) throw new Error(`No unchecked checklist item tagged ${tag}: it is already ticked.`);
+    if (matches.length > 1) {
+      throw new Error(`Selector "${selector}" is ambiguous: ${matches.length} unchecked items carry the tag ${tag}.`);
+    }
+    toTickIndices.add(matches[0]!);
   } else {
     const lower = trimmed.toLowerCase();
     for (const idx of uncheckedIndices) {
@@ -82,11 +109,13 @@ async function tickPlanChecklistLocked(harnixRoot: string, taskId: string, selec
   }
 
   let updated = 0;
+  const items: string[] = [];
   const newLines = lines.map((line, idx) => {
     if (toTickIndices.has(idx)) {
       const match = CHECK_UNCHECKED.exec(line);
       if (match) {
         updated++;
+        items.push(match[2]!.trim().slice(0, 80));
         return `${match[1]}[x]${match[2]!}`;
       }
     }
@@ -97,7 +126,7 @@ async function tickPlanChecklistLocked(harnixRoot: string, taskId: string, selec
   const remaining = uncheckedIndices.length - updated;
   const total = newLines.filter((l) => /^\s*[-*]\s+\[[ xX]\]/u.test(l)).length;
 
-  return { updated, remaining, total };
+  return { updated, remaining, total, items };
 }
 
 export interface WorkflowTickResult {
@@ -107,18 +136,24 @@ export interface WorkflowTickResult {
   updated: number;
   remaining: number;
   total: number;
+  items?: string[];
 }
 
-export async function tickWorkflow(root: string, selector: string): Promise<WorkflowTickResult> {
+export async function tickWorkflow(
+  root: string,
+  selector: string,
+  options: { brief?: boolean } = {},
+): Promise<WorkflowTickResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw noActiveTaskError("Workflow --tick");
-  const result = await tickPlanChecklist(harnixRoot, task.id, selector);
+  const { items, ...counts } = await tickPlanChecklist(harnixRoot, task.id, selector);
   return {
     generator: "harnix",
     schemaVersion: 1,
     taskId: task.id,
-    ...result,
+    ...counts,
+    ...(options.brief === true ? {} : { items }),
   };
 }
 

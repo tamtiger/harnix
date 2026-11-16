@@ -36,7 +36,8 @@ export interface RepoMapRefsResultV1 {
 }
 
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
-const symbolIdentifierPattern = /^[A-Za-z_$][\w$]{0,127}$/u;
+/** An identifier, or a code such as an error number: word characters only, so a regex or a phrase is refused. */
+const symbolIdentifierPattern = /^[\w$]{1,128}$/u;
 
 export async function findRepoMapReferences(
   map: RepoMapV1,
@@ -216,7 +217,7 @@ function emptyRefsResult(
 function assertRefsOptions(options: RepoMapRefsOptions): void {
   const symbol = options.symbol.trim();
   if (!symbolIdentifierPattern.test(symbol)) {
-    throw new Error("Refs symbol must be a valid identifier of 1 to 128 characters.");
+    throw new Error("Refs symbol must be a valid identifier or code of 1 to 128 characters.");
   }
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 20) {
     throw new Error("Refs limit must be an integer between 1 and 20.");

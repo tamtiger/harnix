@@ -242,7 +242,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     const task = await setGoalWorkflow(context.root, context.flags.setGoal as string);
     return presentTask(context, task);
   },
-  tick: (context) => tickWorkflow(context.root, context.flags.tick as string),
+  tick: (context) => tickWorkflow(context.root, context.flags.tick as string, { brief: context.flags.brief === true }),
   batch: async (context) => {
     const envelope = await readRequired(context, "Workflow batch", "Workflow batch requires valid JSON.");
     const task = await batchWorkflow(context.root, envelope);

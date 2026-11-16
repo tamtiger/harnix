@@ -1,5 +1,5 @@
 import { readdir } from "node:fs/promises";
-import { join, resolve, win32 } from "node:path";
+import { dirname, join, resolve, win32 } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 import { readBoundedText } from "src/utils/filesystem.js";
 
@@ -93,4 +93,12 @@ async function nestedProjectFiles(dir: string, depth: number): Promise<string[]>
   };
   await visit(dir, depth);
   return found;
+}
+
+/** True when the solution file references a test project, or a test project sits below its directory. */
+export async function solutionHasTestProject(solutionPath: string): Promise<boolean> {
+  const dir = dirname(solutionPath);
+  const text = (await readBoundedText(solutionPath, MAX_FILE_BYTES)) ?? "";
+  const listed = solutionProjectPaths(text).map((path) => resolve(dir, path));
+  return (await anyTestProject(listed)) || (await anyTestProject(await nestedProjectFiles(dir, NESTED_DEPTH)));
 }

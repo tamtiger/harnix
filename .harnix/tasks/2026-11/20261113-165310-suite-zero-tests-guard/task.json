@@ -1,0 +1,102 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-165310-suite-zero-tests-guard",
+  "title": "Check suite chạy 0 test không được tính là pass",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Phát hiện đầu ra không có test nào chạy (dotnet, vitest, jest, pytest) và không ghi nhận đó là một lần pass đáng tin; cảnh báo ở cổng ready khi lệnh suite trỏ vào solution không có project test.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này.",
+    "Không chặn lệnh của agent; chỉ nhắc hoặc cảnh báo."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Đầu ra thể hiện 0 test được chạy (ví dụ `No test is available`) khiến check không được ghi là pass và trả hint nêu lệnh khắc phục.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cổng ready cảnh báo (mức warning, không chặn) khi lệnh suite của solution không chứa project test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/stack/dotnet-projects.ts",
+    "src/core/workflow/check-output.ts",
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/run-check.ts",
+    "src/core/workflow/suite-command.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của suite-zero-tests-guard",
+      "command": "pnpm exec vitest run test/unit/core/workflow/check-output.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/suite-command.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "src/core/workflow/**",
+        "src/utils/check-runner.ts",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-13T17:15:00.636+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/check-output.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/suite-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dc7157fc9c144b3640630bdca5e18689b9676332921197d926009402081c22a1"
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-13T17:16:29.496+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "65d63ff243aaf846d5145df4a383b4324f706417e7f9fc2b79970972ca487a86"
+    }
+  ],
+  "epicId": "20261113-165307-agent-feedback-hardening",
+  "createdAt": "2026-11-13T16:53:07.711+07:00",
+  "updatedAt": "2026-11-13T17:17:21.815+07:00",
+  "completedAt": "2026-11-13T17:17:21.815+07:00"
+}

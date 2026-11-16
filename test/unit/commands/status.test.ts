@@ -203,6 +203,20 @@ describe("commands/status", () => {
     });
   });
 
+  it("leaves a check retired by --replace-check out of coveredBy", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const base = taskV3("planning", "planning");
+    const [first] = base.validationPlan;
+    const retired = { ...first!, id: "old", required: false };
+    const task = { ...base, validationPlan: [...base.validationPlan, retired] };
+    await saveWorkflow(root, { task });
+
+    const result = await reportProjectCriteria(root);
+
+    expect(result.criteria[0]?.coveredBy).toEqual(["check"]);
+  });
+
   it("lists the checks of the active task compactly with their freshness, without reading task.json", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);

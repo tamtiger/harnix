@@ -48,6 +48,8 @@ export interface WorkflowFlags {
   title?: string;
   task?: string;
   slug?: string;
+  prdFile?: string;
+  planFile?: string;
   mode?: string;
   goal?: string;
   check?: string;

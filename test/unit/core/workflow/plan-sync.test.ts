@@ -102,7 +102,7 @@ describe("tickPlanChecklist", () => {
     await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] First item\n- [ ] Second item\n- [x] Done item\n", "utf8");
 
     const result = await tickPlanChecklist(join(root, ".harnix"), "task-all", "all");
-    expect(result).toEqual({ updated: 2, remaining: 0, total: 3 });
+    expect(result).toEqual({ updated: 2, remaining: 0, total: 3, items: ["First item", "Second item"] });
 
     const content = await readFile(join(taskDir, "plan.md"), "utf8");
     expect(content).toContain("- [x] First item");
@@ -118,7 +118,7 @@ describe("tickPlanChecklist", () => {
     await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] Item 1\n- [ ] Item 2\n- [ ] Item 3\n", "utf8");
 
     const result = await tickPlanChecklist(join(root, ".harnix"), "task-idx", "2");
-    expect(result).toEqual({ updated: 1, remaining: 2, total: 3 });
+    expect(result).toEqual({ updated: 1, remaining: 2, total: 3, items: ["Item 2"] });
 
     const content = await readFile(join(taskDir, "plan.md"), "utf8");
     expect(content).toContain("- [ ] Item 1");
@@ -138,11 +138,66 @@ describe("tickPlanChecklist", () => {
     );
 
     const result = await tickPlanChecklist(join(root, ".harnix"), "task-pattern", "parser");
-    expect(result).toEqual({ updated: 1, remaining: 2, total: 3 });
+    expect(result).toEqual({ updated: 1, remaining: 2, total: 3, items: ["Implement parser logic"] });
 
     const content = await readFile(join(taskDir, "plan.md"), "utf8");
     expect(content).toContain("- [x] Implement parser logic");
     expect(content).toContain("- [ ] Add unit tests");
+  });
+
+  it("ticks by the exact check id: chk-1 never touches chk-10 and the numbering stays irrelevant", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-id");
+    await mkdir(taskDir, { recursive: true });
+    const plan = "# Plan\n- [ ] [chk-1] Slice one\n- [ ] [chk-10] Slice ten\n- [ ] [chk-2] Slice two\n";
+    await writeFile(join(taskDir, "plan.md"), plan, "utf8");
+
+    const first = await tickPlanChecklist(join(root, ".harnix"), "task-id", "chk-1");
+    expect(first).toEqual({ updated: 1, remaining: 2, total: 3, items: ["[chk-1] Slice one"] });
+    await tickPlanChecklist(join(root, ".harnix"), "task-id", "[chk-2]");
+
+    const content = await readFile(join(taskDir, "plan.md"), "utf8");
+    expect(content).toContain("- [x] [chk-1] Slice one");
+    expect(content).toContain("- [ ] [chk-10] Slice ten");
+    expect(content).toContain("- [x] [chk-2] Slice two");
+  });
+
+  it("anchors the id to the leading tag and falls back to a substring when no item carries it", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-anchor");
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(
+      join(taskDir, "plan.md"),
+      "- [ ] [chk-1] Slice one\n- [ ] Slice two, see [chk-1] for context\n- [ ] Update feature-flag docs\n",
+      "utf8",
+    );
+
+    const byId = await tickPlanChecklist(join(root, ".harnix"), "task-anchor", "chk-1");
+    expect(byId.items).toEqual(["[chk-1] Slice one"]);
+    const bySubstring = await tickPlanChecklist(join(root, ".harnix"), "task-anchor", "feature-flag");
+    expect(bySubstring.items).toEqual(["Update feature-flag docs"]);
+  });
+
+  it("does not tick chk-10 when the chk-1 item is already ticked", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-done");
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(join(taskDir, "plan.md"), "- [x] [chk-1] Done\n- [ ] [chk-10] Other\n", "utf8");
+
+    await expect(tickPlanChecklist(join(root, ".harnix"), "task-done", "chk-1")).rejects.toThrow(/already ticked/u);
+    expect(await readFile(join(taskDir, "plan.md"), "utf8")).toContain("- [ ] [chk-10] Other");
+  });
+
+  it("rejects an id that matches no unchecked item or several of them", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-dup");
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(join(taskDir, "plan.md"), "- [ ] [chk-1] A\n- [ ] [chk-1] B\n- [ ] [chk-10] C\n", "utf8");
+
+    await expect(tickPlanChecklist(join(root, ".harnix"), "task-dup", "chk-1")).rejects.toThrow(/ambiguous/u);
+    await expect(tickPlanChecklist(join(root, ".harnix"), "task-dup", "chk-9")).rejects.toThrow(
+      'No unchecked checklist item matched pattern: "chk-9".',
+    );
   });
 
   it("throws clear error when pattern does not match", async () => {
@@ -197,7 +252,24 @@ describe("tickWorkflow", () => {
       updated: 2,
       remaining: 0,
       total: 2,
+      items: ["First", "Second"],
     });
+  });
+
+  it("omits the item names with brief", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("in_progress", "implementing");
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, task);
+    await setActiveTask(harnixRoot, task.id);
+    const taskDir = join(harnixRoot, "tasks", taskMonth(task.id), task.id);
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(join(taskDir, "plan.md"), "- [ ] First\n", "utf8");
+
+    const result = await tickWorkflow(root, "all", { brief: true });
+    expect(result).not.toHaveProperty("items");
+    expect(result.updated).toBe(1);
   });
 });
 

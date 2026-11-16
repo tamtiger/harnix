@@ -51,7 +51,7 @@ export const WORKFLOW_ACTIONS: readonly WorkflowActionSpec[] = [
   action("snapshot", "switch", false),
   action("finish", "switch", true),
   action("cancel", "switch", true),
-  action("tick", "value", false),
+  action("tick", "value", true),
   action("learn", "switch", false),
 ];
 

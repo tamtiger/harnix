@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { launcherFailure, summarizeCheckOutput } from "src/core/workflow/check-output.js";
+import { launcherFailure, noTestsRan, summarizeCheckOutput } from "src/core/workflow/check-output.js";
 
 const vitestReport = [
   " Test Files  1 failed | 2 passed (3)",
@@ -94,5 +94,28 @@ describe("launcherFailure", () => {
       "try 'python -m pytest'",
     );
     expect(launcherFailure("bash: pytest: command not found", 1)).toContain("try 'python -m pytest'");
+  });
+});
+
+describe("noTestsRan", () => {
+  it.each([
+    "No test is available in App.dll. Make sure that test discoverers & executors are registered.",
+    "No test files found, exiting with code 0",
+    "Total tests: 0",
+    "Ran 0 tests in 0.000s",
+    "collected 0 items",
+    "No tests found, exiting with code 0",
+    "?   	example.com/app	[no test files]",
+  ])("recognizes an empty run in %j", (output) => {
+    expect(noTestsRan(output, 0)).toBeDefined();
+  });
+
+  it("stays silent for a failed run, a run with passing tests and plain output", () => {
+    expect(noTestsRan("No test is available in x.dll", 1)).toBeUndefined();
+    expect(
+      noTestsRan("No test is available in A.dll\nPassed!  - Failed: 0, Passed: 12, Skipped: 0", 0),
+    ).toBeUndefined();
+    expect(noTestsRan("Test Files  3 passed (3)\n Tests  20 passed (20)", 0)).toBeUndefined();
+    expect(noTestsRan("build ok", 0)).toBeUndefined();
   });
 });

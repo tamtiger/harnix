@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.33.2"
+  version: "2.34.0"
 ---
 
 # Implement with evidence
@@ -30,7 +30,7 @@ Prose-only wording, generated snapshots and trivial wiring may skip RED: record 
 
 ## Track progress
 
-After each slice and its focused evidence tick its `- [ ]` to `- [x]` in `plan.md` using `harnix workflow --tick <item|all>` (Full tasks; a Lite task has none and its progress is the persisted checks; running `harnix workflow --run-check` or `--evidence` automatically ticks items tagged with `[<chk-id>]` when the check passes). The Full checklist must be 100% before `harnix workflow --transition verifying/verifying`. Record reusable lessons as you learn them: `harnix workflow --add-risk <id> --text <t>` / `--add-decision`.
+After each slice and its focused evidence tick its `- [ ]` to `- [x]` in `plan.md` using `harnix workflow --tick <chk-id|all>` (an id such as `chk-3` matches the exact `[chk-3]` tag; a bare number counts only unchecked items and shifts) (Full tasks; a Lite task has none and its progress is the persisted checks; running `harnix workflow --run-check` or `--evidence` automatically ticks items tagged with `[<chk-id>]` when the check passes). The Full checklist must be 100% before `harnix workflow --transition verifying/verifying`. Record reusable lessons as you learn them: `harnix workflow --add-risk <id> --text <t>` / `--add-decision`.
 
 ## Release preparation
 

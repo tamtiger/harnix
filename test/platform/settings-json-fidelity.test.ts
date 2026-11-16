@@ -81,7 +81,7 @@ describe("settings.json is edited in place", () => {
 
     expect(installed.hooks.PreToolUse).toHaveLength(2);
     expect(installed.hooks.PreToolUse![0]).toEqual(mine);
-    expect(installed.hooks.PreToolUse![1]).toMatchObject({ matcher: "Grep|Bash" });
+    expect(installed.hooks.PreToolUse![1]).toMatchObject({ matcher: "Grep|Bash|PowerShell" });
     expect(installed.hooks.UserPromptSubmit).toHaveLength(1);
 
     await reconcileGlobalManagedFiles({ ...base(root), desired: [], removeObsolete: true });
@@ -94,13 +94,13 @@ describe("settings.json is edited in place", () => {
     const root = await claudeRoot();
     const path = join(root.path, "settings.json");
     await reconcileGlobalManagedFiles({ ...base(root), desired: settingsOnly() });
-    const edited = (await readFile(path, "utf8")).replace('"Grep|Bash"', '"Grep|Bash|Read"');
+    const edited = (await readFile(path, "utf8")).replace('"Grep|Bash|PowerShell"', '"Grep|Bash|PowerShell|Read"');
     await writeFile(path, edited);
 
     const again = await reconcileGlobalManagedFiles({ ...base(root), desired: settingsOnly() });
 
     expect(again.preserved.length + again.unchanged.length + again.updated.length).toBe(2);
-    await expect(readFile(path, "utf8")).resolves.toContain("Grep|Bash|Read");
+    await expect(readFile(path, "utf8")).resolves.toContain("Grep|Bash|PowerShell|Read");
   });
 
   it("creates a new settings.json when none exists and keeps updates in the user's layout", async () => {

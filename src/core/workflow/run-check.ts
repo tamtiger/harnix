@@ -6,7 +6,7 @@ import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { saveInputDigestSnapshot } from "src/core/verification/snapshot-cache.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
-import { launcherFailure, summarizeCheckOutput } from "./check-output.js";
+import { launcherFailure, noTestsRan, summarizeCheckOutput } from "./check-output.js";
 import { describeCommand, sameCommand, splitCommand } from "./command-match.js";
 import { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 import { assertRetryAllowed } from "./retry-guard.js";
@@ -116,6 +116,11 @@ export async function runCheckWorkflow(
   const durationMs = Math.max(0, Math.round(clock() - startedAt));
   const launcher = launcherFailure(run.output, run.exitCode, executable);
   if (launcher !== undefined) throw new Error(`Check ${checkId} could not start: ${launcher}; nothing was recorded.`);
+  const empty = noTestsRan(run.output, run.exitCode);
+  if (empty !== undefined)
+    throw new Error(
+      `Check ${checkId} ran no tests: ${empty}; nothing was recorded.\nGợi ý: khai báo lệnh chạy test thật (xem harnix verify-plan), ví dụ trỏ tới solution có project test.`,
+    );
   const after = (await computeInputDigest(root, task, checkId)).inputDigest;
   if (before !== after)
     throw new Error(`Verification inputs for check ${checkId} changed while it ran; nothing was recorded.`);

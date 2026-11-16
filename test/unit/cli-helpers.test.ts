@@ -69,6 +69,14 @@ describe("CLI helpers", () => {
     expect(redacted).toContain("[REDACTED]");
   });
 
+  it("keeps a repository-relative path that merely contains a tmp or home segment", () => {
+    const command = "dotnet test .harnix/tmp/App.Tests.csproj --logger x/home/y/z";
+    expect(redactPublicErrorMessage(new Error(`declared command is: ${command}`))).toBe(
+      `declared command is: ${command}`,
+    );
+    expect(redactPublicErrorMessage(new Error("Cannot read /tmp/work/file now"))).toContain("[PATH]");
+  });
+
   it("redacts every absolute POSIX path and leaves relative paths and prose alone", () => {
     for (const path of ["/root/.config/x.json", "/opt/app/data", "/etc/harnix/conf", "/srv/a/b/c"]) {
       const redacted = redactPublicErrorMessage(new Error(`Cannot read ${path} now`));

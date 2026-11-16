@@ -67,3 +67,26 @@ export function launcherFailure(output: string, exitCode: number, executable?: s
   }
   return undefined;
 }
+
+const NO_TESTS_RAN: readonly RegExp[] = [
+  /No test is available/iu,
+  /No tests? files? found|No tests found/iu,
+  /\[no test files\]/u,
+  /^\s*Total tests:\s*0\s*$/imu,
+  /\bRan 0 tests\b/u,
+  /\bcollected 0 items\b/u,
+];
+const TESTS_PASSED =
+  /\bPassed!|\b[1-9]\d*\s+passing\b|\b[1-9]\d*\s+passed\b|\bRan [1-9]\d* tests?\b|\bOK \(\d+ tests?\)/u;
+
+/**
+ * Why a run that exited 0 proved nothing: the runner said no test was discovered (a `dotnet test` on a solution without
+ * a test project, a vitest or pytest run that matched no file) and printed no passing test. A multi-project run where
+ * one project has none but another passed is a real run, so any pass keeps it valid.
+ */
+export function noTestsRan(output: string, exitCode: number): string | undefined {
+  if (exitCode !== 0 || TESTS_PASSED.test(output)) return undefined;
+  return NO_TESTS_RAN.some((pattern) => pattern.test(output))
+    ? "the runner reported no test to run, so exit 0 proves nothing"
+    : undefined;
+}

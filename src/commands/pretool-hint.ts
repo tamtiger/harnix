@@ -26,7 +26,9 @@ export function pretoolHintFor(event: unknown): string | undefined {
       ? grepToolSymbol(input.pattern)
       : record.tool_name === "Bash"
         ? bashSymbol(input.command)
-        : undefined;
+        : record.tool_name === "PowerShell"
+          ? powershellSymbol(input.command)
+          : undefined;
   if (symbol === undefined) return undefined;
   return JSON.stringify({
     hookSpecificOutput: {
@@ -51,6 +53,44 @@ function bashSymbol(command: unknown): string | undefined {
       if (symbol !== undefined) return symbol;
       segment = [];
     } else segment.push(token);
+  }
+  return undefined;
+}
+
+const SELECT_STRING = new Set(["select-string", "sls"]);
+const POWERSHELL_RECURSE = /^-r(?:e(?:c(?:u(?:r(?:s(?:e)?)?)?)?)?)?$/iu;
+
+/**
+ * `Select-String` (alias `sls`) over a recursive listing or a wildcard path is the PowerShell form of `grep -r`; a single
+ * file stays silent, like a non-recursive `grep`. The pattern is `-Pattern <p>` or the first bare token.
+ */
+function powershellSymbol(command: unknown): string | undefined {
+  if (typeof command !== "string" || command.length > 4096) return undefined;
+  const tokens = tokenize(command);
+  if (tokens === undefined) return undefined;
+  const recursive = tokens.some(
+    (token) => POWERSHELL_RECURSE.test(token) || token.includes("*") || /^\(?(?:get-childitem|gci|dir)$/iu.test(token),
+  );
+  if (!recursive) return undefined;
+  for (let index = 0; index < tokens.length; index += 1) {
+    if (!SELECT_STRING.has(tokens[index]!.toLowerCase())) continue;
+    const rest = tokens.slice(index + 1);
+    const flag = rest.findIndex((token) => /^-pat(?:t(?:e(?:r(?:n)?)?)?)?$/iu.test(token));
+    const pattern = flag >= 0 ? rest[flag + 1] : firstPositional(rest);
+    const symbol = pattern === undefined ? undefined : symbolOf(pattern);
+    if (symbol !== undefined) return symbol;
+  }
+  return undefined;
+}
+
+const VALUE_PARAMETERS = /^-(?:path|literalpath|include|exclude|context|encoding|filter)$/iu;
+
+/** The first token that is neither a parameter nor the value of a value-taking one. */
+function firstPositional(tokens: readonly string[]): string | undefined {
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index]!;
+    if (VALUE_PARAMETERS.test(token)) index += 1;
+    else if (!token.startsWith("-")) return token;
   }
   return undefined;
 }

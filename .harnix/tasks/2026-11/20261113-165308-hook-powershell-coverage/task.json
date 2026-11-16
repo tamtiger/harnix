@@ -1,0 +1,100 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-165308-hook-powershell-coverage",
+  "title": "Hook nhắc repo-map bắt cả tool PowerShell",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hook PreToolUse nhắc dùng repo-map cũng chạy cho tool PowerShell và nhận diện Select-String, để agent trên Windows không bỏ sót lời nhắc.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này.",
+    "Không chặn lệnh của agent; chỉ nhắc hoặc cảnh báo."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Matcher của nhóm hook `harnix-repo-map-hint` gồm tool PowerShell bên cạnh Grep và Bash.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh PowerShell dùng Select-String hoặc Get-ChildItem -Recurse nối Select-String với một định danh duy nhất nhận được lời nhắc không chặn; từ khóa không phải symbol và ngoài project Harnix thì im lặng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/pretool-hint.ts",
+    "src/configurators/claude.ts",
+    "src/core/platform/facts.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của hook-powershell-coverage",
+      "command": "pnpm exec vitest run test/unit/commands/pretool-hint.test.ts test/platform/claude-global.test.ts test/platform/settings-json-fidelity.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/pretool-hint.ts",
+        "src/configurators/claude.ts",
+        "test/platform/**",
+        "test/unit/commands/pretool-hint.test.ts"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-13T17:02:37.986+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/pretool-hint.test.ts test/platform/claude-global.test.ts test/platform/settings-json-fidelity.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0a53fd19f651a55d5b6a27d6ca215614bd23477d1931122371bef1ff61d1dc5c"
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-13T17:04:05.928+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fd60bb4c7eb6a150e188d895d3053faf86f03eda3c6c83c3d67d1569e7f9f862"
+    }
+  ],
+  "epicId": "20261113-165307-agent-feedback-hardening",
+  "createdAt": "2026-11-13T16:53:07.711+07:00",
+  "updatedAt": "2026-11-13T17:04:32.454+07:00",
+  "completedAt": "2026-11-13T17:04:32.454+07:00"
+}

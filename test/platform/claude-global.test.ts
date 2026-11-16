@@ -80,7 +80,7 @@ describe("claude user-global desired surface", () => {
       memberId: "harnix-repo-map-hint",
     });
     expect(claudeGlobalPretoolHookGroup).toEqual({
-      matcher: "Grep|Bash",
+      matcher: "Grep|Bash|PowerShell",
       hooks: [{ command: CLAUDE_GLOBAL_CONTEXT_COMMAND, timeout: 5, type: "command" }],
     });
   });

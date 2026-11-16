@@ -63,6 +63,8 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       "Edit (or, with --cancel, cancel) this unfinished task instead of the active one (the active pointer stays unless it names that task)",
     )
     .option("--slug <slug>", "English kebab-case slug of the task ID for --init (required for a non-ASCII title)")
+    .option("--prd-file <path>", "Existing Markdown file to use as prd.md of a Full task for --init")
+    .option("--plan-file <path>", "Existing Markdown file to use as plan.md of a Full task for --init")
     .option("--mode <mode>", "Task mode for --init: lite or full")
     .option("--goal <goal>", "Task goal for --init")
     .option("--save", "Persist workflow state from stdin")
@@ -109,7 +111,10 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
     .option("--set-title <title>", "Update the title of the active task")
     .option("--set-goal <goal>", "Update the goal of the active task")
-    .option("--tick <selector>", "Mark plan.md checklist items completed (- [x]) by index, 'all', or pattern")
+    .option(
+      "--tick <selector>",
+      "Mark plan.md checklist items completed (- [x]) by check id (chk-3), index among unchecked items, 'all', or pattern",
+    )
     .option("--file <path>", "Read payload from a UTF-8 file instead of stdin")
     .option("--batch", "Batch apply criteria, checks, decisions, risks and paths from stdin")
     .option("--schema", "Describe the save envelope schema")

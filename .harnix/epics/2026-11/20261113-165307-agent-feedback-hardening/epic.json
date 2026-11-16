@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261113-165307-agent-feedback-hardening",
+  "title": "Củng cố Harnix theo phản hồi của agent",
+  "goal": "Xử lý các điểm yếu đã xác nhận từ phản hồi của Kiro và Claude: hook không bắt PowerShell, --tick lệch số, suite 0 test vẫn pass, --init thiếu tiện ích và các lỗi độ bền nhỏ.",
+  "nonGoals": [
+    "Không thay đổi schema bằng chứng theo mức độ.",
+    "Không can thiệp quy tắc RAI cá nhân ngoài sản phẩm Harnix."
+  ],
+  "createdAt": "2026-11-13T16:53:07.711+07:00",
+  "updatedAt": "2026-11-13T16:53:07.711+07:00"
+}

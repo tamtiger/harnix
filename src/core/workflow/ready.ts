@@ -3,6 +3,7 @@ import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
 import { dirname, basename } from "node:path";
 import { artifactFindings } from "./ready-artifacts.js";
 import { assertSuiteGateReady } from "./suite-gate.js";
+import { suiteWithoutTests } from "./suite-command.js";
 
 import { globby } from "globby";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
@@ -22,6 +23,17 @@ function obligationIssues(task: TaskRecord): string[] {
     issues.push("Workflow ready requires at least one required validation check.");
   }
   return issues;
+}
+
+/** Warnings (never blockers) for a required check whose `dotnet test <solution>` would run no test. */
+async function suiteWithoutTestsAdvisories(projectRoot: string, task: TaskRecord): Promise<string[]> {
+  const found: string[] = [];
+  for (const check of task.validationPlan) {
+    if (!check.required || check.scope !== "full") continue;
+    const message = await suiteWithoutTests(projectRoot, check.command, check.cwd);
+    if (message !== undefined) found.push(`Check ${check.id}: ${message}`);
+  }
+  return found;
 }
 
 async function suiteGateIssues(projectRoot: string, task: TaskRecord): Promise<string[]> {
@@ -101,7 +113,7 @@ async function readyFindings(
       ...(await suiteGateIssues(projectRootOf(harnixRoot), task)),
       ...artifact.issues,
     ],
-    advisories: artifact.advisories,
+    advisories: [...artifact.advisories, ...(await suiteWithoutTestsAdvisories(projectRootOf(harnixRoot), task))],
   };
 }
 

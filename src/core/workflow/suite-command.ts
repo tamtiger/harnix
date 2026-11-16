@@ -1,7 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { win32 } from "node:path";
 
-import { inspectDotnetDirectory, isSolutionFile } from "src/core/stack/dotnet-projects.js";
+import { inspectDotnetDirectory, isSolutionFile, solutionHasTestProject } from "src/core/stack/dotnet-projects.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { equivalentCommand, splitCommand } from "./command-match.js";
 
@@ -85,4 +85,30 @@ export async function acceptsSuiteCommand(
   if (executable?.replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase() !== "dotnet" || verb !== "test") return false;
   if (rest.length === 0) return cwd !== undefined && cwd !== "." && (await isDotnetTestDirectory(projectRoot, cwd));
   return rest.length === 1 && (await isSafeSolutionArgument(projectRoot, rest[0] ?? "", cwd));
+}
+
+/**
+ * A warning (never an issue) for a suite command `dotnet test <solution.sln>` whose solution lists no test project:
+ * the run would exit 0 having tested nothing. Any other command, or an unreadable path, gives no finding.
+ */
+export async function suiteWithoutTests(
+  projectRoot: string,
+  command: string | undefined,
+  cwd: string | undefined,
+): Promise<string | undefined> {
+  if (command === undefined) return undefined;
+  const [executable, verb, ...rest] = splitCommand(command).map(unquote);
+  if (executable?.replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase() !== "dotnet" || verb !== "test") return undefined;
+  const [solution] = rest;
+  if (rest.length !== 1 || solution === undefined || !(await isSafeSolutionArgument(projectRoot, solution, cwd))) {
+    return undefined;
+  }
+  try {
+    const path = await resolveSafeProjectPath(projectRoot, joinedPath(solution, cwd));
+    return (await solutionHasTestProject(path))
+      ? undefined
+      : `${solution} references no test project: dotnet test would exit 0 with no test run`;
+  } catch {
+    return undefined;
+  }
 }

@@ -149,8 +149,9 @@ export async function reportProjectCriteria(cwd: string): Promise<StatusCriteria
   if (task === undefined) return { taskId: null, criteria: [] };
 
   const criteria: StatusCriteriaItem[] = task.acceptanceCriteria.map((c) => {
+    // Only required checks cover a criterion for the gates: a check retired by --replace-check is no longer required.
     const coveringChecks = task.validationPlan
-      .filter((check) => check.criterionIds?.includes(c.id) ?? false)
+      .filter((check) => (check.criterionIds?.includes(c.id) ?? false) && check.required)
       .map((check) => check.id);
     return {
       id: c.id,

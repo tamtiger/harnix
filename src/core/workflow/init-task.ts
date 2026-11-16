@@ -4,7 +4,7 @@ import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import type { TaskMode, TaskRecordV3, ValidationCheckV3 } from "src/core/tasks/task.js";
 import { idPrefix } from "src/utils/clock.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
-import { renderPlanTemplate, renderPrdTemplate } from "./artifact-templates.js";
+import { initArtifacts } from "./init-artifacts.js";
 import { equivalentCommand } from "./command-match.js";
 import { flagIssueError } from "./flag-issues.js";
 import { asciiFold, slugOrIssue } from "./init-issues.js";
@@ -36,6 +36,9 @@ export interface InitTaskOptions {
   cwd?: string | undefined;
   /** True for `--with-lint`: also declare a read-only check-lint from the project lint command. */
   lint?: boolean | undefined;
+  /** Text of `prd.md` / `plan.md` for a Full task, in place of the generated template. */
+  prd?: string | undefined;
+  plan?: string | undefined;
   injectedNow?: string | undefined;
 }
 
@@ -213,13 +216,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     updatedAt: now,
   };
 
-  const artifacts =
-    mode === "full"
-      ? {
-          prd: renderPrdTemplate(candidate),
-          plan: renderPlanTemplate(candidate),
-        }
-      : undefined;
+  const artifacts = initArtifacts(mode, candidate, options);
 
   const similar = await loadSimilarTasks(root, { title, goal });
   const saved = (await saveWorkflow(

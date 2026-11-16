@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.34.0] - 2026-11-16
+
+### Added
+
+- Epic agent-feedback-hardening: hook PreToolUse bắt tool PowerShell (Select-String); --tick theo id check khớp chính xác; run-check từ chối pass khi 0 test chạy và ready cảnh báo solution không có project test; --init in taskDir và nhận --prd-file/--plan-file; sửa che đường dẫn trong lỗi, repo-map --refs mã toàn số, coveredBy bỏ check đã retire
+
 ## [2.33.2] - 2026-11-15
 
 ### Changed

@@ -2,7 +2,7 @@ import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { acceptsSuiteCommand, isSafeSolutionArgument } from "src/core/workflow/suite-command.js";
+import { acceptsSuiteCommand, isSafeSolutionArgument, suiteWithoutTests } from "src/core/workflow/suite-command.js";
 import { fileSymlinksSupported } from "test/support/symlink-support.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -113,5 +113,19 @@ describe("acceptsSuiteCommand", () => {
   it("judges only the inputs when no test command is detected", async () => {
     expect(await acceptsSuiteCommand(await monorepo(), "anything", undefined, [])).toBe(true);
     expect(known).toHaveLength(1);
+  });
+});
+
+describe("suiteWithoutTests", () => {
+  it("names a solution that references no test project, and stays silent otherwise", async () => {
+    const root = await monorepo();
+    await mkdir(join(root, "api"), { recursive: true });
+    await writeFile(join(root, "api", "Api.sln"), 'Project("{X}") = "Api", "Api.csproj", "{1}"\nEndProject\n');
+    await writeFile(join(root, "api", "Api.csproj"), "<Project />");
+
+    expect(await suiteWithoutTests(root, "dotnet test api/Api.sln", undefined)).toMatch(/no test project/u);
+    expect(await suiteWithoutTests(root, "dotnet test svc/App.sln", undefined)).toBeUndefined();
+    expect(await suiteWithoutTests(root, "pnpm test", undefined)).toBeUndefined();
+    expect(await suiteWithoutTests(root, undefined, undefined)).toBeUndefined();
   });
 });

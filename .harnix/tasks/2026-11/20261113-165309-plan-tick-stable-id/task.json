@@ -1,0 +1,103 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-165309-plan-tick-stable-id",
+  "title": "Lệnh --tick chọn mục plan theo id ổn định",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "--tick chọn mục checklist theo id check hoặc slice khớp chính xác, in tên mục sẽ tick và hỗ trợ --brief, để thứ tự không bị lệch sau mỗi lần tick.",
+  "nonGoals": [
+    "Không đổi frozen contract ngoài phạm vi member này.",
+    "Không chặn lệnh của agent; chỉ nhắc hoặc cảnh báo."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Selector là id check dạng `chk-3` khớp chính xác theo `[chk-id]`: `chk-1` không tick mục `chk-10`, và selector mơ hồ bị từ chối thay vì tick nhiều mục.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Selector số vẫn dùng được nhưng kết quả liệt kê tên từng mục đã tick, và lệnh nhận --brief.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/plan-sync.ts",
+    "src/core/workflow/schema.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của plan-tick-stable-id",
+      "command": "pnpm exec vitest run test/unit/core/workflow/plan-sync.test.ts test/unit/core/workflow/actions.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/actions.ts",
+        "src/core/workflow/plan-sync.ts",
+        "src/core/workflow/schema.ts",
+        "test/unit/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-13T17:08:25.158+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-sync.test.ts test/unit/core/workflow/actions.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "41e47d5fd91b3c96922926d5c9b4ad1042cb247ef574a55c636fed6f75f0cca4"
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-13T17:09:56.179+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "209ae7dbd34a49a8db95defd1aad6901b13a730479d06d912f598f9cc11c86c5"
+    }
+  ],
+  "epicId": "20261113-165307-agent-feedback-hardening",
+  "createdAt": "2026-11-13T16:53:07.711+07:00",
+  "updatedAt": "2026-11-13T17:10:07.021+07:00",
+  "completedAt": "2026-11-13T17:10:07.021+07:00"
+}

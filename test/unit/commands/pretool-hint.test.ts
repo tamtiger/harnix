@@ -66,6 +66,41 @@ describe("pretoolHintFor: reminds on a symbol search", () => {
   });
 });
 
+function powershell(command: unknown): unknown {
+  return { hook_event_name: "PreToolUse", tool_name: "PowerShell", tool_input: { command } };
+}
+
+describe("pretoolHintFor: PowerShell recursive symbol search", () => {
+  it.each([
+    ["Get-ChildItem -Recurse -Filter *.cs | Select-String holds_stock", "holds_stock"],
+    ["gci src -r | sls 'HoldsStock'", "HoldsStock"],
+    ["Select-String -Path src/** -Pattern holds_stock", "holds_stock"],
+    ['Get-ChildItem -Recurse | Select-String -Pattern "HoldsStock"', "HoldsStock"],
+    ["Select-String -Path (Get-ChildItem -Recurse) -Pattern holds_stock", "holds_stock"],
+  ])("PowerShell %s names %s", (command, symbol) => {
+    const out = parsed(pretoolHintFor(powershell(command)));
+    expect(out.hookSpecificOutput.additionalContext).toContain(`--refs ${symbol}`);
+  });
+
+  it("skips the value of a value-taking parameter when picking the pattern", () => {
+    const out = parsed(pretoolHintFor(powershell("Select-String -Path src -Context 2 HoldsStock -Recurse")));
+    expect(out.hookSpecificOutput.additionalContext).toContain("--refs HoldsStock");
+  });
+
+  it.each([
+    "Select-String holds_stock file.txt",
+    "Get-ChildItem -Recurse | Select-String 'two words'",
+    "Get-ChildItem -Recurse | Select-String 'đang tải'",
+    "Get-ChildItem -Recurse | Select-String -Pattern $symbol",
+    "Get-ChildItem -Recurse",
+    "Get-Content holds_stock",
+    "",
+  ])("PowerShell %j stays silent", (command) => {
+    expect(pretoolHintFor(powershell(command))).toBeUndefined();
+    expect(pretoolHintFor(powershell(5))).toBeUndefined();
+  });
+});
+
 describe("pretoolHintFor: stays silent", () => {
   it.each([
     "foo.*bar",

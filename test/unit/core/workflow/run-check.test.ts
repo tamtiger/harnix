@@ -183,6 +183,18 @@ describe("workflow --run-check", () => {
     expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
   });
 
+  it("refuses to record a pass when the run executed no test, and records nothing", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const { runner } = fakeRunner(0, "No test is available in App.dll");
+
+    await expect(runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW })).rejects.toThrow(
+      /Check check ran no tests: .*nothing was recorded/su,
+    );
+    const { resolveActiveTask } = await import("src/core/tasks/task.js");
+    expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
+  });
+
   it("rejects an undeclared check, an empty command and a run without an active task", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);

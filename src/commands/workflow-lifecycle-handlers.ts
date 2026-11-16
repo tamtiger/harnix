@@ -9,6 +9,13 @@ import {
 import type { Handler } from "src/commands/workflow-handlers.js";
 import type { TaskMode } from "src/core/tasks/task.js";
 import { parseCheckSpec } from "src/core/workflow/init-spec.js";
+import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { relative, sep } from "node:path";
+
+async function optionalFile(context: HandlerContext, file: string | undefined): Promise<string | undefined> {
+  return file === undefined ? undefined : readBoundedFile(context.root, file);
+}
 
 async function loadInitFilePayload(root: string, file: string | undefined): Promise<Record<string, unknown>> {
   if (file === undefined) return {};
@@ -68,12 +75,18 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       cwd: (filePayload.cwd ?? context.flags.cwd) as string | undefined,
       activate: context.flags.activate,
       lint: context.flags.withLint,
+      prd: await optionalFile(context, context.flags.prdFile),
+      plan: await optionalFile(context, context.flags.planFile),
     });
     if (context.flags.followUp !== undefined && task.epicId === undefined)
       process.stderr.write(
         `notice: follow-up of ${task.followUpOf ?? context.flags.followUp} has no epic, so ${task.id} belongs to none; pass --epic <epic-id> to attach it.\n`,
       );
-    return presentTask(context, task);
+    const taskDir = relative(
+      context.root,
+      await resolveTaskDirectory(await resolveSafeHarnixPath(context.root), task.id),
+    );
+    return { ...(presentTask(context, task) as object), taskDir: taskDir.split(sep).join("/") };
   },
   epicOrder: async ({ root, flags }) => {
     const [epicId, ...taskIds] = [flags.epicOrder].flat().flatMap((item) => splitList(item as string));
