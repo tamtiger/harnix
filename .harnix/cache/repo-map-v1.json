@@ -1,7 +1,7 @@
 {
   "extractorVersion": 2,
   "generator": "harnix",
-  "inventoryFingerprint": "2192615fb532aca6e2d9a51713324982fa02d29fea8645d04221547104bff455",
+  "inventoryFingerprint": "34c8bed5a801ff67b89ecb4a7d26f9a64a3b310df25a364b1cfb3400e9a284f2",
   "records": [
     {
       "byteLength": 351,
@@ -119,15 +119,14 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 106874,
-      "contentHash": "8e66ae50c2ecb8096d0319756382a1df3f8cc28f62a14b18d9eac77987635cfe",
+      "byteLength": 107109,
+      "contentHash": "02cbaee58b89d9d846dc40df823e71a9159c176f91b33d370256b1112a05da0b",
       "extension": "md",
       "headings": [
         "Added",
         "Changed",
         "Changelog",
         "Fixed",
-        "[2.32.0] - 2026-11-10",
         "[2.32.1] - 2026-11-12",
         "[2.32.2] - 2026-11-12",
         "[2.32.3] - 2026-11-12",
@@ -138,7 +137,8 @@
         "[2.34.0] - 2026-11-16",
         "[2.35.0] - 2026-11-16",
         "[2.35.1] - 2026-11-16",
-        "[2.36.0] - 2026-11-16"
+        "[2.36.0] - 2026-11-16",
+        "[2.36.1] - 2026-11-17"
       ],
       "identifiers": [
         "b",
@@ -192,7 +192,7 @@
     },
     {
       "byteLength": 51741,
-      "contentHash": "9f395f6558f70a736505195953e55e16b5407e0fa6ef5374bf95ef71b611903e",
+      "contentHash": "15d7ea21f486f4e872e14302aa2e56c494a3e38859f24a07bb96a097252884e4",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -298,8 +298,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 103572,
-      "contentHash": "a6a7aab3c78aa1732a5f796ac733001874bf788fae67a143844f3f4f87bf4eaf",
+      "byteLength": 104622,
+      "contentHash": "00f5bbf32336adabd0ed355f68933cef350290379ac5f23c3ba0b51e2127a75c",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -329,6 +329,8 @@
         "missing",
         "mode",
         "n",
+        "name",
+        "or",
         "plus",
         "schema",
         "supports",
@@ -925,7 +927,7 @@
     },
     {
       "byteLength": 2666,
-      "contentHash": "be70db136fe426f4ca5c557acd97a8b38b1f18ee23f593c9b60802766c9af018",
+      "contentHash": "b78c4bbeb4411cf55a2fc938474979e747067be502b4559c13576ceac90e9d2c",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -23313,7 +23315,7 @@
     },
     {
       "byteLength": 3587,
-      "contentHash": "95c1fa51a0afb925d9b2ee45223bf59f84e18dfe02b9c62ac18b63f45db7e668",
+      "contentHash": "fc5d7747e6e16c9cc37e8bf6c2f2d9b736e3874cecb2f1e45e1fe4d795de589e",
       "extension": "md",
       "headings": [
         "Architecture design review",
@@ -23384,7 +23386,7 @@
     },
     {
       "byteLength": 2023,
-      "contentHash": "f8a4ae2bd22ffed62733ace6997ec882eab16b641f9fa58ffd45478f3c87c2e2",
+      "contentHash": "dbe5e5ed82cf1093d5c5e0c9eb931129cfa923ee21eb7ea7121e0b9d151440b7",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -23423,7 +23425,7 @@
     },
     {
       "byteLength": 4741,
-      "contentHash": "c24e9e3aaeabba7269e6d131d6a26e252aa9c085f56c2c3d64e4539dd71c45ef",
+      "contentHash": "75787cf4b46085e358a306635177a0ec8d75b07739d3da06446ef314880e5e21",
       "extension": "md",
       "headings": [
         "Capture",
@@ -23462,7 +23464,7 @@
     },
     {
       "byteLength": 2566,
-      "contentHash": "51515f41149f85e9bb1b40ca7a416cf63cb2a4d872c83a073684af37522818ea",
+      "contentHash": "053016787de81f5810f32fc5c0914164e942456a67ac5435b436194f961ebbde",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -23507,7 +23509,7 @@
     },
     {
       "byteLength": 6893,
-      "contentHash": "defe9e6e50b94317c2cf30f2707239dbf0a3eb1725c60ebcfb8a1f6ab575fd19",
+      "contentHash": "18f9ff72bb7bae40a57fd364657718dc3fc0b10ffb91f90cd80753b020189eca",
       "extension": "md",
       "headings": [
         "Documentation synchronization",
@@ -23630,7 +23632,7 @@
     },
     {
       "byteLength": 3130,
-      "contentHash": "62d0dcfde6c2e6c04e8f51e60500e7502e231056222523e51c18291eb26a251e",
+      "contentHash": "bfa901d9946ca5548e494947dc047ac14c5e2a599f3e99be76b41ce2451fb297",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23673,7 +23675,7 @@
     },
     {
       "byteLength": 6291,
-      "contentHash": "1a90372af498e6eee592406edecc6d63b9de337c94ca435965e1a837c52b4ae8",
+      "contentHash": "e258e290ce99325ac47bc94c3599652e4fea945fffeb2bb2193ece461e195df8",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -23847,7 +23849,7 @@
     },
     {
       "byteLength": 3974,
-      "contentHash": "84b8f7c544654e55c25c28159ad77ec35fa0d7ced3b534a090cc5e582414056c",
+      "contentHash": "58caa58ffdfb4c9dac060ed77938e7136db0fbf57083c70c86c45a0c74ce3208",
       "extension": "md",
       "headings": [
         "Decide",
@@ -23885,7 +23887,7 @@
     },
     {
       "byteLength": 4374,
-      "contentHash": "01f5be8491e3126f379a6049919dc827b27bbaa1cfcc3ecef51b0fe638d41dfa",
+      "contentHash": "c999c91669a93e4b31b163b06e9e02ec9cecb140619d068b15913c21c911d6c0",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -23945,7 +23947,7 @@
     },
     {
       "byteLength": 3211,
-      "contentHash": "7df0e59621a8655097e9ae02b2693db6638b8b6ce1b9f97d51ab603fcb1ee2b3",
+      "contentHash": "d1e94e8bb53a738247fbbb05856a9d299130e11a67480da283b4815c2394c074",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -23987,7 +23989,7 @@
     },
     {
       "byteLength": 2642,
-      "contentHash": "a0ad69d4e068ea0e5bcca0ffda6345f43cae4c5a970ad43dae80938199bb7370",
+      "contentHash": "fb9b3a5dc5bd6d6505825b0773166c61fa11ebab67cdd2a7d0c5a7a634a34860",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -24025,7 +24027,7 @@
     },
     {
       "byteLength": 3378,
-      "contentHash": "f626890823860b18113353a6e36fa2a5888bc8ed1e6be8be3e89afac8feeb176",
+      "contentHash": "ba23ebc35b47c95b9c6912b67f679b88c96c1e6ed0357d633176ea0c037e2874",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -24060,7 +24062,7 @@
     },
     {
       "byteLength": 6653,
-      "contentHash": "e7039c497c52bf8b7bb881bb7e4a6a43a691f2a19a4ba279664e90378d200e22",
+      "contentHash": "7ad18b3215c2a4c3fcfccb9f5db1c0941b2f7e9c0d962999f4b69c2d4916ce2d",
       "extension": "md",
       "headings": [
         "Finish",
@@ -38760,8 +38762,8 @@
       ]
     },
     {
-      "byteLength": 10280,
-      "contentHash": "b88d91fe1641ec6dca54caf60d02a9c6783164830c141c446746921430eb9bc4",
+      "byteLength": 11080,
+      "contentHash": "bdadcfeff5c956843d9c05aa9758882bfe86d2c52fdbfc179c623a80e642336d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -38787,6 +38789,7 @@
         "result",
         "root",
         "run",
+        "sourceOnly",
         "target",
         "temporaryRepository",
         "tests",
@@ -38843,13 +38846,13 @@
         "number",
         "order",
         "outlineRepoMap",
+        "own",
         "packagePath",
         "queryRepoMap",
         "ready",
         "reasons",
         "recursive",
         "refreshRepoMap",
-        "refreshed",
         "refs",
         "refsRepoMap",
         "repoMapCachePath",

@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.36.1] - 2026-11-17
+
+### Changed
+
+- repo-map: PRD ghi đủ cờ --source-only, --offset và --outline <Name>; test ghim rằng --source-only giữ nguyên ở nhánh fallback tham chiếu (chỉ quét file source, test, script)
+
 ## [2.36.0] - 2026-11-16
 
 ### Changed

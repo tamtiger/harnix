@@ -192,6 +192,20 @@ describe("query fallback to references", () => {
     expect(result.results[0]?.reasons).toContain("reference fallback");
   });
 
+  it("keeps documentation, manifest and config files out of the fallback under --source-only", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "export const x = USED_LITERAL_TOKEN;\n");
+    await writeFile(join(root, "README.md"), "Mentions USED_LITERAL_TOKEN in prose.\n");
+    await refreshRepoMap({ root });
+
+    // The fallback scans source, test and script files only, so --source-only holds there without a filter of its own.
+    const sourceOnly = await queryRepoMap({ query: "USED_LITERAL_TOKEN", root, signals: { sourceOnly: true } });
+
+    expect(sourceOnly.fallback).toBe("references");
+    expect(sourceOnly.results.map((item) => item.path)).toEqual(["src/a.ts"]);
+  });
+
   it("does not fall back when the index already answers the query", async () => {
     const root = await temporaryRepository();
     await mkdir(join(root, "src"), { recursive: true });
