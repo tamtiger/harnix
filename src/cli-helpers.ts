@@ -69,6 +69,12 @@ export function parseRepoMapDepth(value: string): number {
   return depth;
 }
 
+export function parseRepoMapOffset(value: string): number {
+  if (!/^\d+$/u.test(value) || Number(value) > 10_000)
+    throw new Error("--offset must be an integer between 0 and 10000.");
+  return Number(value);
+}
+
 export function parseRepoMapPath(
   value: string,
   flag: "--impact" | "--tests" | "--outline" | "--path" = "--impact",
@@ -199,8 +205,18 @@ export function platformFlagList(extra: readonly string[] = []): string {
 }
 
 export type RepoMapCliOptions = Partial<
-  Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth" | "format", string>
-> & { body?: boolean; cached?: boolean; events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
+  Record<
+    "query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "offset" | "depth" | "format",
+    string
+  >
+> & {
+  body?: boolean;
+  cached?: boolean;
+  events?: boolean;
+  refresh?: boolean;
+  sourceOnly?: boolean;
+  workspace?: string | boolean | string[];
+};
 
 function validateFormatFlag(options: RepoMapCliOptions): void {
   if (options.format === undefined) return;
@@ -228,6 +244,20 @@ function validateOutlineFlags(options: RepoMapCliOptions): void {
     );
 }
 
+function validateScopedFlags(options: RepoMapCliOptions): void {
+  if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
+  if (options.offset !== undefined && options.refs === undefined) throw new Error("--offset requires repo-map --refs.");
+  if (options.depth !== undefined && options.impact === undefined)
+    throw new Error("--depth requires repo-map --impact.");
+}
+
+function validateSourceOnlyFlag(options: RepoMapCliOptions): void {
+  if (options.sourceOnly === true && (options.query === undefined || options.workspace !== undefined))
+    throw new Error(
+      "--source-only requires repo-map --query, and not --workspace.\nGợi ý: harnix repo-map --query <text> --source-only.",
+    );
+}
+
 export function validateRepoMapOptions(options: RepoMapCliOptions): void {
   const actions = [
     options.query,
@@ -250,9 +280,8 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
     throw new Error(
       "--cached requires repo-map --query, --outline, --refs, --impact or --tests, and not --workspace.\nGợi ý: harnix repo-map --refs <symbol> --cached.",
     );
-  if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
-  if (options.depth !== undefined && options.impact === undefined)
-    throw new Error("--depth requires repo-map --impact.");
+  validateSourceOnlyFlag(options);
+  validateScopedFlags(options);
   validateFormatFlag(options);
   if (
     options.workspace !== undefined &&

@@ -172,3 +172,110 @@ describe("repository map symbol references", () => {
     ).rejects.toThrow(/exact normalized repository-relative POSIX path/i);
   });
 });
+
+describe("repository map symbol references: declarations and paging", () => {
+  async function csharpProject(): Promise<string> {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "Svc"), { recursive: true });
+    await writeFile(
+      join(root, "Svc", "DepositService.cs"),
+      [
+        "namespace Svc {",
+        "  public partial class DepositService {",
+        "    public int Collect(int a) { return a; }",
+        "    public int Collect(string a, int b) { return b; }",
+        "    public async Task<int> Collect(long a) { return 1; }",
+        "    public void Sync() { Collect(1); }",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    return root;
+  }
+
+  it("marks the declaration of every C# method overload and the class, and a call as a reference", async () => {
+    const root = await csharpProject();
+    const { map } = await refreshRepoMap({ root });
+
+    const method = await findRepoMapReferences(map, { limit: 20, root, symbol: "Collect" });
+    const type = await findRepoMapReferences(map, { limit: 20, root, symbol: "DepositService" });
+
+    expect(method.references.map(({ kind, line }) => [line, kind])).toEqual([
+      [3, "declaration"],
+      [4, "declaration"],
+      [5, "declaration"],
+      [6, "reference"],
+    ]);
+    expect(type.references[0]).toMatchObject({ kind: "declaration", line: 2 });
+  });
+
+  it("marks a TypeScript class method as a declaration", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(
+      join(root, "src", "order.ts"),
+      [
+        "export class Order {",
+        "  createOrder(id: string): string {",
+        "    return id;",
+        "  }",
+        "}",
+        "new Order().createOrder('a');",
+        "",
+      ].join("\n"),
+    );
+    const { map } = await refreshRepoMap({ root });
+
+    const result = await findRepoMapReferences(map, { limit: 20, root, symbol: "createOrder" });
+
+    expect(result.references.map(({ kind, line }) => [line, kind])).toEqual([
+      [2, "declaration"],
+      [6, "reference"],
+    ]);
+  });
+
+  it("pages through all references with offset and nextOffset", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    const calls = Array.from({ length: 7 }, (_, index) => `run(${index});`);
+    await writeFile(join(root, "src", "many.ts"), ["export function run(n: number) {}", ...calls, ""].join("\n"));
+    const { map } = await refreshRepoMap({ root });
+
+    const first = await findRepoMapReferences(map, { limit: 3, root, symbol: "run" });
+    const second = await findRepoMapReferences(map, { limit: 3, offset: first.nextOffset ?? 0, root, symbol: "run" });
+    const last = await findRepoMapReferences(map, { limit: 3, offset: second.nextOffset ?? 0, root, symbol: "run" });
+
+    expect(first).toMatchObject({ nextOffset: 3, truncated: true });
+    expect(second).toMatchObject({ nextOffset: 6, truncated: true });
+    expect([...first.references, ...second.references, ...last.references].map(({ line }) => line)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8,
+    ]);
+    expect(last).toMatchObject({ truncated: false });
+    expect(last).not.toHaveProperty("nextOffset");
+    expect((await findRepoMapReferences(map, { limit: 3, root, symbol: "run" })).references).toHaveLength(3);
+  });
+
+  it("finds references in every file of a partial class", async () => {
+    const root = await csharpProject();
+    await writeFile(
+      join(root, "Svc", "DepositService.Sync.cs"),
+      [
+        "namespace Svc {",
+        "  public partial class DepositService {",
+        "    public void Sync() { Collect(2); }",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    const { map } = await refreshRepoMap({ root });
+
+    const result = await findRepoMapReferences(map, { limit: 20, root, symbol: "Collect" });
+
+    expect([...new Set(result.references.map(({ path }) => path))].sort()).toEqual([
+      "Svc/DepositService.Sync.cs",
+      "Svc/DepositService.cs",
+    ]);
+  });
+});

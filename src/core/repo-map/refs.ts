@@ -4,6 +4,7 @@ import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
+import { extractFileSymbols } from "./outline.js";
 import { findAffectedTests } from "./tests.js";
 import { defaultRepoMapLimits, type RepoMapRecordV1, type RepoMapV1, repoMapRefreshHint } from "./types.js";
 
@@ -20,6 +21,8 @@ export interface RepoMapRefsOptions {
   readonly symbol: string;
   readonly target?: string | undefined;
   readonly limit: number;
+  /** References to skip before the first one listed; the `nextOffset` of the previous page. */
+  readonly offset?: number | undefined;
 }
 
 export interface RepoMapRefsResultV1 {
@@ -33,6 +36,8 @@ export interface RepoMapRefsResultV1 {
   readonly limit: number;
   readonly references: readonly RepoMapSymbolReferenceV1[];
   readonly truncated: boolean;
+  /** The `--offset` that lists the next page; present only when `truncated`. */
+  readonly nextOffset?: number;
 }
 
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
@@ -64,17 +69,21 @@ export async function findRepoMapReferences(
     "u",
   );
   const collected: RepoMapSymbolReferenceV1[] = [];
+  const offset = options.offset ?? 0;
+  // One more than the page is read, which is how a following page is known to exist.
+  const wanted = offset + options.limit + 1;
 
   for (const path of candidatePaths) {
-    const matches = await scanFileForSymbol(resolvedRoot, realRoot, path, wordPattern, declPattern);
+    const matches = await scanFileForSymbol(resolvedRoot, realRoot, path, wordPattern, declPattern, symbol);
     for (const match of matches) {
       collected.push(match);
-      if (collected.length > options.limit) break;
+      if (collected.length >= wanted) break;
     }
-    if (collected.length > options.limit) break;
+    if (collected.length >= wanted) break;
   }
 
-  const references = collected.slice(0, options.limit);
+  const references = collected.slice(offset, offset + options.limit);
+  const truncated = collected.length > offset + options.limit;
   return {
     generator: "harnix",
     limit: options.limit,
@@ -84,7 +93,8 @@ export async function findRepoMapReferences(
     status: "ready",
     symbol,
     ...(options.target === undefined ? {} : { target: options.target }),
-    truncated: collected.length > references.length,
+    truncated,
+    ...(truncated ? { nextOffset: offset + options.limit } : {}),
   };
 }
 
@@ -146,6 +156,7 @@ async function scanFileForSymbol(
   path: string,
   wordPattern: RegExp,
   declPattern: RegExp,
+  symbol: string,
 ): Promise<RepoMapSymbolReferenceV1[]> {
   const candidate = join(resolvedRoot, path);
   try {
@@ -159,12 +170,15 @@ async function scanFileForSymbol(
     if (content.includes("\0")) return [];
     const lines = content.replaceAll("\r\n", "\n").split("\n");
     const results: RepoMapSymbolReferenceV1[] = [];
+    let declaredAt: ReadonlySet<number> | undefined;
     for (let index = 0; index < lines.length; index += 1) {
       const trimmed = (lines[index] ?? "").trim();
       if (trimmed.length === 0 || isCommentLine(trimmed) || secretValue.test(trimmed)) continue;
       if (!wordPattern.test(trimmed)) continue;
+      declaredAt ??= declarationLines(content, path, symbol);
+      const kind = classifyReferenceLine(trimmed, declPattern);
       results.push({
-        kind: classifyReferenceLine(trimmed, declPattern),
+        kind: kind === "reference" && declaredAt.has(index + 1) ? "declaration" : kind,
         line: index + 1,
         path,
         preview: trimmed.replace(/\s+/gu, " ").slice(0, 160),
@@ -174,6 +188,16 @@ async function scanFileForSymbol(
   } catch {
     return [];
   }
+}
+
+/** The lines on which the outline extractor sees `symbol` declared: methods and classes of every language it reads. */
+function declarationLines(content: string, path: string, symbol: string): Set<number> {
+  const extension = path.slice(path.lastIndexOf(".") + 1);
+  return new Set(
+    extractFileSymbols(content, extension)
+      .filter((outline) => outline.name === symbol)
+      .map((outline) => outline.startLine),
+  );
 }
 
 function classifyReferenceLine(trimmed: string, declPattern: RegExp): RepoMapRefKind {
@@ -221,6 +245,12 @@ function assertRefsOptions(options: RepoMapRefsOptions): void {
   }
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 20) {
     throw new Error("Refs limit must be an integer between 1 and 20.");
+  }
+  if (
+    options.offset !== undefined &&
+    (!Number.isInteger(options.offset) || options.offset < 0 || options.offset > 10_000)
+  ) {
+    throw new Error("Refs offset must be an integer between 0 and 10000.");
   }
   if (options.target !== undefined) {
     let normalized: string;

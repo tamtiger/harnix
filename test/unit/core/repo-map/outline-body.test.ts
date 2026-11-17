@@ -155,6 +155,21 @@ describe("outline with a body", () => {
     expect(unindexed).toMatchObject({ hint: "run harnix repo-map --refresh", status: "skipped", symbols: [] });
   });
 
+  it("answers not-found with the nearest mapped paths for a path that names no file, never a refresh hint", async () => {
+    const root = await temporaryRepository();
+    await writeFixtureFiles(root, { "svc/src/a.ts": source, "other/src/a.ts": source });
+    await refreshRepoMap({ root });
+
+    const result = await outlineRepoMap({ body: true, limit: 10, root, symbol: "first", target: "src/a.ts" });
+
+    expect(result.status).toBe("not-found");
+    expect(result).not.toHaveProperty("hint");
+    expect(result.suggestions).toEqual(["other/src/a.ts", "svc/src/a.ts"]);
+    const none = await outlineRepoMap({ body: true, limit: 10, root, symbol: "first", target: "nothing/near.ts" });
+    expect(none.status).toBe("not-found");
+    expect(none).not.toHaveProperty("suggestions");
+  });
+
   it("refuses a file that the ignore rules keep out of the map", async () => {
     const root = await temporaryRepository();
     await writeFixtureFiles(root, { ".harnixignore": "private/\n", "private/hidden.ts": source, "a.ts": source });

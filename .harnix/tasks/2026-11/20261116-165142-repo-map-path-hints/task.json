@@ -1,0 +1,122 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-165142-repo-map-path-hints",
+  "title": "Gợi ý đường dẫn đúng khi repo-map không tìm thấy file",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khi đường dẫn truyền vào không có trong bản đồ, repo-map trả not-found kèm đường dẫn gần đúng thay vì skipped kèm hint refresh vô ích, và nhận đường dẫn tương đối theo thư mục đang đứng.",
+  "nonGoals": [
+    "Không đổi định dạng đã có của các trường hiện hành; chỉ thêm trường hoặc cờ mới."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`--outline <path> --symbol <name> --body` với đường dẫn không trỏ tới file nào trả status not-found kèm `suggestions` (không phải skipped kèm hint `--refresh`), giống `--outline` không có `--body`; file có trên đĩa nhưng chưa có trong bản đồ vẫn trả skipped kèm hint refresh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`--outline`, `--impact` và `--tests` khi không tìm thấy đường dẫn đều trả cùng danh sách gợi ý (tối đa 3 đường dẫn trong bản đồ có cùng tên file hoặc cùng hậu tố), và không gợi ý khi không có đường dẫn nào gần đúng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Chạy từ một thư mục con của dự án, đường dẫn tương đối theo thư mục đó được chuẩn hóa về đường dẫn tương đối theo gốc dự án trước khi tra; đường dẫn đã tương đối theo gốc vẫn dùng như cũ và `..` thoát khỏi dự án vẫn bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/outline-body.ts",
+    "src/core/repo-map/outline.ts",
+    "src/commands/repo-map-internal.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của repo-map-path-hints",
+      "command": "pnpm exec vitest run test/unit/core/repo-map/outline.test.ts test/unit/core/repo-map/outline-body.test.ts test/integration/commands/repo-map-internal.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/support/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-16T17:05:37.627+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Làm rõ: hint refresh vẫn đúng cho file tồn tại mà chưa vào bản đồ; chỉ đường dẫn không trỏ tới file nào mới là not-found",
+      "artifactPaths": [
+        ".harnix/tasks/20261116-165142-repo-map-path-hints/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T17:06:13.192+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/outline.test.ts test/unit/core/repo-map/outline-body.test.ts test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2a1111e376bc525053d80646cba39bf1ea6e70656ed89255e3a1d08018e59753",
+      "durationMs": 5460
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:07:40.352+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "948bb0dd7ff3030360e4e7977f65ed5a36dbf9e3903ccf94cefb3cf8e9ef27e2",
+      "durationMs": 86652
+    }
+  ],
+  "epicId": "20261116-165141-repo-map-usability",
+  "createdAt": "2026-11-16T16:51:40.159+07:00",
+  "updatedAt": "2026-11-16T17:08:07.829+07:00",
+  "completedAt": "2026-11-16T17:08:07.829+07:00"
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeTerm, splitIdentifierWords, terms } from "src/core/repo-map/search-terms.js";
+import { normalizeTerm, splitIdentifierWords, taskWords, terms } from "src/core/repo-map/search-terms.js";
 import { fixtureRecord } from "test/support/repo-map-fixtures.js";
 
 describe("splitIdentifierWords", () => {
@@ -28,5 +28,18 @@ describe("terms", () => {
 describe("normalizeTerm", () => {
   it("lowercases and keeps letters, digits, underscores and hyphens", () => {
     expect(normalizeTerm("Foo.Bar/Baz_qux-1")).toBe("foo bar baz_qux-1");
+  });
+});
+
+describe("taskWords", () => {
+  it("lists the distinct lower-case words of its texts in code-unit order", () => {
+    expect(taskWords("Sửa Payment-Gateway", "payment retry_count 42")).toEqual([
+      "42",
+      "payment",
+      "payment-gateway",
+      "retry_count",
+      "sửa",
+    ]);
+    expect(taskWords("", "  ")).toEqual([]);
   });
 });

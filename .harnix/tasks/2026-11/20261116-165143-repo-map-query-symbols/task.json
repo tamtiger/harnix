@@ -1,0 +1,125 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-165143-repo-map-query-symbols",
+  "title": "--query trả đúng symbol khớp từ khóa và cho loại file không phải source",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Kết quả --query cho biết symbol nào khớp từ khóa kèm số dòng thay vì 50 tên đầu theo thứ tự chữ cái, và có tùy chọn bỏ file tài liệu.",
+  "nonGoals": [
+    "Không đổi định dạng đã có của các trường hiện hành; chỉ thêm trường hoặc cờ mới."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Mỗi kết quả của `--query` có danh sách `matchedSymbols` gồm tên, loại, container và dòng bắt đầu của các symbol có tên khớp từ khóa (tối đa 5), được xếp theo mức khớp chứ không theo thứ tự chữ cái.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Một file có symbol trùng khít tên với từ khóa được xếp cao hơn file chỉ chứa từ khóa trong danh sách identifier hoặc tiêu đề.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ `--source-only` bỏ khỏi kết quả `--query` các file có kind tài liệu, manifest và config; không có cờ thì kết quả cũ không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/search.ts",
+    "src/core/repo-map/compact.ts",
+    "src/core/repo-map/types.ts",
+    "src/commands/repo-map-internal.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của repo-map-query-symbols",
+      "command": "pnpm exec vitest run test/unit/core/repo-map/search.test.ts test/unit/core/repo-map/compact.test.ts test/integration/commands/repo-map-internal.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/support/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T17:16:27.354+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/search.test.ts test/unit/core/repo-map/compact.test.ts test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "68deb0af0612760661e9112a0f376cc774c4e16c2d441252c688f1dacc658fab",
+      "durationMs": 5037
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:17:54.598+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e544ad42df2f5a174af3a2e2de06a41762d9f5979eb42c2b986ea00cf8d5c9db",
+      "durationMs": 86757
+    },
+    {
+      "id": "ev-chk-2-2",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:20:09.084+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d985bcf750623ffd7f26d58d442b501c5965663601a1aaaaedb37409e436e0c3",
+      "durationMs": 86912
+    }
+  ],
+  "epicId": "20261116-165141-repo-map-usability",
+  "createdAt": "2026-11-16T16:51:40.159+07:00",
+  "updatedAt": "2026-11-16T17:20:14.884+07:00",
+  "completedAt": "2026-11-16T17:20:14.884+07:00"
+}

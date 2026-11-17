@@ -1,0 +1,125 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-165144-repo-map-refs-detail",
+  "title": "--refs phân biệt khai báo với nơi gọi và cho lấy hết danh sách",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "--refs đánh dấu đúng khai báo của hàm/phương thức ở mọi ngôn ngữ được hỗ trợ (kể cả C#), giữ dòng nội dung ở dạng compact, và có phân trang để lấy đủ danh sách caller.",
+  "nonGoals": [
+    "Không đổi định dạng đã có của các trường hiện hành; chỉ thêm trường hoặc cờ mới."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Với C#, khai báo method và class có kind `declaration` thay vì `reference`, và overload của một method đều là `declaration`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`--refs --format compact` giữ nội dung dòng rút gọn (tối đa 80 ký tự) cạnh `path:line kind`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "`--refs` nhận `--offset <n>` và trả `nextOffset` khi còn kết quả, nên gọi nối tiếp lấy đủ danh sách caller; `--limit` và giới hạn 20 mặc định giữ nguyên khi không có `--offset`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/refs.ts",
+    "src/core/repo-map/references.ts",
+    "src/core/repo-map/compact.ts",
+    "src/commands/repo-map-internal.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của repo-map-refs-detail",
+      "command": "pnpm exec vitest run test/unit/core/repo-map/refs.test.ts test/unit/core/repo-map/references.test.ts test/unit/core/repo-map/compact.test.ts test/integration/commands/repo-map-internal.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/support/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T17:27:31.224+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/refs.test.ts test/unit/core/repo-map/references.test.ts test/unit/core/repo-map/compact.test.ts test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "97e221cf582f66e8b26e124736d7b760f0da150bc8cda6ced353044eb254a007",
+      "durationMs": 5063
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:28:56.815+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "caebfcdc8443b26fac617931ef060450a7efa43002142c9c7aa3f81980538b33",
+      "durationMs": 85109
+    },
+    {
+      "id": "ev-chk-2-2",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:31:13.126+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "04660145dae257a4baaaf1a19e73971c7fd399c0afcae09ed288f29e9891a0f3",
+      "durationMs": 86759
+    }
+  ],
+  "epicId": "20261116-165141-repo-map-usability",
+  "createdAt": "2026-11-16T16:51:40.159+07:00",
+  "updatedAt": "2026-11-16T17:31:18.601+07:00",
+  "completedAt": "2026-11-16T17:31:18.601+07:00"
+}

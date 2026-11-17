@@ -58,10 +58,12 @@ describe("CLI command contract", () => {
       "--body",
       "--path",
       "--limit",
+      "--offset",
       "--depth",
       "--format",
       "--events",
       "--workspace",
+      "--source-only",
       "--cached",
       "--refresh",
     ]);

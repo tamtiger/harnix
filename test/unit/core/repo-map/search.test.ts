@@ -61,4 +61,33 @@ describe("words inside names", () => {
 
     expect(searchRepoMap(map, "session cache", 10).map((result) => result.path)).toEqual(["src/session-cache.ts"]);
   });
+
+  it("ranks a file that declares the exact name above one that only mentions it in other names", () => {
+    const map = createRepoMap([
+      fixtureRecord("src/a/many-names.ts", { identifiers: ["MapDataSyncESHelper", "MapDataSyncESRunner", "other"] }),
+      fixtureRecord("src/b/exact.ts", { identifiers: ["MapDataSyncES"] }),
+      fixtureRecord("src/c/note.ts", { identifiers: ["something"], importTargets: ["MapDataSyncES"] }),
+    ]);
+
+    const [first] = searchRepoMap(map, "MapDataSyncES", 5);
+
+    expect(first).toMatchObject({ path: "src/b/exact.ts" });
+    expect(first?.reasons).toContain("exact symbol");
+  });
+
+  it("leaves documentation, manifests and configuration out of the results with sourceOnly", () => {
+    const map = createRepoMap([
+      fixtureRecord("src/pay.ts", { identifiers: ["payment"] }),
+      fixtureRecord("docs/payment.md", { headings: ["payment"], kind: "documentation" }),
+      fixtureRecord("package.json", { identifiers: ["payment"], kind: "manifest" }),
+      fixtureRecord("app.config.ts", { identifiers: ["payment"], kind: "config" }),
+      fixtureRecord("test/pay.test.ts", { identifiers: ["payment"], kind: "test" }),
+    ]);
+
+    const all = searchRepoMap(map, "payment", 20).map((result) => result.path);
+    const sourceOnly = searchRepoMap(map, "payment", 20, { sourceOnly: true }).map((result) => result.path);
+
+    expect(all).toEqual(expect.arrayContaining(["docs/payment.md", "package.json", "app.config.ts"]));
+    expect(sourceOnly.sort()).toEqual(["src/pay.ts", "test/pay.test.ts"]);
+  });
 });

@@ -51,6 +51,8 @@ export interface RepoMapInventory {
 }
 
 export interface RepoMapQuerySignals {
+  /** Leave out documentation, manifest and configuration files. */
+  sourceOnly?: boolean | undefined;
   taskTerms?: readonly string[] | undefined;
   relevantPaths?: readonly string[] | undefined;
   packagePath?: string | undefined;
@@ -58,7 +60,17 @@ export interface RepoMapQuerySignals {
   technologies?: readonly string[] | undefined;
 }
 
+/** A symbol of a query result whose name matches the query, with the line it starts on. */
+export interface MatchedSymbolV1 {
+  readonly name: string;
+  readonly kind: RepoMapSymbolKind;
+  readonly container?: string;
+  readonly startLine: number;
+}
+
 export interface RepoMapQueryResult {
+  /** Up to five symbols whose name matches the query, closest match first; read from the file, absent when none match. */
+  matchedSymbols?: readonly MatchedSymbolV1[];
   path: string;
   score: number;
   reasons: string[];
@@ -95,6 +107,12 @@ export interface RepoMapOutlineOptions {
 
 export interface RepoMapOutlineResultV1 {
   readonly hint?: string;
+  /** Up to three paths of the map that end like a target that was not found. */
+  readonly suggestions?: readonly string[] | undefined;
+  /** The class, interface or type name the target was resolved from, when `--outline` was given a name instead of a path. */
+  readonly resolvedFrom?: string | undefined;
+  /** The files (with their lines) that declare a name given to `--outline` that more than one file declares. */
+  readonly candidates?: readonly { readonly path: string; readonly startLine: number }[] | undefined;
   readonly generator: "harnix";
   readonly schemaVersion: 1;
   readonly scope: "project";

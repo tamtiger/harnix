@@ -1,5 +1,6 @@
 import { readRepoMap } from "./store.js";
 import { makeResult } from "./outline-helpers.js";
+import { nearestPaths, projectFileExists, withSuggestions } from "./path-hints.js";
 import {
   repoMapRefreshHint,
   type RepoMapOutlineOptions,
@@ -75,8 +76,18 @@ export async function refuseBody(
   try {
     const map = await readRepoMap(options.root);
     if (map.records.some((record) => record.path === options.target)) return undefined;
+    // A file that exists but is not in the map is stale or ignored: a refresh is the useful answer (below). A path that
+    // names no file is a typo or a missing prefix: say so and name the paths the map does hold, as `--outline` does.
+    if (!(await projectFileExists(options.root, options.target)))
+      return withSuggestions(
+        makeResult("not-found", options),
+        nearestPaths(
+          map.records.map((record) => record.path),
+          options.target,
+        ),
+      );
   } catch {
-    // No readable map: the same answer as a file the map does not hold.
+    // No readable map: the one command that fixes it is a refresh.
   }
   return { ...makeResult("skipped", options), hint: repoMapRefreshHint };
 }

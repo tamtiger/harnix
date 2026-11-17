@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261116-165141-repo-map-usability",
+  "title": "Cải tiến khả năng dùng của harnix repo-map",
+  "goal": "Xử lý các điểm đã xác minh là đúng khi dùng repo-map: gợi ý sai ngữ cảnh khi không thấy đường dẫn, --query không trả symbol khớp, --refs thiếu phân biệt khai báo và phân trang, --outline không nhận tên class.",
+  "nonGoals": [
+    "Không so mốc HEAD cho độ tươi của bản đồ: độ tươi đã được kiểm theo từng file (kích thước, mtime, băm nội dung) và --cached là chủ ý bỏ qua.",
+    "Không đổi giao thức hook: hook vẫn không chạy repo-map."
+  ],
+  "createdAt": "2026-11-16T16:51:40.159+07:00",
+  "updatedAt": "2026-11-16T16:51:40.159+07:00"
+}

@@ -45,6 +45,12 @@ export function formatQueryResults(
 }
 
 function extractPrimarySymbols(result: RepoMapQueryResult): string[] {
+  if (result.matchedSymbols !== undefined && result.matchedSymbols.length > 0) {
+    return result.matchedSymbols.map(
+      ({ container, kind, name, startLine }) =>
+        `${container === undefined ? "" : `${container}.`}${name} ${kind} ${startLine}`,
+    );
+  }
   if (result.outline.kind === "documentation" && result.outline.headings.length > 0) {
     return result.outline.headings.slice(0, MAX_SYMBOLS_PER_RESULT);
   }
@@ -65,7 +71,7 @@ export function compactRefs(result: RepoMapRefsResultV1): Record<string, unknown
   return {
     ...result,
     format: "compact",
-    references: result.references.map((ref) => `${ref.path}:${ref.line} ${ref.kind}`),
+    references: result.references.map((ref) => `${ref.path}:${ref.line} ${ref.kind} ${ref.preview.slice(0, 80)}`),
   };
 }
 

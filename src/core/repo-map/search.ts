@@ -4,6 +4,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
 import { normalizeTerm, terms } from "./search-terms.js";
+import { exactSymbolBonus, queryWords } from "./symbol-matches.js";
 import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapRecordV1, RepoMapV1 } from "./types.js";
 
 interface SearchDocument {
@@ -21,6 +22,21 @@ interface GraphSignals {
 const MAX_LEXICAL_SEEDS = 50;
 const MAX_EXPANDED_CANDIDATES = 200;
 
+/** Kinds `--source-only` leaves out: they describe or configure the project instead of implementing it. */
+const NON_SOURCE_KINDS: ReadonlySet<string> = new Set(["documentation", "manifest", "config"]);
+
+/** The result with the bonus for a file that declares a name equal to a query word. */
+function withExactSymbol(
+  result: RepoMapQueryResult,
+  record: RepoMapRecordV1,
+  words: readonly string[],
+): RepoMapQueryResult {
+  const bonus = exactSymbolBonus(record, words);
+  return bonus === undefined
+    ? result
+    : { ...result, reasons: sortedUnique([...result.reasons, bonus.reason]), score: result.score + bonus.score };
+}
+
 export function searchRepoMap(
   map: RepoMapV1,
   query: string,
@@ -28,6 +44,7 @@ export function searchRepoMap(
   signals: RepoMapQuerySignals = {},
 ): RepoMapQueryResult[] {
   const normalizedQuery = query.trim();
+  const words = queryWords(normalizedQuery);
   if (normalizedQuery.length === 0 || normalizedQuery.length > 256)
     throw new Error("Repo map query must contain 1 to 256 characters.");
   if (!Number.isInteger(limit) || limit < 1 || limit > 20)
@@ -65,15 +82,19 @@ export function searchRepoMap(
   return candidates
     .flatMap((path) => {
       const record = records.get(path);
-      if (record === undefined) return [];
-      const result = rank(
+      if (record === undefined || (signals.sourceOnly === true && NON_SOURCE_KINDS.has(record.kind))) return [];
+      const result = withExactSymbol(
+        rank(
+          record,
+          lexicalBase.get(path) ?? 0,
+          lexicalBase.has(path),
+          taskTerms,
+          relevant,
+          signals.packagePath,
+          languageTerms,
+        ),
         record,
-        lexicalBase.get(path) ?? 0,
-        lexicalBase.has(path),
-        taskTerms,
-        relevant,
-        signals.packagePath,
-        languageTerms,
+        words,
       );
       return [
         applyGraphSignals(result, path, {

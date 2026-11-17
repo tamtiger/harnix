@@ -5,6 +5,7 @@ import {
   parseReportLimit,
   parseRepoMapDepth,
   parseRepoMapLimit,
+  parseRepoMapOffset,
   parseRepoMapOutlineLimit,
   parseRepoMapPath,
   parseRepoMapSymbol,
@@ -139,5 +140,23 @@ describe("validateRepoMapOptions --format", () => {
     expect(() => validateRepoMapOptions({ body: true, format: "compact", outline: "src/a.ts", symbol: "run" })).toThrow(
       /--body cannot be combined with --format compact/u,
     );
+  });
+
+  it("accepts --source-only only with --query and without --workspace", () => {
+    expect(() => validateRepoMapOptions({ query: "x", sourceOnly: true })).not.toThrow();
+    for (const options of [
+      { sourceOnly: true },
+      { refs: "run", sourceOnly: true },
+      { query: "x", sourceOnly: true, workspace: true },
+    ])
+      expect(() => validateRepoMapOptions(options)).toThrow(/--source-only requires repo-map --query/u);
+  });
+
+  it("accepts --offset only with --refs and parses it as an integer up to 10000", () => {
+    expect(() => validateRepoMapOptions({ offset: "20", refs: "run" })).not.toThrow();
+    expect(() => validateRepoMapOptions({ offset: "20", query: "run" })).toThrow(/--offset requires repo-map --refs/u);
+    expect(parseRepoMapOffset("0")).toBe(0);
+    expect(parseRepoMapOffset("10000")).toBe(10_000);
+    for (const bad of ["-1", "1.5", "x", "10001", ""]) expect(() => parseRepoMapOffset(bad)).toThrow(/--offset/u);
   });
 });

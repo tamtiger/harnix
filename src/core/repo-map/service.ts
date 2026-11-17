@@ -3,6 +3,7 @@ import { attachReferences } from "./references.js";
 import { inventoryRepository } from "./inventory.js";
 import { createRepoMap, isOlderExtractorCache, readRepoMap, writeRepoMap } from "./store.js";
 import { searchRepoMap } from "./search.js";
+import { withMatchedSymbols } from "./symbol-matches.js";
 import {
   createRepoMapImpact,
   createUnavailableRepoMapImpact,
@@ -16,6 +17,8 @@ import {
   type RepoMapTestsResultV1,
 } from "./tests.js";
 import { refuseBody } from "./outline-body.js";
+import { findDeclaredType, resolveTypeTarget } from "./class-lookup.js";
+import { nearestPaths, withSuggestions } from "./path-hints.js";
 import { createRepoMapOutline, type RepoMapOutlineOptions, type RepoMapOutlineResultV1 } from "./outline.js";
 import {
   createUnavailableRepoMapRefs,
@@ -75,7 +78,11 @@ export async function queryRepoMap(options: QueryRepoMapOptions): Promise<QueryR
     return isMissingPathError(error) ? { results: [], status: "missing" } : { results: [], status: "invalid" };
   }
   const limit = options.limit ?? 20;
-  const results = searchRepoMap(map, options.query, limit, options.signals);
+  const results = await withMatchedSymbols(
+    options.root,
+    searchRepoMap(map, options.query, limit, options.signals),
+    options.query,
+  );
   if (results.length === 0) {
     const fallback = await referenceFallback(map, options.root, options.query.trim(), limit);
     if (fallback.length > 0) return { fallback: "references", map, results: fallback, status: "ready" };
@@ -130,7 +137,7 @@ export async function impactRepoMap(
   } catch (error: unknown) {
     return createUnavailableRepoMapImpact(isMissingPathError(error) ? "missing" : "invalid", options);
   }
-  return createRepoMapImpact(map, options);
+  return suggestedFor(createRepoMapImpact(map, options), map, options.target);
 }
 
 export async function impactRepoMapTests(
@@ -142,17 +149,44 @@ export async function impactRepoMapTests(
   } catch (error: unknown) {
     return createUnavailableRepoMapTests(isMissingPathError(error) ? "missing" : "invalid", options);
   }
-  return findAffectedTests(map, options);
+  return suggestedFor(findAffectedTests(map, options), map, options.target);
 }
 
 export async function outlineRepoMap(
   options: RepoMapOutlineOptions & { readonly root: string },
 ): Promise<RepoMapOutlineResultV1> {
-  if (options.body === true) {
-    const refusal = await refuseBody(options);
+  let map: RepoMapV1 | undefined;
+  try {
+    map = await readRepoMap(options.root);
+  } catch {
+    // No readable map: a path is still outlined from the file; a name and a body need the map.
+  }
+  const lookup =
+    map === undefined
+      ? undefined
+      : resolveTypeTarget(options, await findDeclaredType(options.root, map, options.target));
+  if (lookup !== undefined && "result" in lookup) return lookup.result;
+  const target = lookup === undefined ? options : { ...options, ...lookup.options };
+  if (target.body === true) {
+    const refusal = await refuseBody(target);
     if (refusal !== undefined) return refusal;
   }
-  return createRepoMapOutline(options);
+  const result = await createRepoMapOutline(target);
+  if (result.status !== "not-found") return lookup === undefined ? result : { ...result, resolvedFrom: options.target };
+  return map === undefined ? result : suggestedFor(result, map, options.target);
+}
+
+/** A `not-found` result plus the paths of the map that end like the target; any other result is returned as it is. */
+function suggestedFor<T extends { readonly status: string }>(result: T, map: RepoMapV1, target: string): T {
+  return result.status === "not-found"
+    ? withSuggestions(
+        result,
+        nearestPaths(
+          map.records.map((record) => record.path),
+          target,
+        ),
+      )
+    : result;
 }
 
 export async function refsRepoMap(

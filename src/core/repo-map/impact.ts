@@ -14,6 +14,8 @@ export interface RepoMapImpactOptions {
 
 export interface RepoMapImpactResultV1 {
   readonly hint?: string | undefined;
+  /** Up to three paths of the map that end like a target that was not found. */
+  readonly suggestions?: readonly string[] | undefined;
   readonly generator: "harnix";
   readonly schemaVersion: 1;
   readonly scope: "project";

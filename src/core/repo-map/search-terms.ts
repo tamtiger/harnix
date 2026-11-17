@@ -1,3 +1,4 @@
+import { compareCodeUnits } from "src/utils/order.js";
 import type { RepoMapRecordV1 } from "./types.js";
 
 /** `buildSessionCacheKey` becomes `build`, `session`, `cache`, `key`; digits are words of their own. */
@@ -31,4 +32,16 @@ export function normalizeTerm(value: string): string {
     .toLowerCase()
     .replaceAll(/[^\p{L}\p{N}_-]+/gu, " ")
     .trim();
+}
+
+/** The distinct lower-case words of the given texts in code-unit order: what the active task contributes to a query. */
+export function taskWords(...values: string[]): string[] {
+  return [
+    ...new Set(
+      values
+        .join(" ")
+        .toLowerCase()
+        .match(/[\p{L}\p{N}_-]+/gu) ?? [],
+    ),
+  ].sort(compareCodeUnits);
 }

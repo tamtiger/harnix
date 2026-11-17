@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.36.0] - 2026-11-16
+
+### Changed
+
+- repo-map: not-found kèm đường dẫn gợi ý cho --outline/--impact/--tests (cả --body), và đường dẫn gõ từ thư mục con được chuẩn hóa về gốc dự án
+- repo-map --query: matchedSymbols kèm dòng, file khai báo đúng tên xếp trước, cờ --source-only
+- repo-map --refs: khai báo method/class mọi ngôn ngữ là declaration, compact giữ dòng 80 ký tự, phân trang --offset/nextOffset
+- repo-map: --outline nhận tên class/type, khóa hành vi overload và partial class bằng test
+
 ## [2.35.1] - 2026-11-16
 
 ### Fixed

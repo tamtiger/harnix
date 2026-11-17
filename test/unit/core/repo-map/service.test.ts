@@ -2,7 +2,14 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { outlineRepoMap, queryRepoMap, refreshRepoMap, refsRepoMap } from "src/core/repo-map/service.js";
+import {
+  impactRepoMap,
+  impactRepoMapTests,
+  outlineRepoMap,
+  queryRepoMap,
+  refreshRepoMap,
+  refsRepoMap,
+} from "src/core/repo-map/service.js";
 import { createRepoMap, repoMapCachePath } from "src/core/repo-map/store.js";
 import type { RepoMapRecordV1 } from "src/core/repo-map/types.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -15,6 +22,48 @@ describe("repository map service", () => {
 
     expect(map.records.map(({ path }) => path)).toEqual(["src/B.ts", "src/a.ts"]);
   });
+  it("names the nearest mapped paths when --outline, --impact or --tests cannot find a path", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "pay", "src"), { recursive: true });
+    await writeFile(join(root, "pay", "src", "svc.ts"), "export function run() {}\n");
+    await refreshRepoMap({ root });
+    const target = "src/svc.ts";
+
+    const outline = await outlineRepoMap({ limit: 5, root, target });
+    const impact = await impactRepoMap({ depth: 1, limit: 5, root, target });
+    const tests = await impactRepoMapTests({ limit: 5, root, target });
+
+    for (const result of [outline, impact, tests]) {
+      expect(result.status).toBe("not-found");
+      expect(result.suggestions).toEqual(["pay/src/svc.ts"]);
+    }
+    const found = await outlineRepoMap({ limit: 5, root, target: "pay/src/svc.ts" });
+    expect(found).not.toHaveProperty("suggestions");
+    const unrelated = await impactRepoMap({ depth: 1, limit: 5, root, target: "none/else.ts" });
+    expect(unrelated).not.toHaveProperty("suggestions");
+  });
+
+  it("adds the matched symbols with their lines to each --query result", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    const lines = [
+      "export class Billing {",
+      "  charge(): number {",
+      "    return 1;",
+      "  }",
+      "}",
+      "export function chargeAll(): void {}",
+      "",
+    ];
+    await writeFile(join(root, "src", "billing.ts"), lines.join("\n"));
+    await refreshRepoMap({ root });
+
+    const answer = await queryRepoMap({ limit: 5, query: "chargeAll", root });
+
+    expect(answer.results[0]?.path).toBe("src/billing.ts");
+    expect(answer.results[0]?.matchedSymbols).toEqual([{ kind: "function", name: "chargeAll", startLine: 6 }]);
+  });
+
   it("uses code-unit ordering for persisted outlines", () => {
     const value = record("src/order.ts");
     value.headings = ["B", "a"];

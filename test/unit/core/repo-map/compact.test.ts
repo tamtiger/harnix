@@ -139,12 +139,20 @@ describe("repo-map list formats", () => {
     truncated: false,
   };
 
-  it("writes each reference as path:line kind and drops the preview", () => {
+  it("writes each reference as path:line kind and the line cut to 80 characters", () => {
+    const long = { ...refs, references: [{ ...refs.references[1]!, preview: `return ${"x".repeat(120)};` }] };
+
+    expect(compactRefs(long).references).toEqual([
+      `src/b.ts:13 reference ${`return ${"x".repeat(120)};`.slice(0, 80)}`,
+    ]);
     const compacted = compactRefs(refs);
 
     expect(compacted).toMatchObject({
       format: "compact",
-      references: ["src/a.ts:10 declaration", "src/b.ts:13 reference"],
+      references: [
+        "src/a.ts:10 declaration export const repoMapRelativePath = 1;",
+        "src/b.ts:13 reference return join(root, repoMapRelativePath);",
+      ],
     });
     expect(JSON.stringify(compacted).length).toBeLessThan(JSON.stringify(refs).length);
   });
@@ -217,5 +225,32 @@ describe("repo-map list formats", () => {
     };
 
     expect(compactOutline(outline)).toMatchObject({ format: "compact", symbols: ["writeRepoMap function 21-24"] });
+  });
+});
+
+describe("matched symbols in compact query results", () => {
+  const result = {
+    matchedSymbols: [{ container: "Sync", kind: "method" as const, name: "run", startLine: 12 }],
+    outline: {
+      extension: "cs",
+      headings: [],
+      identifiers: ["Aaa", "Bbb"],
+      importTargets: [],
+      kind: "source" as const,
+      packagePath: "",
+    },
+    path: "src/Sync.cs",
+    reasons: [],
+    score: 5,
+  };
+
+  it("lists the matched symbols with their line ahead of the alphabetical names", () => {
+    const plain = { outline: result.outline, path: result.path, reasons: result.reasons, score: result.score };
+    expect(formatQueryResults([result], "compact")).toEqual([
+      { path: "src/Sync.cs", score: 5, symbols: ["Sync.run method 12"] },
+    ]);
+    expect(formatQueryResults([plain], "compact")).toEqual([
+      { path: "src/Sync.cs", score: 5, symbols: ["Aaa", "Bbb"] },
+    ]);
   });
 });

@@ -1,0 +1,102 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261116-165145-repo-map-class-lookup",
+  "title": "--outline nhận tên class và khóa bằng test hành vi overload, partial",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "--outline chấp nhận tên class hoặc symbol khi không có file nào trùng đường dẫn, và hành vi với overload, partial class và tên trùng ở nhiều class được ghim bằng test.",
+  "nonGoals": [
+    "Không đổi định dạng đã có của các trường hiện hành; chỉ thêm trường hoặc cờ mới."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`--outline <Tên>` khi `<Tên>` không phải đường dẫn trong bản đồ nhưng là tên class hoặc type được khai báo trong đúng một file thì trả outline của file đó; khai báo ở nhiều file (partial class) thì trả danh sách các file kèm dòng, không đoán.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Test C# khóa hành vi hiện tại: overload của một method là các mục riêng có container và khoảng dòng riêng, cùng tên ở hai class khác nhau được phân biệt bằng container, và `--refs` trả cả file partial.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-1-1",
+        "ev-chk-2-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/outline.ts",
+    "src/core/repo-map/outline-helpers.ts",
+    "src/commands/repo-map-internal.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-1",
+      "description": "Test tập trung của repo-map-class-lookup",
+      "command": "pnpm exec vitest run test/unit/core/repo-map/outline.test.ts test/unit/core/repo-map/refs.test.ts test/unit/core/repo-map/extract-symbols.test.ts test/integration/commands/repo-map-internal.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/support/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-2",
+      "description": "Bộ test toàn dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-1-1",
+      "checkId": "chk-1",
+      "recordedAt": "2026-11-16T17:36:39.094+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/outline.test.ts test/unit/core/repo-map/refs.test.ts test/unit/core/repo-map/extract-symbols.test.ts test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3e68b9c54f6516e79f9ad52e2f437447a63fdfb8ef371fa592f0ab89a9a8e4bb",
+      "durationMs": 5169
+    },
+    {
+      "id": "ev-chk-2-1",
+      "checkId": "chk-2",
+      "recordedAt": "2026-11-16T17:38:05.234+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "acb52584eaba82d1c47bf35ec38f6103ff30173d875e01bdbc20bd3c3eb0b3c7",
+      "durationMs": 85671
+    }
+  ],
+  "epicId": "20261116-165141-repo-map-usability",
+  "createdAt": "2026-11-16T16:51:40.159+07:00",
+  "updatedAt": "2026-11-16T17:38:31.984+07:00",
+  "completedAt": "2026-11-16T17:38:31.984+07:00"
+}
