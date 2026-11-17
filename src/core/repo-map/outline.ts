@@ -1,7 +1,14 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
-import { assertOutlineOptions, filterSymbols, makeResult, makeSymbol, stripComments } from "./outline-helpers.js";
+import {
+  assertOutlineOptions,
+  filterSymbols,
+  makeResult,
+  makeSymbol,
+  pageSymbols,
+  stripComments,
+} from "./outline-helpers.js";
 import {
   defaultRepoMapLimits,
   type ContainerKind,
@@ -25,6 +32,7 @@ const ignoredDirs = new Set(
 );
 import { secretPath } from "./inventory.js";
 import { attachSymbolBodies } from "./outline-body.js";
+import { extractMarkdownSymbols } from "./outline-markdown.js";
 import { isMissingPathError } from "src/utils/errno.js";
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
 const reservedMethodNames = new Set("if,for,while,switch,catch,return,sizeof,typeof,new".split(","));
@@ -54,9 +62,9 @@ export async function createRepoMapOutline(
     const ext = extname(options.target).slice(1).toLowerCase();
     const text = raw.toString("utf8");
     const all = filterSymbols(extractFileSymbols(text, ext), options.symbol);
-    const listed = all.slice(0, options.limit);
+    const { listed, truncated, nextOffset } = pageSymbols(all, options.offset ?? 0, options.limit);
     const symbols = options.body === true ? attachSymbolBodies(text, listed) : listed;
-    return makeResult("ready", options, symbols, all.length > listed.length, languageByExtension[ext]);
+    return makeResult("ready", options, symbols, truncated, languageByExtension[ext], nextOffset);
   } catch (error: unknown) {
     const isMissing = isMissingPathError(error);
     return makeResult(isMissing ? "not-found" : "skipped", options);
@@ -70,32 +78,6 @@ export function extractFileSymbols(content: string, extension: string): RepoMapS
   if (ext === "py") return extractPythonSymbols(lines);
   if (ext === "go") return extractGoSymbols(lines);
   return extractBraceLanguageSymbols(lines);
-}
-
-function extractMarkdownSymbols(lines: readonly string[]): RepoMapSymbolOutlineV1[] {
-  const headings: Array<{ level: number; line: number; name: string; raw: string }> = [];
-  let inFence = false;
-  let lastContent = 1;
-  for (let i = 0; i < lines.length; i += 1) {
-    const trimmed = (lines[i] ?? "").trim();
-    if (trimmed.length > 0) lastContent = i + 1;
-    if (/^(?:```|~~~)/u.test(trimmed)) inFence = !inFence;
-    else if (!inFence && !secretValue.test(trimmed)) {
-      const match = /^(#{1,6})\s+(.{1,240})$/u.exec(trimmed);
-      if (match) headings.push({ level: match[1]!.length, line: i + 1, name: match[2]!.trim(), raw: trimmed });
-    }
-  }
-  return headings.map((h, idx) => {
-    const nextPeer = headings.slice(idx + 1).find((c) => c.level <= h.level);
-    return makeSymbol([
-      h.name,
-      "heading",
-      true,
-      h.line,
-      nextPeer ? Math.max(h.line, nextPeer.line - 1) : Math.max(h.line, lastContent),
-      h.raw,
-    ]);
-  });
 }
 
 function extractPythonSymbols(lines: readonly string[]): RepoMapSymbolOutlineV1[] {

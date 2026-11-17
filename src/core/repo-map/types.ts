@@ -103,6 +103,8 @@ export interface RepoMapOutlineOptions {
   readonly limit: number;
   /** Add the source lines of each matched symbol (needs `symbol`). */
   readonly body?: boolean;
+  /** Symbols to skip before the first one listed; the `nextOffset` of the previous page. */
+  readonly offset?: number;
 }
 
 export interface RepoMapOutlineResultV1 {
@@ -123,6 +125,8 @@ export interface RepoMapOutlineResultV1 {
   readonly limit: number;
   readonly symbols: readonly RepoMapSymbolOutlineV1[];
   readonly truncated: boolean;
+  /** The `--offset` that lists the next page; present only when `truncated`. */
+  readonly nextOffset?: number;
 }
 
 /** One place for the per-record name-list caps shared by extraction and cache validation. */

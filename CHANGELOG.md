@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.36.2] - 2026-11-17
+
+### Fixed
+
+- repo-map: --tests đọc file test tìm tên lớp (CodeIgniter load->model) và không coi view test_*.php là test; --outline có --offset/nextOffset; --refs gắn kind string cho tham chiếu trong chuỗi; help ghi rõ output là JSON một dòng
+
 ## [2.36.1] - 2026-11-17
 
 ### Changed

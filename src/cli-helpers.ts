@@ -246,7 +246,8 @@ function validateOutlineFlags(options: RepoMapCliOptions): void {
 
 function validateScopedFlags(options: RepoMapCliOptions): void {
   if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
-  if (options.offset !== undefined && options.refs === undefined) throw new Error("--offset requires repo-map --refs.");
+  if (options.offset !== undefined && options.refs === undefined && options.outline === undefined)
+    throw new Error("--offset requires repo-map --refs or --outline.");
   if (options.depth !== undefined && options.impact === undefined)
     throw new Error("--depth requires repo-map --impact.");
 }

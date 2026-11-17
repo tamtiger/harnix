@@ -22,6 +22,35 @@ describe("repository map symbol references of a numeric code", () => {
   });
 });
 
+describe("repository map symbol references inside strings", () => {
+  it("marks a line whose only mention is inside a quoted string as a string reference", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(
+      join(root, "src", "svc.ts"),
+      [
+        "export function getRecords(): number {",
+        "  return 1;",
+        "}",
+        "const total = getRecords();",
+        'log("Svc::getRecords SQL error");',
+        "const both = getRecords() + 'getRecords';",
+        "",
+      ].join("\n"),
+    );
+    const { map } = await refreshRepoMap({ root });
+
+    const result = await findRepoMapReferences(map, { limit: 20, root, symbol: "getRecords" });
+
+    expect(result.references.map(({ kind, line }) => `${line}:${kind}`)).toEqual([
+      "1:declaration",
+      "4:reference",
+      "5:string",
+      "6:reference",
+    ]);
+  });
+});
+
 describe("repository map symbol references", () => {
   it("finds declarations, imports and call references across the repository and scopes by target path", async () => {
     const root = await temporaryRepository();

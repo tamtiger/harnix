@@ -247,9 +247,15 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--body", "Include the source lines of the matched symbol (with --outline and --symbol)")
     .option("--path <path>", "Scope symbol reference lookup to a file and its dependents when using --refs")
     .option("--limit <count>", "Maximum results (1-20, default 20; 1-50 for --outline)")
-    .option("--offset <count>", "References to skip, to list the next page of --refs (the nextOffset of the last page)")
+    .option(
+      "--offset <count>",
+      "Results to skip, to list the next page of --refs or --outline (the nextOffset of the last page)",
+    )
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact (1-3, default 2)")
-    .option("--format <format>", "Result format: json or compact (also outline for --query)")
+    .option(
+      "--format <format>",
+      "Output is always one line of JSON; --format compact makes the entries shorter strings (outline also for --query)",
+    )
     .option("--events", "Generate cross-service event matrix of publishers and subscribers by topic")
     .option("--workspace [path]", "Index and query across sub-repositories in a workspace")
     .option("--source-only", "Leave documentation, manifest and config files out of --query results")

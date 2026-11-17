@@ -100,13 +100,7 @@ function nearestPackage(path: string, roots: readonly string[]): string {
 function fileKind(path: string, extension: string): RepoMapFileKind {
   const normalized = path.replaceAll("\\", "/");
   const name = basename(normalized).toLowerCase();
-  if (
-    /(?:^|\.)test\.[^.]+$|(?:^|\.)spec\.[^.]+$|__tests__\//u.test(normalized) ||
-    /^(?:test_.*|.*_test)\.[^.]+$/u.test(name) ||
-    /(?:^|\/)(?:tests?|specs?)\/.*test.*\.[^.]+$/u.test(normalized) ||
-    /(?:^|\/)(?:tests?|specs?)\/.*(?:test|spec)/iu.test(normalized)
-  )
-    return "test";
+  if (isTestPath(normalized, name)) return "test";
   if (
     ["package.json", "pnpm-lock.yaml", "composer.json", "go.mod", "pom.xml", "*.csproj", "*.sln"].includes(name) ||
     name.endsWith(".csproj") ||
@@ -118,6 +112,26 @@ function fileKind(path: string, extension: string): RepoMapFileKind {
   if (sourceExtensions.has(extension)) return "source";
   if (["sh", "ps1", "cmd", "bat"].includes(extension)) return "script";
   return "other";
+}
+
+/**
+ * A view or template named `test_result.php` shows a result, it is not a test: under a views, templates or layouts
+ * directory only an explicit `.test.`/`.spec.` name or a tests directory makes a file a test.
+ */
+function isTestPath(normalized: string, name: string): boolean {
+  const insideTests = /(?:^|\/)(?:tests?|specs?|__tests__)\//u.test(normalized);
+  if (
+    !insideTests &&
+    /(?:^|\/)(?:views?|templates?|layouts?)\//u.test(normalized) &&
+    !/\.(?:test|spec)\.[^.]+$/u.test(name)
+  )
+    return false;
+  return (
+    /(?:^|\.)test\.[^.]+$|(?:^|\.)spec\.[^.]+$|__tests__\//u.test(normalized) ||
+    /^(?:test_.*|.*_test)\.[^.]+$/u.test(name) ||
+    /(?:^|\/)(?:tests?|specs?)\/.*test.*\.[^.]+$/u.test(normalized) ||
+    /(?:^|\/)(?:tests?|specs?)\/.*(?:test|spec)/iu.test(normalized)
+  );
 }
 
 function replacementHeavy(content: string): boolean {

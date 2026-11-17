@@ -8,6 +8,8 @@ import { repoMapRefreshHint, type RepoMapRecordV1, type RepoMapV1 } from "./type
 export interface RepoMapTestsOptions {
   readonly target: string;
   readonly limit: number;
+  /** Tests found by reading their text for the target's class name (see `findContentTests`), linked as `symbol`. */
+  readonly contentMatches?: readonly string[];
 }
 
 /** Why a test is listed, from the strongest link to the weakest; a test written for the file outranks mere importers. */
@@ -74,6 +76,7 @@ export function findAffectedTests(map: RepoMapV1, options: RepoMapTestsOptions):
   };
   for (const path of findConventionTests(options.target, map.records)) link(path, "convention", 1);
   for (const path of findSymbolTests(targetRecord, map.records)) link(path, "symbol", 1);
+  for (const path of options.contentMatches ?? []) link(path, "symbol", 1);
   linkDependents(options.target, map, link);
 
   const ordered = [...links.entries()].sort(

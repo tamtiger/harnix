@@ -251,6 +251,22 @@ describe("affected test ranking", () => {
     ]);
   });
 
+  it("links the tests found by reading their text as symbol matches, ahead of transitive ones", () => {
+    const map = createRepoMap([
+      makeRecord("application/models/M17C71Model.php", "source", [], "php"),
+      makeRecord("tests/test_m17_hold.php", "test", [], "php"),
+    ]);
+
+    const result = findAffectedTests(map, {
+      contentMatches: ["tests/test_m17_hold.php"],
+      limit: 20,
+      target: "application/models/M17C71Model.php",
+    });
+
+    expect(result.tests).toEqual(["tests/test_m17_hold.php"]);
+    expect(result.reasons?.["tests/test_m17_hold.php"]).toBe("symbol");
+  });
+
   it("keeps the direct unit test in the top five of a refreshed TypeScript project", async () => {
     const root = await temporaryRepository();
     const importers = Object.fromEntries(
