@@ -1,6 +1,7 @@
 import { parse } from "yaml";
 
 import bugfixPreserveSource from "./harnix-bugfix-preserve/SKILL.md";
+import exerciseSource from "./harnix-exercise/SKILL.md";
 import flakyTestSource from "./harnix-flaky-test/SKILL.md";
 import migrationSafetySource from "./harnix-migration-safety/SKILL.md";
 import securityLensSource from "./harnix-security-lens/SKILL.md";
@@ -11,6 +12,12 @@ import domainBriefsReference from "./harnix-arch-review/references/domain-briefs
 import domainBriefsOperationsReference from "./harnix-arch-review/references/domain-briefs-operations.md";
 import wbsConsolidationReference from "./harnix-arch-review/references/wbs-consolidation.md";
 import invariantDebuggingReference from "./harnix-bugfix-preserve/references/invariant-debugging.md";
+import exerciseApiReference from "./harnix-exercise/references/api.md";
+import exerciseCliReference from "./harnix-exercise/references/cli.md";
+import exerciseDetectionReference from "./harnix-exercise/references/detection.md";
+import exerciseEvidenceReference from "./harnix-exercise/references/evidence.md";
+import exerciseSafetyReference from "./harnix-exercise/references/safety.md";
+import exerciseWebReference from "./harnix-exercise/references/web.md";
 import concurrencyIsolationReference from "./harnix-flaky-test/references/concurrency-isolation.md";
 import zeroDowntimeEvolutionReference from "./harnix-migration-safety/references/zero-downtime-evolution.md";
 import injectionTraversalReference from "./harnix-security-lens/references/injection-traversal-guardrails.md";
@@ -83,6 +90,17 @@ const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
     bugfixPreserveSource,
     {
       "invariant-debugging": invariantDebuggingReference,
+    },
+  ],
+  [
+    exerciseSource,
+    {
+      api: exerciseApiReference,
+      cli: exerciseCliReference,
+      detection: exerciseDetectionReference,
+      evidence: exerciseEvidenceReference,
+      safety: exerciseSafetyReference,
+      web: exerciseWebReference,
     },
   ],
   [

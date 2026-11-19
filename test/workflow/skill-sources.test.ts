@@ -22,6 +22,7 @@ const techniqueSkillNames = [
   "harnix-security-lens",
   "harnix-sequential-thinking",
   "harnix-arch-review",
+  "harnix-exercise",
 ] as const;
 const allSkillNames = [...workflowSkillNames, ...techniqueSkillNames];
 const TASK_SKILLS: readonly SkillName[] = ["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"];
@@ -292,6 +293,14 @@ describe("canonical Harnix workflow skill sources", () => {
     ]);
     for (const alias of Object.values(legacySkillAliases)) {
       expect(workflowSkillNames).toContain(alias.name);
+    }
+  });
+
+  it("points harnix-implement and harnix-verify at harnix-exercise with exactly one line each", () => {
+    for (const name of ["harnix-implement", "harnix-verify"] as const) {
+      const skill = workflowSkills.find((candidate) => candidate.name === name)!;
+      const lines = skill.content.split("\n").filter((line) => line.includes("harnix skill harnix-exercise"));
+      expect(lines, name).toHaveLength(1);
     }
   });
 

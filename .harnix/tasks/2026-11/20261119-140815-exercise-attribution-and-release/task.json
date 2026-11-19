@@ -1,0 +1,134 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261119-140815-exercise-attribution-and-release",
+  "epicId": "20261119-140811-exercise-skill",
+  "title": "harnix-exercise: ghi công nguồn, đồng bộ tài liệu và phát hành",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Ghi công nguồn ngoài đã adapt, đồng bộ toàn bộ tài liệu và template liên quan, thêm fixture API và CLI mẫu để kiểm skill, rồi đóng epic bằng bản phát hành minor.",
+  "nonGoals": [
+    "Không thêm tài liệu ngoài phạm vi skill harnix-exercise",
+    "Không đổi hợp đồng đóng băng"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "docs/UPSTREAM_MAPPING.md, docs/UPSTREAM_BASELINE.md và docs/HARNESS_RESEARCH.md ghi nguồn đã adapt (Anthropic webapp-testing Apache-2.0, ECC e2e-runner, browser-qa, ai-regression-testing MIT) với URL, giấy phép, quyết định adopt/adapt/defer/reject và ngày truy cập; NOTICE chỉ đổi nếu thực sự tái dùng nội dung gây nghĩa vụ ghi công.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "README.md, AGENTS.md, các platform rules và template (agents.ts, activation.ts, global-surface.ts), docs/HARNIX_PRD.md, docs/HARNIX_WORKFLOW.md, docs/IMPLEMENTATION_PLAN.md và src/templates/harnix/workflow.md được rà soát và đồng bộ; pnpm selfhost:sync chạy khi template workflow đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Có fixture tối thiểu trong test (một API nhỏ và một CLI nhỏ) cùng test chứng minh quy trình của skill chạy được đầu-cuối bằng công cụ có sẵn trong Node, không cần cài thêm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Phiên bản được nâng bằng pnpm version:sync theo chính sách epic (member cuối đóng epic bằng bản minor kèm --fold-dev) và CHANGELOG.md có mục tương ứng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "src/templates/harnix/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI contract, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-19T15:34:50.861+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3e9b01788bb235f550265a569c80c3d7bdccfcaf9c1642adfef6495ed69ad658",
+      "durationMs": 9191
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-19T15:36:37.929+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1058b57d08c5b46568da8f85da276d570cf22822aa112b40cc04be93a2d418a5",
+      "durationMs": 106482
+    }
+  ],
+  "createdAt": "2026-11-19T14:08:15.000+07:00",
+  "updatedAt": "2026-11-19T15:40:29.138+07:00",
+  "completedAt": "2026-11-19T15:40:29.138+07:00"
+}

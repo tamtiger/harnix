@@ -264,6 +264,20 @@ Khảo sát ngày 2026-10-15 trên hai kho tài nguyên `frt-public-projects/ai-
 | `ui-ux` & `web-testing` | ak-quick-setup | `src/guides/topics/` | `adapt` | 2 Topic Guides mới tuân thủ đúng 3 đề mục (Verify, Constraints, Common mistakes) và trần <= 600 tokens. |
 | `arch-review` & Enterprise Practices | Backend Harness Practices (`04. Backend`) | `src/skills/harnix-arch-review/`, `src/guides/technologies/`, `harnix-migration-safety` | `adapt` | Technique skill 7 `harnix-arch-review` (10 domain briefs, WBS Core MAX + BFF dedup), làm giàu 6 backend guides và quy chuẩn expand-contract application DB rollback. |
 
+#### 8.5.1a Technique skill `harnix-exercise` (khảo sát 2026-11-19)
+
+Khảo sát chỉ đọc qua WebFetch/WebSearch ngày 2026-11-19, không ghim được commit SHA vì công cụ fetch không trả SHA; chi tiết nguồn, phản biện và bất định nằm trong `.harnix/epics/2026-11/20261119-140811-exercise-skill/research.md`. Tất cả là clean-room: viết lại bằng ngôn ngữ Harnix, không chép nguyên văn nên `NOTICE` không đổi.
+
+| Nguồn | Giấy phép | Phân loại | Nội dung thích nghi vào `src/skills/harnix-exercise/` |
+|---|---|---|---|
+| [anthropics/skills `webapp-testing`](https://github.com/anthropics/skills/tree/main/skills/webapp-testing) | Apache-2.0 (đã đọc `LICENSE.txt`) | `adapt` | Quy trình khảo sát rồi hành động, cây quyết định static/dynamic, vòng đời server tách khỏi logic test (reference `web`, `safety`). Không dùng script và không dùng shell. |
+| [ECC `agents/e2e-runner.md`](https://github.com/affaan-m/everything-claude-code/blob/main/agents/e2e-runner.md) | MIT | `adapt` | Chạy lặp bắt flaky, selector ổn định, đợi theo điều kiện (reference `web`, `evidence`). Bỏ cài đặt toàn cục và việc ngầm định dùng một công cụ. |
+| [ECC `skills/browser-qa`](https://github.com/affaan-m/everything-claude-code/blob/main/skills/browser-qa/SKILL.md) | MIT | `adapt` | Smoke thu console và request lỗi, mặc định chỉ đọc, mutation cần đồng ý, che dữ liệu cá nhân (reference `web`, `safety`). Bỏ tên tool gắn MCP và visual regression theo baseline. |
+| [ECC `skills/ai-regression-testing`](https://github.com/affaan-m/everything-claude-code/blob/main/skills/ai-regression-testing/SKILL.md) | MIT | `adapt` | Ép sandbox/mock, helper gọi route, kiểm hình dạng response, test hồi quy đặt tên theo lỗi (reference `api`). |
+| ECC `agents/gan-evaluator.md`, họ `orch-*` | MIT | `reject` | Chấm điểm thẩm mỹ, prompt có lệnh giả mã, thiết kế đa subagent và commit sau cổng. Chỉ giữ ý báo cáo đúng chế độ thực sự chạy (`full`/`partial`/`code-only`). |
+| ECC `skills/verification-loop` | MIT | `defer` | Không chạy app, API hay browser; chỉ đáng lấy quy tắc kiểm local không tính là kiểm môi trường đích. |
+| Playwright Test Agents, Vercel agent-browser, Schemathesis, Hurl | chưa xác minh / Apache-2.0 / MIT / Apache-2.0 | công cụ tùy chọn, không đóng gói | Chỉ được nhắc tên như lựa chọn có phát hiện sự có mặt; Harnix không cài và không phụ thuộc cứng vào công cụ nào. |
+
 #### 8.5.2 Các pattern Explicitly Rejected
 1. **Silent Network Sync & MCP Auto-pull**: `tools/rai-client-sync-mcp/` và session hook tự động fetch/pull remote vi phạm nguyên tắc Lean & Offline-first của Harnix. Harnix dùng lệnh CLI tường minh `harnix update`.
 2. **Proprietary Token Handling**: `auto-refresh-token.kiro.hook` và token Keycloak/GitLab là hạ tầng riêng của doanh nghiệp, không thuộc phạm vi harness mã nguồn mở.

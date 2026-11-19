@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.36.1"
+  version: "2.37.0"
 ---
 
 # Implement with evidence
@@ -50,6 +50,7 @@ Reviewer or user feedback is a hypothesis: read all of it, verify it against the
 - **Active Trigger (.NET / C# Microservices):** When implementing .NET microservices, DDD layering, Kafka event publishing/consumption or NSubstitute mocks, MUST load `harnix skill harnix-implement --reference dotnet-microservices`.
 - Complex bugfix preserving behavior: `harnix skill harnix-bugfix-preserve` builds test specifications to protect working contracts.
 - Schema/contract evolution: `harnix skill harnix-migration-safety` guards data and compatibility.
+- Behavior a caller observes (API, CLI, page): `harnix skill harnix-exercise` proves it by running it and records the evidence.
 
 ## Exit
 

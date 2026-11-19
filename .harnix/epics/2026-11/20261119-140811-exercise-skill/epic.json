@@ -1,0 +1,23 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261119-140811-exercise-skill",
+  "title": "Skill harnix-exercise: tự sinh và chạy thử test thật",
+  "goal": "Thêm technique skill harnix-exercise để agent tự suy ra kịch bản từ tiêu chí chấp nhận, sinh test gắn [chk-id], khởi chạy ứng dụng có kiểm soát rồi gọi thử API, chạy CLI hoặc mở browser, và ghi bằng chứng qua harnix workflow --run-check; thiếu công cụ thì hạ bậc và báo rõ phần chưa kiểm chạy thật.",
+  "nonGoals": [
+    "Không thêm package, bin, MCP mặc định, daemon hay stage workflow mới",
+    "Không cài công cụ ngoài (Hurl, Schemathesis, agent-browser, Playwright) và không phụ thuộc cứng vào công cụ nào",
+    "Không sao chép nguyên văn skill hay prompt của nguồn ngoài; chỉ viết lại ngắn gọn kèm ghi công",
+    "Không chạy trên môi trường production, không đọc hay in secret",
+    "Không đổi hợp đồng đóng băng của TaskRecord v3 hay cơ chế bằng chứng hiện có",
+    "Chưa hỗ trợ mobile, TUI, job/queue, performance và security smoke ở v1"
+  ],
+  "createdAt": "2026-11-19T14:08:11.000+07:00",
+  "updatedAt": "2026-11-19T14:53:32.333+07:00",
+  "order": [
+    "20261119-140812-exercise-skill-core",
+    "20261119-140813-exercise-api-cli-reference",
+    "20261119-140814-exercise-web-reference",
+    "20261119-140815-exercise-attribution-and-release"
+  ]
+}

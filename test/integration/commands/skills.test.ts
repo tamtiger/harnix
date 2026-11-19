@@ -214,6 +214,10 @@ describe("harnix skill", () => {
     expect(security.suggestions.length).toBeGreaterThan(0);
     expect(security.suggestions[0]?.name).toBe("harnix-security-lens");
 
+    const exercise = suggestSkills("call api endpoint run cli drive browser");
+    expect(exercise.suggestions.map((s) => s.name)).toContain("harnix-exercise");
+    expect(reportSkill("harnix-exercise").content).toContain("# Exercise");
+
     const dotnet = suggestSkills("dotnet microservices kafka outbox");
     expect(dotnet.suggestions.length).toBeGreaterThan(0);
     expect(dotnet.suggestions.map((s) => s.name)).toContain("harnix-implement");

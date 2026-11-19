@@ -53,6 +53,18 @@ Khóa nguồn tham chiếu hành vi điều hướng mã nguồn cấp symbol v�
 |---|---|---|---|---|---|---|
 | [microsoft/hve-core](https://github.com/microsoft/hve-core) | `main` | `eae87ecfcb5c6cc51f94e2df8a5757ee96737119` | 2026-10-27 | 2026-10-27 | MIT, Copyright (c) Microsoft Corporation. All rights reserved. | Nguồn ý tưởng kỷ luật lập kế hoạch, triển khai, nghiên cứu và review cho skill; được viết lại bằng lời riêng, không sao chép mã hay văn bản |
 
+### 2.5 Runtime-exercise sources 2026-11-19
+
+Quan sát chỉ đọc cho technique skill `harnix-exercise`, ngày truy cập **2026-11-19**. Công cụ fetch không trả commit SHA nên các nguồn dưới đây **chưa ghim SHA**; đây là dated observation, không thay các ref đã khóa ở mục 2.
+
+| Nguồn | Branch | Commit SHA | Ngày truy cập | License | Vai trò |
+|---|---|---|---|---|---|
+| [anthropics/skills `webapp-testing`](https://github.com/anthropics/skills/tree/main/skills/webapp-testing) | `main` | chưa ghim | 2026-11-19 | Apache-2.0 (đã đọc `LICENSE.txt`) | Ý tưởng quy trình khảo sát rồi hành động và vòng đời server; clean-room, không chép |
+| [affaan-m/ECC](https://github.com/affaan-m/everything-claude-code) (`e2e-runner`, `browser-qa`, `ai-regression-testing`) | `main` | chưa ghim | 2026-11-19 | MIT | Ý tưởng chống flaky, smoke browser mặc định chỉ đọc, kiểm hình dạng response; clean-room |
+| Vercel agent-browser, Schemathesis, Hurl, Playwright Test Agents | `main` | chưa ghim | 2026-11-19 | Apache-2.0, MIT, Apache-2.0, chưa xác minh | Công cụ tùy chọn được nhắc tên; không đóng gói, không phụ thuộc |
+
+Nguồn đầy đủ, phản biện và bất định còn lại: `.harnix/epics/2026-11/20261119-140811-exercise-skill/research.md`.
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:

@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.37.0] - 2026-11-19
+
+### Added
+
+- Skill kỹ thuật harnix-exercise: lõi quy trình, reference detection và evidence, preflight gợi ý theo tiêu chí hành vi chạy được, harnix-implement và harnix-verify trỏ tới skill
+- harnix-exercise: reference api, cli và safety (Hurl, Schemathesis tùy chọn, sandbox/mock, chạy CLI và thư viện như consumer, giới hạn an toàn bắt buộc)
+- harnix-exercise: reference web (khảo sát rồi hành động, thứ tự công cụ có đường lui cho nền tảng không có browser tool, thu console, request lỗi và screenshot)
+
+### Changed
+
+- Epic exercise-skill: kho tài liệu và ghi công nguồn (UPSTREAM_MAPPING, UPSTREAM_BASELINE, HARNESS_RESEARCH), fixture API và CLI mẫu kiểm quy trình harnix-exercise
+
 ## [2.36.1] - 2026-11-17
 
 ### Changed

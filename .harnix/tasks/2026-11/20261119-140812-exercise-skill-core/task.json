@@ -1,0 +1,172 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261119-140812-exercise-skill-core",
+  "epicId": "20261119-140811-exercise-skill",
+  "title": "harnix-exercise: lõi skill, phát hiện loại dự án và đăng ký",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tạo technique skill harnix-exercise (SKILL.md cùng reference detection và evidence), đăng ký trong technique-skills và để preflight/--suggest gợi ý khi task có hành vi chạy được cần kiểm chứng.",
+  "nonGoals": [
+    "Chưa viết hướng dẫn chi tiết cho API, CLI hay web (thuộc các member sau)",
+    "Không thêm stage workflow hay lệnh công khai mới"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix skill harnix-exercise --raw in được skill hợp lệ theo parseSkill, có trong catalog technique skills, description bắt đầu bằng 'Use when '.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Quy trình trong SKILL.md đi từ tiêu chí chấp nhận sang kịch bản (happy, biên, lỗi), chọn công cụ có phát hiện sự có mặt, sinh test gắn [chk-id], khởi chạy có kiểm soát rồi ghi bằng chứng qua harnix workflow --run-check; không bịa hành vi ngoài tiêu chí hay contract.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Reference detection nêu cách suy ra loại dự án (API, CLI, web, thư viện) từ manifest, OpenAPI, route và entrypoint, xử lý khi không chắc, và hạ bậc xuống test code-only kèm báo rõ chế độ thực sự đã chạy (full, screenshot, code-only).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Hàm suggestTechniques trong preflight và harnix skill --suggest gợi ý harnix-exercise khi tiêu chí hoặc mô tả task nhắc tới API, endpoint, CLI, giao diện hoặc browser (cả tiếng Việt lẫn tiếng Anh); test ghim cả trường hợp có gợi ý lẫn trường hợp không gợi ý.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Skill và reference nằm trong ngân sách token của token-budgets.json, không nhắc lệnh riêng của repo, mỗi reference có một dòng trỏ tới nó và dòng phiên bản đã cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "SKILL.md của harnix-implement và harnix-verify mỗi nơi có đúng một dòng trong mục Technique skills trỏ tới harnix skill harnix-exercise (implement: kiểm chứng hành vi chạy được sau khi code; verify: trước khi ghi bằng chứng), vẫn trong trần token của từng skill; test ghim hai dòng này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/preflight.ts",
+    "src/skills/harnix-exercise/**",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "src/skills/technique-skills.ts",
+    "test/integration/commands/skills.test.ts",
+    "test/unit/core/workflow/preflight.test.ts",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (nguồn skill, ngân sách token, kiến trúc, CLI contract) cho skill mới",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-19T15:18:00.390+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8db32f317560ec348605a8e801edb779eaa57c278af54ff98720c4c1e39c5c46",
+      "durationMs": 7983
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-19T15:19:45.087+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "613677343f16e59a59c711f4e16d4035b1947e3f1efb828cef63212030ea1a6b",
+      "durationMs": 99349
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-19T15:21:54.410+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "71c431855fccf4ec43ad6938d197aef66f88f62a8c385de1c7ff87a9392643d3",
+      "durationMs": 7624
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-19T15:23:36.627+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bdc4d17742aea1afb5cea75e2fc5a765bbbda7c15a62671ae7829ca53517c5e4",
+      "durationMs": 101677
+    }
+  ],
+  "createdAt": "2026-11-19T14:08:12.000+07:00",
+  "updatedAt": "2026-11-19T15:24:01.305+07:00",
+  "completedAt": "2026-11-19T15:24:01.305+07:00"
+}

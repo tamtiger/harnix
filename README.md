@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.36.1`
+**Version:** `2.37.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -150,7 +150,7 @@ Agent chỉ nạp đúng một skill quy trình mỗi lần, theo `nextStage` m�
 | `harnix-review`    | Review code chỉ đọc (Bypass, không đụng task)                                                                                        |
 | `harnix-research`  | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging                                                        |
 
-Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **7 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh hoặc tìm qua `harnix skill --suggest <query>`):
+Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **8 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh hoặc tìm qua `harnix skill --suggest <query>`):
 
 - `harnix-verification-gap`: Đánh giá khoảng trống kiểm chứng, phát hiện điểm mù false-success (`--reference verification-blindspots`).
 - `harnix-bugfix-preserve`: Định hình bất biến ("must remain working") khi sửa bug để chống regression (`--reference invariant-debugging`).
@@ -159,6 +159,7 @@ Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **7 technique-skills �
 - `harnix-security-lens`: Ống kính bảo mật rà soát ranh giới dữ liệu không tin cậy, injection, traversal (`--reference injection-traversal-guardrails`).
 - `harnix-sequential-thinking`: Phân tích tuần tự kiến trúc phức tạp, so sánh tradeoffs và kiểm chứng đa bước (`--reference multi-step-tree-search`).
 - `harnix-arch-review`: Đánh giá kiến trúc hệ thống doanh nghiệp, phân rã WBS và bóc tách Backend Core vs BFF (`--reference domain-briefs`, `domain-briefs-operations`, `wbs-consolidation`).
+- `harnix-exercise`: Tự sinh kịch bản từ tiêu chí chấp nhận rồi chạy thật (gọi API, chạy CLI hoặc thư viện, mở browser) và ghi bằng chứng; công cụ ngoài chỉ là tùy chọn, thiếu thì hạ bậc `full`/`partial`/`code-only` (`--reference detection`, `evidence`, `api`, `cli`, `web`, `safety`).
 - Kèm cẩm nang kiến trúc .NET Microservices trong `harnix-implement` (`--reference dotnet-microservices`).
 
 **Extension Point cho dự án:** Bạn có thể tự thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`. Harnix tự động phát hiện qua `harnix skill --all` và đồng bộ vào platform agent.

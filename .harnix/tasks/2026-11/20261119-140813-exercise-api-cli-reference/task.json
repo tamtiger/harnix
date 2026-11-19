@@ -1,0 +1,134 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261119-140813-exercise-api-cli-reference",
+  "epicId": "20261119-140811-exercise-skill",
+  "title": "harnix-exercise: reference API, CLI và an toàn",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Viết các reference api, cli và safety cho harnix-exercise: gọi thử API thật, chạy CLI, kiểm thư viện từ góc nhìn consumer, với giới hạn an toàn bắt buộc.",
+  "nonGoals": [
+    "Không đóng gói hay cài Hurl, Schemathesis",
+    "Không hướng dẫn kiểm thử web (member khác)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Reference api nêu thứ tự công cụ: test của framework dự án trước, Hurl cho API không có OpenAPI, Schemathesis tùy chọn khi có OpenAPI kèm cảnh báo nó tạo, sửa, xóa dữ liệu thật; mỗi lựa chọn có điều kiện phát hiện và bằng chứng thu được (file .hurl, JUnit, exit code).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Reference api có mẫu ép chế độ sandbox/mock, helper gọi route, kiểm hình dạng response theo contract, và test hồi quy đặt tên theo lỗi đã gặp.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Reference cli nêu cách chạy lệnh thật bằng mảng executable cộng args, kiểm stdout, stderr, exit code, và smoke thư viện qua một script chạy như một consumer.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Reference safety bắt buộc: DB tạm hoặc mock, không gọi production, không đọc hay in secret, che PII trong artifact, cổng khai báo và timeout, dọn tiến trình con, hỏi người dùng trước khi cài công cụ hoặc mở cổng; Windows và POSIX đều chạy được.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Các reference nằm trong ngân sách token, mỗi reference có một dòng trỏ tới nó trong SKILL.md, và test cấu trúc skill vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/harnix-exercise/**",
+    "src/skills/technique-skills.ts",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh cho nguồn skill và ngân sách token",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-19T15:26:37.426+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7af37e9269a25a98e213fed153b70f26d176834c474a0329b1d2e443ccc9863c",
+      "durationMs": 7624
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-19T15:28:07.343+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a5604e3c88b6c09f79d136c615de0d18f740102359cfd3778cfd580813b83166",
+      "durationMs": 89406
+    }
+  ],
+  "createdAt": "2026-11-19T14:08:13.000+07:00",
+  "updatedAt": "2026-11-19T15:28:19.119+07:00",
+  "completedAt": "2026-11-19T15:28:19.119+07:00"
+}

@@ -16,6 +16,7 @@ const expectedTechniqueSkillNames = [
   "harnix-security-lens",
   "harnix-sequential-thinking",
   "harnix-arch-review",
+  "harnix-exercise",
 ] as const;
 
 describe("technique skills catalog", () => {
@@ -87,6 +88,10 @@ describe("technique skills catalog", () => {
     const sequentialThinking = techniqueSkills.find((s) => s.name === "harnix-sequential-thinking");
     expect(sequentialThinking).toBeDefined();
     expect(Object.keys(sequentialThinking!.references).sort()).toEqual(["multi-step-tree-search"]);
+
+    const exercise = techniqueSkills.find((s) => s.name === "harnix-exercise");
+    expect(exercise).toBeDefined();
+    expect(Object.keys(exercise!.references).sort()).toEqual(["api", "cli", "detection", "evidence", "safety", "web"]);
 
     const verificationGap = techniqueSkills.find((s) => s.name === "harnix-verification-gap");
     expect(verificationGap).toBeDefined();

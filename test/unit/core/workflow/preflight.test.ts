@@ -408,5 +408,6 @@ describe("workflow preflight version skew", () => {
     expect(preflight.suggestedTechniques).toContain("harnix-migration-safety");
     expect(preflight.suggestedTechniques).toContain("harnix-sequential-thinking");
     expect(preflight.suggestedTechniques).toContain("harnix-verification-gap");
+    expect(preflight.suggestedTechniques).not.toContain("harnix-exercise");
   });
 });

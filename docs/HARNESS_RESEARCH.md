@@ -335,3 +335,14 @@ Khảo sát chuyên sâu kiến trúc quản lý task từ GitHub Spec Kit, Roo-
 3. **Plan-Task Checklist Auto-Sync:** Khảo sát từ Roo-Code Task Boomerang. Mỗi checklist item trong `plan.md` gắn mã `[chk-id]`; khi check vượt qua qua `workflow --run-check` hoặc `workflow --evidence`, runner tự động chuyển `- [ ]` thành `- [x]`, loại bỏ hoàn toàn việc chỉnh sửa thủ công và chống ảo giác tiến độ.
 4. **Code Impact Dashboard:** Khảo sát từ Aider. Báo cáo `review.md` tích hợp bảng thống kê trực quan số files thay đổi và dòng code `+ / -` trước khi commit.
 
+
+## 11. Nghiên cứu skill tự sinh và chạy thật test (2026-11-19)
+
+Khảo sát chỉ đọc cho technique skill `harnix-exercise` (epic `20261119-140811-exercise-skill`): agent tự suy ra kịch bản từ tiêu chí chấp nhận, sinh test gắn `[chk-id]`, khởi chạy ứng dụng có kiểm soát rồi gọi thử API, chạy CLI hoặc mở browser.
+
+1. **Adapt:** quy trình khảo sát rồi hành động và vòng đời server (Anthropic `webapp-testing`, Apache-2.0); chạy lặp bắt flaky, smoke browser mặc định chỉ đọc, kiểm hình dạng response và sandbox/mock (ECC `e2e-runner`, `browser-qa`, `ai-regression-testing`, MIT).
+2. **Reject:** `gan-evaluator` (chấm điểm thẩm mỹ, prompt có lệnh giả mã) và họ `orch-*` (đa subagent, commit sau cổng) vì mâu thuẫn core single-agent và không tự commit; **defer:** `verification-loop` vì không chạy app.
+3. **Công cụ tùy chọn, không đóng gói:** Playwright, agent-browser, Hurl, Schemathesis. Skill chỉ phát hiện sự có mặt, hỏi người dùng trước khi cài, và hạ bậc `full` → `partial` → `code-only` khi thiếu, nên vẫn dùng được trên nền tảng không có browser tool (Cursor, Kiro).
+4. **Bất định còn lại:** chưa ghim SHA, chưa đọc đủ danh sách skill của ECC, chưa khảo sát OpenHands/SWE-agent/Cline/Aider, chưa đo hiệu quả trên dự án thật, chưa thử trên Cursor và Kiro.
+
+Nguồn, phản biện và bảng quyết định đầy đủ: `.harnix/epics/2026-11/20261119-140811-exercise-skill/research.md`; ghi công theo `docs/UPSTREAM_MAPPING.md` mục 8.5.1a.

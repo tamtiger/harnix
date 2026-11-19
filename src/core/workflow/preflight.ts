@@ -181,6 +181,9 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
   };
 }
 
+/** Wording that names behavior a caller or user can observe by running the thing (API, CLI, browser UI). */
+const RUNTIME_BEHAVIOR = /\b(?:api|endpoint|cli|browser|e2e)\b|giao diện|trình duyệt|dòng lệnh|màn hình/u;
+
 function suggestTechniques(
   task: TaskRecord | undefined,
   requiredChecks: RequiredChecks,
@@ -205,6 +208,8 @@ function suggestTechniques(
   )
     set.add("harnix-verification-gap");
   if (/enterprise|wbs|bff|arch/u.test(text)) set.add("harnix-arch-review");
+  const behaviorText = `${text} ${task.acceptanceCriteria.map((criterion) => criterion.text).join(" ")}`.toLowerCase();
+  if (RUNTIME_BEHAVIOR.test(behaviorText)) set.add("harnix-exercise");
   return set.size === 0 ? undefined : [...set].sort(compareCodeUnits);
 }
 

@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.36.1"
+  version: "2.37.0"
 ---
 
 # Verify and finish Harnix work
@@ -36,6 +36,7 @@ Use native agent skills on demand (load via `harnix skill <name>`):
 - Verification blind spots: `harnix skill harnix-verification-gap` detects weak assertions and false-success tests.
 - Security and boundary review: `harnix skill harnix-security-lens` checks injection, path traversal and secret leakage.
 - Database and schema safety: `harnix skill harnix-migration-safety` ensures rollback and data integrity.
+- Runtime behavior of an API, CLI or page: `harnix skill harnix-exercise` runs it for real before its evidence is recorded.
 
 ## Finish
 
