@@ -1,0 +1,124 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261117-203128-repo-map-accuracy-fixes",
+  "title": "Sửa độ chính xác repo-map: --tests, --outline --offset, --refs chuỗi, help JSON",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa --tests bỏ sót test PHP và nhầm view test_*.php, thêm --offset cho --outline, đánh dấu tham chiếu trong chuỗi ở --refs, ghi rõ output JSON trong help.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "repo-map --tests liệt kê test tham chiếu tên lớp của target qua references (không cần new/typeof) và không coi view test_*.php dưới thư mục views/templates là test",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-2",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "repo-map --outline nhận --offset và trả nextOffset để phân trang đủ ký hiệu của file lớn",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-2",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "repo-map --refs gắn kind string cho dòng chỉ chứa ký hiệu trong chuỗi ký tự, help ghi rõ output là JSON một dòng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-2",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "check-focused",
+      "description": "Test repo-map và cli-helpers",
+      "command": "pnpm exec vitest run --coverage.enabled=false test/unit/core/repo-map test/unit/cli-helpers.test.ts test/integration/commands/repo-map-internal.test.ts test/unit/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-focused-1",
+      "checkId": "check-focused",
+      "recordedAt": "2026-11-17T20:38:11.986+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run --coverage.enabled=false test/unit/core/repo-map test/unit/cli-helpers.test.ts test/integration/commands/repo-map-internal.test.ts test/unit/cli.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "684dde6b6aa53a09f06aa62ae9f70da2022eb1f8eaccd8961ce314260a7b85b3",
+      "durationMs": 6846
+    },
+    {
+      "id": "ev-check-focused-2",
+      "checkId": "check-focused",
+      "recordedAt": "2026-11-17T20:41:47.378+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run --coverage.enabled=false test/unit/core/repo-map test/unit/cli-helpers.test.ts test/integration/commands/repo-map-internal.test.ts test/unit/cli.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "561aae7c145f43ed34d6a8dbe999675f586c75d3206cbe5dc7100a0e1fa5b30e",
+      "durationMs": 7948
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-17T20:43:54.694+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "799fe31361b2aa196a7d7b69cb7c4cf7758adcdabb4810df7faa9f77e57c75af",
+      "durationMs": 125463
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-17T20:31:28.937+07:00",
+  "updatedAt": "2026-11-17T20:44:01.860+07:00",
+  "completedAt": "2026-11-17T20:44:01.860+07:00"
+}

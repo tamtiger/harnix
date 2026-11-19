@@ -89,6 +89,7 @@ async function runReadAction(cwd: string, options: RepoMapCliOptions): Promise<u
       symbol,
       options.body === true,
       parseRepoMapListFormat(options.format),
+      options.offset === undefined ? 0 : parseRepoMapOffset(options.offset),
     );
   }
   const limit = parseRepoMapLimit(options.limit ?? "20");
@@ -278,10 +279,12 @@ export async function outlineRepoMapInternal(
   symbol?: string,
   body = false,
   format: RepoMapListFormat = "json",
+  offset = 0,
 ): Promise<unknown> {
   const root = await configuredRoot(cwd);
   const result = await outlineRepoMap({
     limit,
+    ...(offset === 0 ? {} : { offset }),
     root,
     ...(symbol === undefined ? {} : { symbol }),
     ...(body ? { body: true } : {}),

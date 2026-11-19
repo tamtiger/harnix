@@ -43,6 +43,8 @@ describe("repo-map record extraction", () => {
     const root = await temporaryRepository();
     const kinds: Record<string, string> = {
       "src/a.test.ts": "test",
+      "tests/test_m17_hold.php": "test",
+      "application/views/M07C01/test_result.php": "source",
       "package.json": "manifest",
       "README.md": "documentation",
       "settings.yaml": "config",

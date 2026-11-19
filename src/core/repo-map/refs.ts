@@ -8,7 +8,8 @@ import { extractFileSymbols } from "./outline.js";
 import { findAffectedTests } from "./tests.js";
 import { defaultRepoMapLimits, type RepoMapRecordV1, type RepoMapV1, repoMapRefreshHint } from "./types.js";
 
-export type RepoMapRefKind = "declaration" | "import" | "reference";
+/** `string`: the symbol appears only inside a quoted string (a log message, a `load->model('Name')` argument). */
+export type RepoMapRefKind = "declaration" | "import" | "reference" | "string";
 
 export interface RepoMapSymbolReferenceV1 {
   readonly path: string;
@@ -176,7 +177,7 @@ async function scanFileForSymbol(
       if (trimmed.length === 0 || isCommentLine(trimmed) || secretValue.test(trimmed)) continue;
       if (!wordPattern.test(trimmed)) continue;
       declaredAt ??= declarationLines(content, path, symbol);
-      const kind = classifyReferenceLine(trimmed, declPattern);
+      const kind = classifyReferenceLine(trimmed, declPattern, wordPattern);
       results.push({
         kind: kind === "reference" && declaredAt.has(index + 1) ? "declaration" : kind,
         line: index + 1,
@@ -200,12 +201,14 @@ function declarationLines(content: string, path: string, symbol: string): Set<nu
   );
 }
 
-function classifyReferenceLine(trimmed: string, declPattern: RegExp): RepoMapRefKind {
+const quotedString = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/gu;
+
+function classifyReferenceLine(trimmed: string, declPattern: RegExp, wordPattern: RegExp): RepoMapRefKind {
   if (/^(?:import\b|from\s+\S+\s+import\b|(?:global\s+)?using\b|.*=\s*require\s*\()/u.test(trimmed)) {
     return "import";
   }
   if (declPattern.test(trimmed)) return "declaration";
-  return "reference";
+  return wordPattern.test(trimmed.replace(quotedString, '""')) ? "reference" : "string";
 }
 
 function isCommentLine(trimmed: string): boolean {

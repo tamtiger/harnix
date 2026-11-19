@@ -16,6 +16,7 @@ import {
   type RepoMapTestsOptions,
   type RepoMapTestsResultV1,
 } from "./tests.js";
+import { findContentTests } from "./test-content.js";
 import { refuseBody } from "./outline-body.js";
 import { findDeclaredType, resolveTypeTarget } from "./class-lookup.js";
 import { nearestPaths, withSuggestions } from "./path-hints.js";
@@ -149,7 +150,8 @@ export async function impactRepoMapTests(
   } catch (error: unknown) {
     return createUnavailableRepoMapTests(isMissingPathError(error) ? "missing" : "invalid", options);
   }
-  return suggestedFor(findAffectedTests(map, options), map, options.target);
+  const contentMatches = await findContentTests(map, options.root, options.target);
+  return suggestedFor(findAffectedTests(map, { ...options, contentMatches }), map, options.target);
 }
 
 export async function outlineRepoMap(

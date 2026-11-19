@@ -154,7 +154,10 @@ describe("validateRepoMapOptions --format", () => {
 
   it("accepts --offset only with --refs and parses it as an integer up to 10000", () => {
     expect(() => validateRepoMapOptions({ offset: "20", refs: "run" })).not.toThrow();
-    expect(() => validateRepoMapOptions({ offset: "20", query: "run" })).toThrow(/--offset requires repo-map --refs/u);
+    expect(() => validateRepoMapOptions({ offset: "20", outline: "src/a.ts" })).not.toThrow();
+    expect(() => validateRepoMapOptions({ offset: "20", query: "run" })).toThrow(
+      /--offset requires repo-map --refs or --outline/u,
+    );
     expect(parseRepoMapOffset("0")).toBe(0);
     expect(parseRepoMapOffset("10000")).toBe(10_000);
     for (const bad of ["-1", "1.5", "x", "10001", ""]) expect(() => parseRepoMapOffset(bad)).toThrow(/--offset/u);

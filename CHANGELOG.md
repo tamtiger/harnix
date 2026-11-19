@@ -16,6 +16,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Epic exercise-skill: kho tài liệu và ghi công nguồn (UPSTREAM_MAPPING, UPSTREAM_BASELINE, HARNESS_RESEARCH), fixture API và CLI mẫu kiểm quy trình harnix-exercise
 
+## [2.36.2] - 2026-11-17
+
+### Fixed
+
+- repo-map: --tests đọc file test tìm tên lớp (CodeIgniter load->model) và không coi view test_*.php là test; --outline có --offset/nextOffset; --refs gắn kind string cho tham chiếu trong chuỗi; help ghi rõ output là JSON một dòng
+
 ## [2.36.1] - 2026-11-17
 
 ### Changed

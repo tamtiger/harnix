@@ -46,12 +46,24 @@ export function filterSymbols(
   return list.sort((a, b) => a.startLine - b.startLine || compareCodeUnits(a.name, b.name));
 }
 
+/** One page of symbols: `nextOffset` is set only when more follow. */
+export function pageSymbols(
+  all: readonly RepoMapSymbolOutlineV1[],
+  offset: number,
+  limit: number,
+): { readonly listed: RepoMapSymbolOutlineV1[]; readonly truncated: boolean; readonly nextOffset?: number } {
+  const listed = all.slice(offset, offset + limit);
+  const truncated = all.length > offset + limit;
+  return { listed, truncated, ...(truncated ? { nextOffset: offset + limit } : {}) };
+}
+
 export function makeResult(
   status: "ready" | "not-found" | "skipped",
   opts: RepoMapOutlineOptions,
   symbols: readonly RepoMapSymbolOutlineV1[] = [],
   truncated = false,
   language?: string,
+  nextOffset?: number,
 ): RepoMapOutlineResultV1 {
   return {
     generator: "harnix",
@@ -62,6 +74,7 @@ export function makeResult(
     symbols,
     target: opts.target,
     truncated,
+    ...(nextOffset !== undefined ? { nextOffset } : {}),
     ...(language !== undefined ? { language } : {}),
     ...(opts.symbol !== undefined ? { symbolFilter: opts.symbol.trim() } : {}),
   };
@@ -78,6 +91,11 @@ export function assertOutlineOptions(options: RepoMapOutlineOptions): void {
     throw new Error("Outline target must be an exact normalized repository-relative POSIX path.");
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 50)
     throw new Error("Outline limit must be an integer between 1 and 50.");
+  if (
+    options.offset !== undefined &&
+    (!Number.isInteger(options.offset) || options.offset < 0 || options.offset > 10_000)
+  )
+    throw new Error("Outline offset must be an integer between 0 and 10000.");
   if (options.body === true && options.symbol === undefined) throw new Error("Outline body requires a symbol filter.");
   if (options.symbol !== undefined && (options.symbol.trim().length === 0 || options.symbol.trim().length > 128))
     throw new Error("Outline symbol filter must contain 1 to 128 characters.");

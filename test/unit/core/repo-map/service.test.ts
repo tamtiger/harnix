@@ -168,6 +168,42 @@ describe("repository map service", () => {
       },
     ]);
   });
+  it("finds a PHP test that names the model only inside a load->model string after many other words", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "application", "models"), { recursive: true });
+    await mkdir(join(root, "application", "views", "M07C01"), { recursive: true });
+    await mkdir(join(root, "tests"), { recursive: true });
+    await writeFile(
+      join(root, "application", "models", "M17C71Model.php"),
+      "<?php\nclass M17C71Model {\n  public function run() { return 1; }\n}\n",
+    );
+    await writeFile(join(root, "application", "views", "M07C01", "test_result.php"), "<?php echo 'M17C71Model';\n");
+    const noise = Array.from({ length: 1_200 }, (_, i) => `$word${i} = ${i};`).join("\n");
+    await writeFile(join(root, "tests", "test_m17_hold.php"), `<?php\n${noise}\n$this->load->model('M17C71Model');\n`);
+    await writeFile(join(root, "tests", "test_m17_other.php"), "<?php\n$x = 1;\n");
+    await refreshRepoMap({ root });
+
+    const result = await impactRepoMapTests({ limit: 20, root, target: "application/models/M17C71Model.php" });
+
+    expect(result.tests).toEqual(["tests/test_m17_hold.php"]);
+  });
+  it("pages the outline of a file with many functions by --offset and reports the nextOffset", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    const functions = Array.from({ length: 5 }, (_, i) => `export function fn${i}(): number {\n  return ${i};\n}\n`);
+    await writeFile(join(root, "src", "many.ts"), functions.join("\n"));
+
+    const first = await outlineRepoMap({ limit: 2, root, target: "src/many.ts" });
+    const second = await outlineRepoMap({ limit: 2, offset: first.nextOffset ?? -1, root, target: "src/many.ts" });
+    const last = await outlineRepoMap({ limit: 2, offset: second.nextOffset ?? -1, root, target: "src/many.ts" });
+
+    expect(first.symbols.map(({ name }) => name)).toEqual(["fn0", "fn1"]);
+    expect(first).toMatchObject({ nextOffset: 2, truncated: true });
+    expect(second.symbols.map(({ name }) => name)).toEqual(["fn2", "fn3"]);
+    expect(last.symbols.map(({ name }) => name)).toEqual(["fn4"]);
+    expect(last.truncated).toBe(false);
+    expect(last.nextOffset).toBeUndefined();
+  });
   it("reports missing cache when refsRepoMap runs before refreshRepoMap", async () => {
     const root = await temporaryRepository();
     const refs = await refsRepoMap({ limit: 20, root, symbol: "PaymentService" });
