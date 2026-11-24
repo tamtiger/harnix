@@ -2,7 +2,7 @@
 name: harnix-security-lens
 description: Use when reviewing or implementing security-critical code paths including untrusted input boundaries, command execution, path traversal and credential handling.
 metadata:
-  version: "2.38.1"
+  version: "2.38.2"
 ---
 
 # Security review lens

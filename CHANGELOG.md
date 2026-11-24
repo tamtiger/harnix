@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.38.2] - 2026-11-24
+
+### Fixed
+
+- harnix skill harnix-exercise --reference runbook chạy được: đăng ký references/runbook.md, thêm test chiều ngược mọi file references/ phải được đăng ký và script scripts/exercise-skill-references.mjs chạy dist/cli.js cho mọi reference được nhắc
+
 ## [2.38.1] - 2026-11-24
 
 ### Fixed

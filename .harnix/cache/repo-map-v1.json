@@ -1,7 +1,7 @@
 {
   "extractorVersion": 2,
   "generator": "harnix",
-  "inventoryFingerprint": "d41d96db67bd5615311797f5b4f4820fe5a6d460881e8d595f3f975d862f14b0",
+  "inventoryFingerprint": "561f14790a0cdb69c962ede233013fb2f6a1ac2d3c3165029dfeacc6c2ecf612",
   "records": [
     {
       "byteLength": 351,
@@ -77,8 +77,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 52287,
-      "contentHash": "c3d95c3398f7d1de54306c195c611d8240bf877b329404fde7ae7e67212e9b67",
+      "byteLength": 53057,
+      "contentHash": "77cf2bf47a96223d05dc84fb3f94430d13bfaec0e15f52e7bd3ef8c2fe8e21e7",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -119,14 +119,15 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 109055,
-      "contentHash": "c18c7b3f956f2aecd6472fb8a84b1d919b6ee12108a4a1f07d020d2d6be9a067",
+      "byteLength": 109307,
+      "contentHash": "8e27801a74b6a7e28815881d2923b90aaf8d1769e2a4299a275f5995a644cf83",
       "extension": "md",
       "headings": [
         "Added",
         "Changed",
         "Changelog",
         "Fixed",
+        "[2.33.0] - 2026-11-14",
         "[2.33.1] - 2026-11-15",
         "[2.33.2] - 2026-11-15",
         "[2.34.0] - 2026-11-16",
@@ -136,9 +137,8 @@
         "[2.36.1] - 2026-11-17",
         "[2.36.2] - 2026-11-17",
         "[2.37.0] - 2026-11-19",
-        "[2.38.0-dev.1] - 2026-11-24",
-        "[2.38.0-dev.2] - 2026-11-24",
-        "[2.38.0-dev.3] - 2026-11-24"
+        "[2.38.0] - 2026-11-24",
+        "[2.38.1] - 2026-11-24"
       ],
       "identifiers": [
         "b",
@@ -191,8 +191,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 53264,
-      "contentHash": "482d75424a683ffeff9d907bcced60806fd25d9b881bfe55a5f76f4bdd53c07f",
+      "byteLength": 53266,
+      "contentHash": "bf73e5dd4ba2202badfdd64830cf0af63e4959f93a63d36c3f95190b49b66cb2",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -298,8 +298,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 106723,
-      "contentHash": "70623346be663a19898acafae666b8e276fafc1853967ef8177a97e2b2c9a63d",
+      "byteLength": 107260,
+      "contentHash": "17a019c194b760d86f728909ebeb95c22bebc84bab8ad54cc91fc30fae5a6bd9",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -927,8 +927,8 @@
       ]
     },
     {
-      "byteLength": 2672,
-      "contentHash": "e69aea712e1613f4d7fc0cc9c629feaefab1c5de7fbb66e915ae60189473fe22",
+      "byteLength": 2666,
+      "contentHash": "bfe93c6043f5ce25e98a7c80c59f459f3e8a521c98082e9226dc002795a4c5c3",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -7085,6 +7085,45 @@
       ]
     },
     {
+      "byteLength": 1849,
+      "contentHash": "0182232b7d04d7235a8c6a462e6857e51da11e89b3bdd29f2e572b859b807526",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "DoctorFinding",
+        "RUNNABLE_SCRIPTS",
+        "hasRunnableEntryPoint",
+        "inspectExerciseRunbook",
+        "manifest",
+        "scripts"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/doctor/findings.js",
+        "src/core/spec/exercise-runbook.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/doctor/exercise-runbook-finding.ts",
+      "language": "typescript",
+      "references": [
+        "EXERCISE_RUNBOOK_PATH",
+        "bin",
+        "count",
+        "findExerciseRunbook",
+        "finding",
+        "info",
+        "runbook",
+        "running",
+        "severity",
+        "skill",
+        "spec",
+        "started",
+        "warning"
+      ]
+    },
+    {
       "byteLength": 665,
       "contentHash": "c08829cb46f47a0969294d4bc4ed9555267598be1b641f54f5ac0bb6b543f0dd",
       "extension": "ts",
@@ -7144,8 +7183,8 @@
       ]
     },
     {
-      "byteLength": 1406,
-      "contentHash": "ca4ee9d4d84941d5c6d5be2b62137fec48e966fc59ad9687d6ae6c36cc92da2f",
+      "byteLength": 1436,
+      "contentHash": "1add87cfae098ef30f486fbf6b471b6dc624354052b48002c67ee5410b6a6677",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7178,6 +7217,7 @@
         "managed",
         "obsolete",
         "profile",
+        "runbook",
         "skew",
         "step",
         "tracked",
@@ -7919,8 +7959,8 @@
       ]
     },
     {
-      "byteLength": 7935,
-      "contentHash": "452cb4a631dc0b9da14cec1b9d241a80ac463906b1ba06362da80f0beabc328d",
+      "byteLength": 8069,
+      "contentHash": "c64641355d8ac0ea8bee7e689e3dba2ee0ff16080e935d9bdc07d3111f989a99",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7959,6 +7999,7 @@
         "node:fs/promises",
         "src/core/config/config.js",
         "src/core/doctor/config-drift.js",
+        "src/core/doctor/exercise-runbook-finding.js",
         "src/core/doctor/findings.js",
         "src/core/doctor/layout-finding.js",
         "src/core/doctor/project-legacy.js",
@@ -7992,19 +8033,18 @@
         "hooks",
         "info",
         "inspectConfigDrift",
+        "inspectExerciseRunbook",
         "inspectLegacyEntry",
         "inspectStorageLayout",
         "inspectTaskRecords",
         "inspectTrackedRuntimeFiles",
         "inspectUntrackedLegacySurfaces",
         "isMissingPathError",
-        "kiro",
         "layer",
         "layout",
         "live",
         "managed",
         "obsolete",
-        "own",
         "ownershipState",
         "process",
         "readConfigDocument",
@@ -8015,6 +8055,7 @@
         "resolveSafeHarnixPath",
         "resolveSafeProjectPath",
         "restore",
+        "runbook",
         "set",
         "severity",
         "skewMessage",
@@ -19004,8 +19045,8 @@
       ]
     },
     {
-      "byteLength": 1990,
-      "contentHash": "ca7b5fa34aabc789d5986fe95370b4bfbf9b3319ba9336cc98afa3b76dd5e03e",
+      "byteLength": 2494,
+      "contentHash": "9532ae54c7ad90981456083aaae1c03e0b8d70b49b839a6dd7f257c291b14cff",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -19014,15 +19055,20 @@
         "SecretScanGitRunner",
         "Set",
         "advice",
+        "candidates",
         "changed",
         "covered",
+        "exists",
         "finishCommitAdvice",
         "outside",
+        "path",
         "patterns"
       ],
       "importTargets": [
         "./secret-scan-changes.js",
         "globby",
+        "node:fs/promises",
+        "node:path",
         "src/core/tasks/task.js",
         "src/core/verification/transient-directories.js",
         "type"
@@ -19036,6 +19082,7 @@
         "before",
         "bounded",
         "buildGlobIgnores",
+        "cannot",
         "changedPaths",
         "commit",
         "contract",
@@ -19049,7 +19096,6 @@
         "proposal",
         "scan",
         "skipped",
-        "slice",
         "targetedSegments",
         "title"
       ]
@@ -23618,8 +23664,8 @@
       ]
     },
     {
-      "byteLength": 3593,
-      "contentHash": "0886775d7cce912cb83cea20f2cce38f019535dc240737da64a945cc6c2f6f56",
+      "byteLength": 3587,
+      "contentHash": "f81e0de7b94ad93ef88b9419273ddde0c5601176939da840679cd6965fabed20",
       "extension": "md",
       "headings": [
         "Architecture design review",
@@ -23689,8 +23735,8 @@
       "path": "src/skills/harnix-arch-review/references/wbs-consolidation.md"
     },
     {
-      "byteLength": 2029,
-      "contentHash": "3aa6e3efd69d0c699fcc6ed6bbdd2a0cbeb0ea7bb15b4c2bf90aa9bc356f810c",
+      "byteLength": 2023,
+      "contentHash": "9a64786207afc615003b4ca9011c34a6d25ffc4d5a5dd3b1502f9427f4b6c7db",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -23728,8 +23774,8 @@
       "path": "src/skills/harnix-bugfix-preserve/references/invariant-debugging.md"
     },
     {
-      "byteLength": 4747,
-      "contentHash": "6b9f1b611e09b18f4131c23053cf380d0bab3ee62558d8a645d9e7d7d56ff431",
+      "byteLength": 4741,
+      "contentHash": "67e33ebff9b6c1fc5f4dd7112707b90c9bde4ece13093d02c50a7a9d43b564ff",
       "extension": "md",
       "headings": [
         "Capture",
@@ -23767,8 +23813,8 @@
       "path": "src/skills/harnix-debug/references/feedback-loop.md"
     },
     {
-      "byteLength": 3693,
-      "contentHash": "48aea65cf0888a6899e0ce452466f83d2f627443195a8553c3fa9550468e0e14",
+      "byteLength": 3809,
+      "contentHash": "a1eeb93faa75d63ce9befee4a51cda301574d7dfc6cf38640fa96786a1e7323e",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23860,6 +23906,24 @@
       "path": "src/skills/harnix-exercise/references/evidence.md"
     },
     {
+      "byteLength": 1280,
+      "contentHash": "6d2aa2b39c9f482a5e7ad0e1c2319904958c003e2a547c8d29e64f6d20b5a26a",
+      "extension": "md",
+      "headings": [
+        "Exercise runbook",
+        "Proposing it",
+        "Template",
+        "The exercise runbook of a repository"
+      ],
+      "identifiers": [
+        "nothing"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/runbook.md"
+    },
+    {
       "byteLength": 2201,
       "contentHash": "1267442b4f7b479be710359dd3fdee8dbb0865e72770388aa4cc15e8a30cd6cc",
       "extension": "md",
@@ -23904,8 +23968,8 @@
       "path": "src/skills/harnix-exercise/references/web.md"
     },
     {
-      "byteLength": 2572,
-      "contentHash": "0c6332921a9c1454fd8eb23a615248b2cabf0239fb879bf8b6c7e66f9a06dd4c",
+      "byteLength": 2566,
+      "contentHash": "1761790b8a1986d827eb62c0c0ed2a714b80f57efb90847a341f5fa2f1a78c61",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -23949,8 +24013,8 @@
       "path": "src/skills/harnix-flaky-test/references/concurrency-isolation.md"
     },
     {
-      "byteLength": 7130,
-      "contentHash": "4e2764abaf10248e9da1b8e0776010cec2c3277d341b5fa70bab4ab2df44b50a",
+      "byteLength": 7191,
+      "contentHash": "03ffc7aea93251dca0a72bb4d7d224b79c9b10356b81043ffa5e61ce3a842ac4",
       "extension": "md",
       "headings": [
         "Documentation synchronization",
@@ -24072,8 +24136,8 @@
       "path": "src/skills/harnix-implement/references/feedback.md"
     },
     {
-      "byteLength": 3136,
-      "contentHash": "315c5ad95cea52c5fc9c771fa0800a60fbd7fcd5cc725162789ff32f7e3a46d4",
+      "byteLength": 3130,
+      "contentHash": "5dd13f38973c89cd7f2c125d9ca1995421358d8efe8bbf20da93ea1d5ae5e01e",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -24115,8 +24179,8 @@
       "path": "src/skills/harnix-migration-safety/references/zero-downtime-evolution.md"
     },
     {
-      "byteLength": 6297,
-      "contentHash": "d3650a56154ba399e6e486dea86cab255635ca3ae0d673ae849b16fc9c645ad0",
+      "byteLength": 6291,
+      "contentHash": "78e75837a9420f1b02e3584c512c21c2a128f130c1959b17d76eee9c70aa2ebd",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -24289,8 +24353,8 @@
       "path": "src/skills/harnix-plan/references/replan.md"
     },
     {
-      "byteLength": 3980,
-      "contentHash": "7cabbdcd787f6ddcb65657baa7d527a0b77485ea7b6c08fcfbce190f21b8e6ec",
+      "byteLength": 3974,
+      "contentHash": "602d3bc203709d162b46cd354beb1cd29f41c47993efee02d1907eb7d00649d8",
       "extension": "md",
       "headings": [
         "Decide",
@@ -24327,8 +24391,8 @@
       "path": "src/skills/harnix-research/references/scouting-isolation.md"
     },
     {
-      "byteLength": 4380,
-      "contentHash": "e9f3214432184d9c19483510c8fd7f821255c7e84234d544af2548c2797402e7",
+      "byteLength": 4374,
+      "contentHash": "ffa9216acda99ca1b50fa021a4018ba6a5bf1e6d9a1db326bc00ab081de87979",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -24387,8 +24451,8 @@
       "path": "src/skills/harnix-review/references/multi-lens.md"
     },
     {
-      "byteLength": 3217,
-      "contentHash": "85607d7f51d6cfe3318c7182bede147bc52f1b136cf14884935424fe17e38d62",
+      "byteLength": 3211,
+      "contentHash": "6df65a451f12454f89196b48fb17a49813b2ff14f9a1d08f07638e0e5dfd54b3",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -24429,8 +24493,8 @@
       "path": "src/skills/harnix-security-lens/references/injection-traversal-guardrails.md"
     },
     {
-      "byteLength": 2648,
-      "contentHash": "c3edf7b844feadcd296acdfb64e744d129386d4f499ad359dd02c3fe241af9a4",
+      "byteLength": 2642,
+      "contentHash": "bb8ecec6baec4ab0980ec603aa639ce3afb049c259653cfafaf06d2e7886fbaa",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -24467,8 +24531,8 @@
       "path": "src/skills/harnix-sequential-thinking/references/multi-step-tree-search.md"
     },
     {
-      "byteLength": 3384,
-      "contentHash": "2afc412cb56f410803306b5ecfed675152b5e9acf784fe13c9c6d0fa75492cd6",
+      "byteLength": 3378,
+      "contentHash": "25f6c9f510284120695b632f4b156c135ddf1dfad3cb29724bbe18a8dab38ac0",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -24502,8 +24566,8 @@
       "path": "src/skills/harnix-verification-gap/references/verification-blindspots.md"
     },
     {
-      "byteLength": 6914,
-      "contentHash": "b0a4754c4fd4e02c7a21a6c71a51ede50cd830b18fc92cab6759a870cb38c972",
+      "byteLength": 6975,
+      "contentHash": "953847b0eed44f77a84c19a8fae07784155f8d3fcdd665e88a271fde009d58f3",
       "extension": "md",
       "headings": [
         "Finish",
@@ -24819,6 +24883,7 @@
         "must",
         "nearest",
         "needs",
+        "nested",
         "nextStage",
         "none",
         "open",
@@ -24827,7 +24892,6 @@
         "prune",
         "refs",
         "runs",
-        "scripts",
         "set",
         "solutions",
         "spans",
@@ -28371,6 +28435,7 @@
         "implementingTaskV3",
         "initializeUtcProject",
         "inspect",
+        "inspected",
         "instead",
         "note",
         "payload",
@@ -28383,7 +28448,6 @@
         "runCli",
         "running",
         "runs",
-        "scripts",
         "secretAdvisory",
         "set",
         "setActiveTask",
@@ -31755,6 +31819,7 @@
         "context",
         "contextFastPathArguments",
         "dependencies",
+        "extra",
         "hook",
         "hooks",
         "link",
@@ -31770,7 +31835,6 @@
         "samples",
         "scan",
         "scanTextFiles",
-        "scripts",
         "server",
         "shared",
         "sources",
@@ -34623,8 +34687,8 @@
       ]
     },
     {
-      "byteLength": 5080,
-      "contentHash": "6b68799fe17f23b780869d356ba8c119c33d4f1959875e189612b0689c7b1271",
+      "byteLength": 6216,
+      "contentHash": "c21b3b2adf1a661b6181b918f03a4b9d4de9bf949a70b775883c1dd2d2a371f6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -34632,6 +34696,7 @@
         "DoctorDeps",
         "Error",
         "GlobalManagedTransactionError",
+        "baseline",
         "calls",
         "claude",
         "deps",
@@ -34645,8 +34710,11 @@
         "temporaryUserHome"
       ],
       "importTargets": [
+        "node:fs/promises",
+        "node:path",
         "src/commands/init.js",
         "src/core/doctor/doctor.js",
+        "src/core/doctor/exit-code.js",
         "src/core/global/managed-files.js",
         "test/support/temporary-repository.js",
         "test/support/temporary-user-home.js",
@@ -34662,13 +34730,16 @@
         "cannot",
         "claude",
         "commands",
+        "count",
         "created",
         "defaultCommandLookup",
         "developer",
+        "doctorExitCode",
         "drifted",
         "failed",
         "fixed",
         "globalIntegrations",
+        "info",
         "initializeProject",
         "managed",
         "memberMatchers",
@@ -34681,6 +34752,8 @@
         "restored",
         "rollback",
         "runDoctor",
+        "runbook",
+        "scripts",
         "sections",
         "setup",
         "severity",
@@ -34688,6 +34761,53 @@
         "updated",
         "useTemporaryUserHomes",
         "warning"
+      ]
+    },
+    {
+      "byteLength": 2614,
+      "contentHash": "5d6c1e5cb7d75a953b196d3e6a86e0942a2b8a5aab197f9ed3c90cb544728897",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "empty",
+        "findings",
+        "manifest",
+        "project",
+        "root",
+        "run",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/doctor/exercise-runbook-finding.js",
+        "src/core/doctor/finding-codes.js",
+        "src/core/doctor/findings.js",
+        "test/support/temporary-repository.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/doctor/exercise-runbook-finding.test.ts",
+      "language": "typescript",
+      "references": [
+        "DOCTOR_FINDING_CODES",
+        "bin",
+        "codes",
+        "empty",
+        "finding",
+        "info",
+        "inspectExerciseRunbook",
+        "level",
+        "message",
+        "packageJson",
+        "recursive",
+        "runbook",
+        "scripts",
+        "severity",
+        "skill",
+        "spec"
       ]
     },
     {
@@ -44281,8 +44401,8 @@
       ]
     },
     {
-      "byteLength": 2961,
-      "contentHash": "2b6fa249d8a35e9d177f9c660a1cfdc50f3b95436d1eca5230f89ceaaf3aa419",
+      "byteLength": 3390,
+      "contentHash": "6725ab76569bfd4661ff3356bc5a402093e864e6c1bc5c340c2d93745fa51ce4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -44319,6 +44439,7 @@
         "buildTaskV3",
         "cannot",
         "commit",
+        "does",
         "finish",
         "finishCommitAdvice",
         "inside",
@@ -44326,6 +44447,7 @@
         "order",
         "outside",
         "recursive",
+        "report",
         "runner",
         "slice",
         "title"
@@ -50322,6 +50444,7 @@
         "delta",
         "digest",
         "does",
+        "failures",
         "focused",
         "followUpOf",
         "format",
@@ -50340,7 +50463,6 @@
         "resolve",
         "retired",
         "safe",
-        "scripts",
         "set",
         "sources",
         "split",
@@ -51943,8 +52065,8 @@
         "reads",
         "ready",
         "recordedAt",
+        "recursive",
         "runs",
-        "scripts",
         "seedLearningLines",
         "sessionLiteTokens",
         "shared",

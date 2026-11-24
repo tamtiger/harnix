@@ -16,6 +16,7 @@ import exerciseApiReference from "./harnix-exercise/references/api.md";
 import exerciseCliReference from "./harnix-exercise/references/cli.md";
 import exerciseDetectionReference from "./harnix-exercise/references/detection.md";
 import exerciseEvidenceReference from "./harnix-exercise/references/evidence.md";
+import exerciseRunbookReference from "./harnix-exercise/references/runbook.md";
 import exerciseSafetyReference from "./harnix-exercise/references/safety.md";
 import exerciseWebReference from "./harnix-exercise/references/web.md";
 import concurrencyIsolationReference from "./harnix-flaky-test/references/concurrency-isolation.md";
@@ -99,6 +100,7 @@ const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
       cli: exerciseCliReference,
       detection: exerciseDetectionReference,
       evidence: exerciseEvidenceReference,
+      runbook: exerciseRunbookReference,
       safety: exerciseSafetyReference,
       web: exerciseWebReference,
     },

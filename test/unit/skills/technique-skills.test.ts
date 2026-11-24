@@ -91,7 +91,15 @@ describe("technique skills catalog", () => {
 
     const exercise = techniqueSkills.find((s) => s.name === "harnix-exercise");
     expect(exercise).toBeDefined();
-    expect(Object.keys(exercise!.references).sort()).toEqual(["api", "cli", "detection", "evidence", "safety", "web"]);
+    expect(Object.keys(exercise!.references).sort()).toEqual([
+      "api",
+      "cli",
+      "detection",
+      "evidence",
+      "runbook",
+      "safety",
+      "web",
+    ]);
 
     const verificationGap = techniqueSkills.find((s) => s.name === "harnix-verification-gap");
     expect(verificationGap).toBeDefined();

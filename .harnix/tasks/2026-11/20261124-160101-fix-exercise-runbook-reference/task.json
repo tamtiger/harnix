@@ -1,0 +1,195 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-160101-fix-exercise-runbook-reference",
+  "title": "Sửa đăng ký reference runbook của harnix-exercise và kiểm bằng CLI build",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đăng ký references/runbook.md trong technique-skills.ts để harnix skill harnix-exercise --reference runbook chạy được, và chặn tái diễn bằng test chiều ngược cùng một check chạy thật bản build.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix skill harnix-exercise --reference runbook, chạy bằng dist/cli.js đã build, thoát 0 và in nội dung mẫu exercise.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-cli-4",
+        "ev-chk-focused-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mọi file trong references/ của mọi skill đều được đăng ký trong catalog, có test đơn vị đòi điều đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Một script chạy bản build thật spawn dist/cli.js cho mọi cặp skill và reference được nhắc trong nguồn skill và thoát 0 với nội dung không rỗng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-cli-4",
+        "ev-chk-focused-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-cli",
+      "description": "exercise: chạy bản build thật, dist/cli.js skill cho mọi reference được nhắc",
+      "command": "node scripts/exercise-skill-references.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-exercise-cli-1",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:04:56.991+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-references.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae859691bb237d875bb547d6d4c71524fe6d5c20f4c5cfa52e0fa2cfa534dc2d",
+      "durationMs": 12915
+    },
+    {
+      "id": "ev-chk-exercise-cli-2",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:05:03.042+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. node scripts/exercise-skill-references.mjs chạy dist/cli.js thật cho mọi cặp skill và reference được nhắc (46), thoát 0; trước khi sửa cùng lệnh báo harnix-exercise --reference runbook: Unknown reference",
+      "artifactPaths": [],
+      "inputDigest": "ae859691bb237d875bb547d6d4c71524fe6d5c20f4c5cfa52e0fa2cfa534dc2d"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T16:05:15.630+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b585d4da16f5721d076013c8e910de9745e91fae51f37eed57f04d06c4d70178",
+      "durationMs": 10729
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T16:07:54.992+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "efb85cd0a6c9ae8f58061d2aa0b4b1aee66484024f1394f79d4e8d92ca4e33b0",
+      "durationMs": 157119
+    },
+    {
+      "id": "ev-chk-exercise-cli-3",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:09:52.272+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-references.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e9abf3366637394301d46d9c8f91996392488635cb5ede19528f563d24f85640",
+      "durationMs": 10293
+    },
+    {
+      "id": "ev-chk-exercise-cli-4",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:09:53.075+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. node scripts/exercise-skill-references.mjs chạy dist/cli.js thật cho mọi cặp skill và reference được nhắc, thoát 0; trước khi sửa cùng lệnh báo harnix-exercise --reference runbook: Unknown reference",
+      "artifactPaths": [],
+      "inputDigest": "e9abf3366637394301d46d9c8f91996392488635cb5ede19528f563d24f85640"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T16:10:04.303+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "22524cad713ac4a39d35bc171611dca96b19b2ca698d9f42eba1fce0eda99da2",
+      "durationMs": 9492
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T16:12:17.599+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c25c4def201235bcd838a22757bdc36eac2854be504f45236a4002e9218b6784",
+      "durationMs": 131043
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T16:01:01.822+07:00",
+  "updatedAt": "2026-11-24T16:12:26.992+07:00",
+  "completedAt": "2026-11-24T16:12:26.992+07:00"
+}
