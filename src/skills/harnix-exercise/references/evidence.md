@@ -5,7 +5,7 @@
 - Declare one required check per behavior group: `--set-check` or `--with-check` with the command that starts, drives and stops the target, and `inputs` covering the source and the test files.
 - Run it with `harnix workflow --run-check <id> -- <exe> [args...]`. The argument array must equal the declared command; a pipeline needs `-- bash -c "a && b"`.
 - Write the command so its exit code is the verdict: non-zero on any failed assertion, a timeout or a target that never became ready.
-- Name the declared check so ready can see it: an id or description that starts with `exercise` (for example `exercise-orders-api`); `harnix workflow --transition ready/ready --dry-run` adds an advisory for an observable criterion that no required `exercise` check covers.
+- Name the declared check so ready can see it: an id with an `exercise` segment (for example `chk-exercise-api`) or a description that starts with `exercise:`; `harnix workflow --transition ready/ready --dry-run` adds an advisory for an observable criterion that no required `exercise` check covers, and when `relevantPaths` touch the CLI or skill surface (`src/commands/`, `src/cli*`, `src/skills/`, `bin/`) and the task has no required `exercise` check.
 - Start the evidence summary with `mode: full`, `mode: partial` or `mode: code-only`. A criterion that describes observable behavior and reached only `code-only` gets a residual risk (`harnix workflow --add-risk <id> --text <t>`), never a plain pass.
 - Keep artifacts small and local to the task: response bodies, command output, screenshots, traces. Name them after the check id and redact secrets, tokens and personal data before saving.
 

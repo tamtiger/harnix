@@ -1,0 +1,188 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-162009-exercise-advisory-matching",
+  "title": "Sửa heuristic advisory exercise: nhận id chk-exercise-* và nhắc khi đổi bề mặt CLI hoặc skill",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Advisory ready --dry-run nhận check có đoạn exercise trong id hoặc mô tả bắt đầu bằng exercise, và còn nhắc khi relevantPaths chạm bề mặt CLI hoặc skill mà chưa có check chạy thật.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "ready --dry-run không còn bỏ sót check có id dạng chk-exercise-api hoặc exercise-cli (đoạn exercise phân tách bằng dấu gạch) hay mô tả bắt đầu bằng exercise, và không nhận chuỗi exercises hay unexercised; tiêu chí văn bản quan sát được xử lý như cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-cli-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Advisory còn kích hoạt khi relevantPaths của task chạm bề mặt CLI hoặc skill (src/commands/**, src/cli*, src/skills/**, bin) mà không có required check exercise nào; chỉ là advisory không chặn, không thêm trường vào TaskRecord, cùng lệnh gợi ý harnix skill harnix-exercise; task không chạm các đường dẫn đó hoặc đã có check exercise thì im lặng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-cli-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Chạy bản build thật (node dist/cli.js workflow --transition ready/ready --dry-run trong thư mục tạm cô lập) cho đúng các ca: id chk-exercise-api không advisory; task chạm src/commands/** không có check exercise có advisory; tiêu chí văn bản quan sát được như cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-cli-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu, skill, PRD, AGENTS.md và CHANGELOG mô tả đúng quy tắc đặt tên và điều kiện kích hoạt; version nâng một lần lên 2.38.3.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-cli",
+      "description": "exercise: chạy dist/cli.js ready --dry-run trên task tạm",
+      "command": "node scripts/exercise-advisory.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-exercise-cli-1",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:27:35.840+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-advisory.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c82f4f8c930d00cbbf97757ba220a6a91e7af9cb3e4abfb9381543e49c097051",
+      "durationMs": 12323
+    },
+    {
+      "id": "ev-chk-exercise-cli-2",
+      "checkId": "chk-exercise-cli",
+      "recordedAt": "2026-11-24T16:27:41.509+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full — 7 ca ready --dry-run chạy bằng dist/cli.js trong dự án tạm cô lập (id chk-exercise-api không advisory; id chk-exercises, đường dẫn src/commands và src/skills không có check exercise đều có advisory; đường dẫn src/core im lặng)",
+      "artifactPaths": [],
+      "inputDigest": "c82f4f8c930d00cbbf97757ba220a6a91e7af9cb3e4abfb9381543e49c097051"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T16:27:55.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1e95ef08cb30e51cd198a0bdeac48be61ffe4d193e736185d8582aaeb449c391",
+      "durationMs": 11903
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T16:30:13.352+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c7facb56b9588449f7e7226b58f7a8e21f7393da51c7b466aa4bd8ba220acd1e",
+      "durationMs": 133429
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/**",
+    "scripts/exercise-advisory.mjs",
+    "src/core/workflow/exercise-advisory.ts",
+    "src/core/workflow/ready.ts",
+    "src/skills/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T16:20:09.281+07:00",
+  "updatedAt": "2026-11-24T16:30:32.565+07:00",
+  "residualRisks": [
+    {
+      "id": "risk-broad-path-miss",
+      "text": "Task có relevantPaths là glob rộng như src/** không khớp mẫu bề mặt CLI hoặc skill nên advisory theo đường dẫn im lặng (bỏ sót); chỉ khớp khi đường dẫn bắt đầu bằng src/commands/, src/cli*, src/skills/ hoặc bin/.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-prose-skill-false-positive",
+      "text": "Sửa chỉ lời văn SKILL.md hoặc reference mà không có check exercise vẫn nhận advisory theo đường dẫn; chấp nhận vì chỉ là advisory không chặn, bỏ qua bằng cách khai báo check exercise hoặc ghi lý do trong quyết định.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-24T16:30:32.565+07:00"
+}

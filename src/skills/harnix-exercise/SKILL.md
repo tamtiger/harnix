@@ -2,7 +2,7 @@
 name: harnix-exercise
 description: Use when an implemented behavior must be proven by running it for real, by calling an API endpoint, running a CLI or driving a browser with generated test cases and recorded evidence.
 metadata:
-  version: "2.38.2"
+  version: "2.38.3"
 ---
 
 # Exercise the behavior for real
