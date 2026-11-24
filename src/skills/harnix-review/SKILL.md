@@ -2,7 +2,7 @@
 name: harnix-review
 description: Use when Harnix needs a standalone read-only code review of a diff, commit range or paths, or an evaluation of review feedback, without touching any task.
 metadata:
-  version: "2.38.3"
+  version: "2.39.0"
 ---
 
 # Review code (read-only)
@@ -35,7 +35,7 @@ Triage each finding before reporting it: `harnix skill harnix-review --reference
 
 ## Report
 
-Findings first, most severe first. Each has a severity, a precise `file:line`, the defect and when it occurs, why it matters here, the code or command evidence, and a fix direction when it is not obvious. Then a verdict (`ready`, `ready-with-fixes`, `not-ready`), the reviewed scope, omitted checks and residual risk. No findings is stated explicitly, still with scope and residual risk; absence of a visible defect is not proof of correctness.
+Findings first, most severe first. Each has a severity, a precise `file:line`, the defect and when it occurs, why it matters here, the code or command evidence, and a fix direction when it is not obvious. Then a verdict (`ready`, `ready-with-fixes`, `not-ready`), the reviewed scope, omitted checks and residual risk. No findings is stated explicitly, still with scope and residual risk; absence of a visible defect is not proof of correctness. What a review must disclose (Could-Not-Verify, what was tried, an independent reviewer's inputs): `harnix skill harnix-review --reference disclosure`.
 
 ## Feedback on a review
 

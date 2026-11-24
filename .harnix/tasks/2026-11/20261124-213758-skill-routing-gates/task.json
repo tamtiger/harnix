@@ -1,0 +1,253 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-213758-skill-routing-gates",
+  "title": "Test định tuyến skill suggest và kiểm tham chiếu skill",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bắt hồi quy định tuyến của harnix skill --suggest và mọi tham chiếu treo (skill, reference, cờ) trong nguồn skill bằng test tất định, không dùng model và không thêm dependency.",
+  "nonGoals": [],
+  "epicId": "20261124-213757-external-skill-lessons",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một fixture JSON liệt kê prompt `{query, expect, shouldTrigger}` gồm ca nên kích hoạt và ca gần-giống không được kích hoạt; một test vitest chạy `suggestSkills` và khẳng định top-1 đúng ở ca nên kích hoạt, không có skill sai đứng đầu ở ca gần-giống, và ghi hit@1, hit@3, tỉ lệ kích hoạt nhầm thành sàn chỉ tăng. Prompt không lặp nguyên từ vựng của mô tả skill.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-routing-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Một test quét mọi tên `harnix-*` và mọi cụm `harnix <lệnh> --cờ` trong SKILL.md và references của `src/skills` rồi báo tham chiếu treo: skill không tồn tại, reference không tồn tại, hoặc cờ không có trong bảng Commander hay `WORKFLOW_ACTIONS`; có test chứng minh fixture lỗi bị bắt và danh sách ngoại lệ (nếu có) chỉ được co lại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-references-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Nếu eval định tuyến lộ ca sai có thật của `suggestSkills`, bản sửa là tối thiểu và có test; không thêm chữ vào mô tả skill chỉ để qua test. Số phận của `scripts/eval-skill-triggers.py` (thay bằng test TS hay giữ làm công cụ thủ công) được ghi thành một decision.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-routing-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu liên quan (test/README.md, CHANGELOG, AGENTS.md nếu đổi hợp đồng) được đồng bộ; phiên bản nâng một lần bằng `pnpm version:sync` theo chính sách member epic (X.Y.0-dev.N); mọi trần token giữ nguyên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-routing",
+      "description": "Exercise: chạy CLI build thật harnix skill --suggest trên các ca định tuyến và prompt không liên quan",
+      "command": "node scripts/exercise-skill-routing.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/workflow/skill-routing-cases.json"
+      ]
+    },
+    {
+      "id": "chk-exercise-references",
+      "description": "Exercise: chạy CLI build thật harnix skill <tên> --reference <chủ đề> cho mọi cặp được nêu trong nguồn skill",
+      "command": "node scripts/exercise-skill-references.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/**",
+        "src/skills/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T21:55:08.277+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "da2ede8844d014c79a85984233df69594d02dd5f999bbeb7356ed27bd85ffd40",
+      "durationMs": 8801
+    },
+    {
+      "id": "ev-chk-exercise-routing-1",
+      "checkId": "chk-exercise-routing",
+      "recordedAt": "2026-11-24T21:55:23.339+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-routing.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f241a1dc911cfb15ed48a2212a614d449a2395c5e891f09a678339cbe6d86a3f",
+      "durationMs": 14285
+    },
+    {
+      "id": "ev-chk-exercise-references-1",
+      "checkId": "chk-exercise-references",
+      "recordedAt": "2026-11-24T21:55:33.927+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-references.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8857e5b8146c3b67ed2044f45e8dcc4ae80e676ee82e82c274d5f0c759a8fa6c",
+      "durationMs": 10099
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T21:57:23.433+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9fda893b5a75009af9f79d0c73e210ed31efb5c254391873a2b842ed5362fd1c",
+      "durationMs": 108636
+    },
+    {
+      "id": "ev-chk-exercise-routing-2",
+      "checkId": "chk-exercise-routing",
+      "recordedAt": "2026-11-24T21:57:29.993+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. Chạy dist/cli.js skill --suggest từ thư mục không có dự án Harnix cho 21 ca nên kích hoạt, 5 ca gần-giống và 2 prompt không liên quan: hit@1 0.52, hit@3 0.76, kích hoạt nhầm 0.20, prompt không liên quan trả rỗng; 0 lỗi.",
+      "artifactPaths": [],
+      "inputDigest": "f241a1dc911cfb15ed48a2212a614d449a2395c5e891f09a678339cbe6d86a3f"
+    },
+    {
+      "id": "ev-chk-exercise-references-2",
+      "checkId": "chk-exercise-references",
+      "recordedAt": "2026-11-24T21:57:31.059+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. Chạy dist/cli.js skill <tên> --reference <chủ đề> cho mọi cặp được nêu trong nguồn skill: 0 lỗi.",
+      "artifactPaths": [],
+      "inputDigest": "8857e5b8146c3b67ed2044f45e8dcc4ae80e676ee82e82c274d5f0c759a8fa6c"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "package.json",
+    "scripts/eval-skill-triggers.py",
+    "scripts/exercise-skill-references.mjs",
+    "scripts/exercise-skill-routing.mjs",
+    "src/commands/skills-suggest.ts",
+    "src/skills/**",
+    "test/README.md",
+    "test/support/skill-reference-audit.ts",
+    "test/workflow/skill-reference-audit.test.ts",
+    "test/workflow/skill-routing-cases.json",
+    "test/workflow/skill-routing-exercise.test.ts",
+    "test/workflow/skill-routing.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T21:37:58.429+07:00",
+  "updatedAt": "2026-11-24T21:57:44.018+07:00",
+  "decisions": [
+    {
+      "id": "dec-scope-dropped",
+      "text": "Bỏ khỏi epic: ma trận quyết định và ADR (harnix đã có --add-decision kèm rationale, schema đóng băng), tag nguồn gốc quyết định user/ai (không thêm trường), kiểm --run-check chạy 0 test (CLI đã từ chối ở run-check.ts), rubric tự chấm, scanner ngoài, điều phối nhiều agent, skill miền.",
+      "rationale": "Đối chiếu với mã harnix hiện có và ràng buộc AGENTS.md (không mạng, không subagent bắt buộc, không đổi TaskRecord v3, trần token)."
+    },
+    {
+      "id": "dec-license-ideas-only",
+      "text": "Chỉ lấy ý tưởng và viết lại bằng lời của harnix; không chép câu hay file nguyên văn từ 3 repo ngoài.",
+      "rationale": "claude-code-skills không có LICENSE rõ ràng và knowledge/ chưng cất từ tài liệu bên thứ ba; hai repo kia là MIT và Apache-2.0 nhưng giữ cùng quy tắc cho nhất quán."
+    },
+    {
+      "id": "dec-python-trigger-script",
+      "text": "Giữ scripts/eval-skill-triggers.py làm công cụ thủ công kiểm trùng mô tả (cosine TF-IDF, ngưỡng 0.80); hiện chạy PASS với độ giống tối đa 0.171. Không đưa vào gate vì gate của repo chỉ dùng Node và script không được tham chiếu ở package.json hay CI.",
+      "rationale": "Test routing mới đo hành vi suggestSkills, còn script này đo độ trùng giữa các mô tả; hai việc khác nhau. Đổi sang TypeScript chỉ khi trùng mô tả thành rủi ro thật."
+    },
+    {
+      "id": "dec-suggest-scorer-minimal",
+      "text": "suggestSkills chuyển từ khớp chuỗi con sang khớp theo token (bỏ stopword, bỏ chữ s số nhiều): hit@1 trên fixture từ 8/21 lên 11/21, prompt không liên quan trả rỗng. Sàn đặt đúng số đo (hit@1 0.5, hit@3 0.75, false trigger 0.2); không thêm trọng số IDF vì đổi kiểu điểm công khai.",
+      "rationale": "Sửa tối thiểu theo tiêu chí ac-3; các ca còn sai là giới hạn của so khớp từ vựng (từ test trong tên flaky-test luôn cộng điểm), được ghi bằng sàn chỉ tăng để lần cải tiến sau có chỗ nâng."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-lexical-scorer",
+      "text": "suggestSkills vẫn chỉ khớp từ vựng: hit@1 0.52 trên fixture, prompt không trùng từ nào với mô tả nhận danh sách rỗng, và từ test trong tên flaky-test cộng điểm cho mọi prompt nhắc test; sàn chỉ ghi lại mức hiện tại, cải tiến sau (ví dụ trọng số IDF) cần đổi kiểu điểm công khai. (Mitigation: Sàn chỉ tăng trong skill-routing-cases.json và test floor sát số đo nên cải tiến sau phải nâng sàn.)",
+      "severity": "medium"
+    },
+    {
+      "id": "risk-audit-text-only",
+      "text": "Test tham chiếu treo chỉ đọc văn bản trong backtick và dòng bắt đầu bằng harnix; cờ viết ngoài các dạng đó hoặc lệnh dựng động không bị kiểm.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-24T21:57:44.018+07:00"
+}

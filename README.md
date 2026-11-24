@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.38.3`
+**Version:** `2.39.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -203,6 +203,7 @@ Một vài quy ước chung đáng nhớ:
 
 - Nếu public command lỗi trước khi có kết quả riêng, bạn sẽ nhận `PublicCliErrorV1` trên stdout với `exitCode` là `1` (warning) hoặc `2` (lỗi sử dụng/schema).
 - `harnix doctor` có finding mức `info` `config-packages-drift` khi `.harnix/config.yaml` thiếu thư mục package mà phát hiện hiện tại thấy (chỉ nhắc, không đổi mã thoát và không ghi config).
+- `harnix doctor` có finding mức `warning` `skill-suspicious-content` (từ 2.39.0) khi skill, reference hoặc guide của dự án (`.harnix/spec/skills`, `.harnix/spec/guides`; không quét skill đóng gói của Harnix) chứa chỉ dẫn ghi đè hoặc giấu hành động khỏi người dùng, tải về rồi chuyển thẳng vào shell, lệnh đọc kho credential, đẩy toàn bộ biến môi trường ra mạng, hoặc ký tự vô hình; chỉ đọc, không mạng, không fix, thông điệp nêu tên rule chứ không in lại nội dung, và vì là `warning` nên `doctor` thoát 1. Câu cảnh báo về chính các mối đe dọa đó (có `never`, `do not`, `không`, ... đứng trước) không bị cờ, nên đây là gợi ý để xem lại chứ không phải bằng chứng một file an toàn; khi lần quét bị cắt ở giới hạn file hoặc finding, một finding `info` cùng mã nói rõ.
 - `harnix doctor --fix` chỉ sửa issue được xác định là an toàn (kể cả tạo `prd.md`/`plan.md` còn thiếu của task Full chưa kết thúc từ mẫu chuẩn, không ghi đè file có sẵn); nó không tự trust hook hay bật permission thay bạn.
 - `harnix update` (và `doctor --fix`) chuyển task và epic còn ở bố cục phẳng (`.harnix/tasks/<id>/`, `.harnix/epics/<id>/`) sang bucket tháng `<YYYY-MM>/<id>/` bằng một rename mỗi thư mục, dưới khóa workflow, không ghi đè đích và không sửa nội dung; kết quả có trường `layout` (`tasks`, `epics`, `skipped`), `update --dry-run` chỉ liệt kê, chạy lần hai không đổi gì và `doctor` báo `task-layout-legacy` khi còn mục phẳng. `doctor` cũng cảnh báo sớm task chưa kết thúc sẽ vướng về sau: `task-check-cwd-missing`, `task-plan-criterion-missing` và `task-near-duplicate`. Không chạy khi một worktree hay subagent khác đang ghi task.
 - `harnix workflow` (với các cờ `--preflight|--inspect|--save|...`) là transport nội bộ dành cho skill của agent, **không phải** lệnh bạn cần gõ tay.

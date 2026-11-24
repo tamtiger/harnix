@@ -1,5 +1,6 @@
 import debugSource from "./harnix-debug/SKILL.md";
 import feedbackLoopReference from "./harnix-debug/references/feedback-loop.md";
+import rivalHypothesesReference from "./harnix-debug/references/rival-hypotheses.md";
 import implementSource from "./harnix-implement/SKILL.md";
 import brownfieldReference from "./harnix-implement/references/brownfield.md";
 import commitHygieneReference from "./harnix-implement/references/commit-hygiene.md";
@@ -13,6 +14,7 @@ import grillingReference from "./harnix-plan/references/grilling.md";
 import migrationReference from "./harnix-plan/references/migration.md";
 import multiRepoReference from "./harnix-plan/references/multi-repo.md";
 import planCritiqueReference from "./harnix-plan/references/plan-critique.md";
+import preReadyRiskReference from "./harnix-plan/references/pre-ready-risk.md";
 import readyReviewReference from "./harnix-plan/references/ready-review.md";
 import replanReference from "./harnix-plan/references/replan.md";
 import workflowRoutingRef from "./harnix-verify/references/workflow-routing.md";
@@ -24,6 +26,8 @@ import cookbookCommandsRef from "./harnix-verify/references/cookbook-commands.md
 import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
 import scoutingIsolationReference from "./harnix-research/references/scouting-isolation.md";
+import sourceVerificationReference from "./harnix-research/references/source-verification.md";
+import disclosureReference from "./harnix-review/references/disclosure.md";
 import findingTriageReference from "./harnix-review/references/finding-triage.md";
 import multiLensReference from "./harnix-review/references/multi-lens.md";
 import reviewSource from "./harnix-review/SKILL.md";
@@ -53,6 +57,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       grilling: grillingReference,
       "decision-discipline": decisionDisciplineReference,
       "plan-critique": planCritiqueReference,
+      "pre-ready-risk": preReadyRiskReference,
     },
   ],
   [
@@ -81,9 +86,15 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       "cookbook-commands": cookbookCommandsRef,
     },
   ],
-  [reviewSource, { "multi-lens": multiLensReference, "finding-triage": findingTriageReference }],
-  [researchSource, { "scouting-isolation": scoutingIsolationReference }],
-  [debugSource, { "feedback-loop": feedbackLoopReference }],
+  [
+    reviewSource,
+    { "multi-lens": multiLensReference, "finding-triage": findingTriageReference, disclosure: disclosureReference },
+  ],
+  [
+    researchSource,
+    { "scouting-isolation": scoutingIsolationReference, "source-verification": sourceVerificationReference },
+  ],
+  [debugSource, { "feedback-loop": feedbackLoopReference, "rival-hypotheses": rivalHypothesesReference }],
 ];
 
 /**

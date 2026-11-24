@@ -1,0 +1,201 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-213800-review-verify-wording",
+  "title": "Chuẩn hóa lời văn review và verify: không-chứng-minh, could-not-verify, escalation",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Siết lời hướng dẫn của review, verify và implement để bằng chứng nêu rõ điều nó không chứng minh, phần không kiểm được và lối thoát replan, mà không đổi CLI hay transition.",
+  "nonGoals": [],
+  "epicId": "20261124-213757-external-skill-lessons",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Reference mới `harnix skill harnix-review --reference report-limits` (không nhân đôi `finding-triage` hay `multi-lens`) yêu cầu: mục \"Could-Not-Verify\" bắt buộc có kể cả rỗng, mục \"đã thử bác bỏ nhưng không thấy gì\" ghi rõ đã thử gì, và reviewer độc lập chỉ nhận luận đề cùng bằng chứng chứ không nhận lập luận của người viết.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-references-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`harnix-verify` hoặc `harnix-verification-gap` yêu cầu mỗi check nêu nó không chứng minh điều gì, kết luận chỉ đúng trong phạm vi đã quét, và một check bị bỏ qua hoặc chạy 0 test không phải pass (CLI đã từ chối 0 test ở `run-check.ts`; chỉ bổ sung lời hướng dẫn).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-references-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "`harnix-implement` hướng dẫn khi một tiêu chí không đạt được thì chuyển `replan` kèm điều gì sẽ giải quyết được, thay vì yếu hóa test hay tiêu chí; khớp luồng replan hiện có, không thêm transition.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-references-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Mọi thay đổi nằm trong trần token (không nâng budget), mỗi reference có dòng trỏ, chạy được qua CLI build thật (thêm vào `scripts/exercise-skill-references.mjs`), tài liệu, CHANGELOG và phiên bản (member epic) được đồng bộ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-references-2",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-references",
+      "description": "Exercise: chạy CLI build thật nạp từng reference qua harnix skill --reference",
+      "command": "node scripts/exercise-skill-references.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T22:19:34.651+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "82ddf23cdbea85ed2781f44fe210e98a055a7138a8c96c23bc9908ae67db5570",
+      "durationMs": 8688
+    },
+    {
+      "id": "ev-chk-exercise-references-1",
+      "checkId": "chk-exercise-references",
+      "recordedAt": "2026-11-24T22:19:46.780+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-references.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1eee07f24e951576d28ac928716b58a01996f7dd7a7ecf326b6fa1586cdebe69",
+      "durationMs": 10834
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T22:21:38.179+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fed1e5258bf37ae037d84215b137703bdb80575031dfe334816c75b202560578",
+      "durationMs": 106486
+    },
+    {
+      "id": "ev-chk-exercise-references-2",
+      "checkId": "chk-exercise-references",
+      "recordedAt": "2026-11-24T22:21:47.295+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full — CLI build thật (dist) nạp mọi reference qua harnix skill <tên> --reference <chủ đề>, gồm review/disclosure; không chạy ứng dụng ngoài CLI",
+      "artifactPaths": [],
+      "inputDigest": "1eee07f24e951576d28ac928716b58a01996f7dd7a7ecf326b6fa1586cdebe69"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "NOTICE",
+    "README.md",
+    "docs/**",
+    "package.json",
+    "scripts/**",
+    "src/skills/catalog.ts",
+    "src/skills/harnix-implement/**",
+    "src/skills/harnix-review/**",
+    "src/skills/harnix-verification-gap/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T21:38:00.429+07:00",
+  "updatedAt": "2026-11-24T22:22:00.511+07:00",
+  "decisions": [
+    {
+      "id": "dec-disclosure-topic-name",
+      "text": "Reference review đặt tên disclosure thay vì report-limits.",
+      "rationale": "Công cụ Write của fork từ chối ghi file tên report-limits.md (coi là file báo cáo); nội dung là reference nguồn của sản phẩm nên đổi tên cho đúng nghĩa hơn."
+    },
+    {
+      "id": "dec-wording-no-duplication",
+      "text": "Không nhân đôi finding-triage; run-check.ts đã từ chối 0 test nên mục verification-gap chỉ thêm lời hướng dẫn, và replan dùng luồng sẵn có không thêm transition hay cờ.",
+      "rationale": "Đối chiếu với finding-triage.md, run-check.ts và discoveries.md trước khi viết."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-wording-unmeasured",
+      "text": "Chưa có bằng chứng agent đọc reference disclosure hay mục 7 và các review có thật sự công bố Could-Not-Verify; test chỉ ghim cụm từ, không kiểm chất lượng diễn đạt.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-24T22:22:00.511+07:00"
+}

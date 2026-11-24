@@ -65,6 +65,18 @@ Quan sát chỉ đọc cho technique skill `harnix-exercise`, ngày truy cập *
 
 Nguồn đầy đủ, phản biện và bất định còn lại: `.harnix/epics/2026-11/20261119-140811-exercise-skill/research.md`.
 
+### 2.6 External skill lessons 2026-11-24
+
+Nghiên cứu chỉ đọc (clone nông, không chạy script nào) cho epic `20261124-213757-external-skill-lessons`, ngày truy cập **2026-11-24**. Harnix không chép văn bản hay mã; chỉ thích nghi ý tưởng và viết lại bằng lời riêng.
+
+| Nguồn | Branch | Commit SHA | Ngày commit | License | Vai trò |
+|---|---|---|---|---|---|
+| [KalarisLabs/research-agent-skills](https://github.com/KalarisLabs/research-agent-skills) | `main` | `a74b0dbe5fa865d73b9f250ba5b0c9f107bd1baa` | 2026-11-17 | MIT, Copyright (c) 2026 Kalaris Labs | Ý tưởng chuẩn nguồn và kết luận trong phạm vi đã quét, kiểm định tuyến và tham chiếu skill |
+| [product-on-purpose/thinking-framework-skills](https://github.com/product-on-purpose/thinking-framework-skills) | `main` | `6ab95db2d6469e4b65f3eb3ed265e46a6a1e69a8` | 2026-11-11 | Apache-2.0 | Ý tưởng premortem, điều kiện chịu lực, giả thuyết đối thủ, eval định tuyến |
+| [johnsondatascience/claude-code-skills](https://github.com/johnsondatascience/claude-code-skills) | `main` | `4acc337d4dbdb19da6469eb2504c16669c1cafa1` | 2026-08-22 | không có file LICENSE (README chỉ ghi "use freely") | Chỉ đọc để tham khảo cơ chế; không chép gì và không có mục NOTICE |
+
+Nguồn đầy đủ, phản biện và bất định còn lại: `.harnix/epics/2026-11/20261124-213757-external-skill-lessons/research.md`.
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:

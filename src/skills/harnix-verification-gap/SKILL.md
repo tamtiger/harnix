@@ -2,7 +2,7 @@
 name: harnix-verification-gap
 description: Use when evaluating whether a test suite, verification plan or review scope has hidden gaps, false-success blind spots or unverified critical requirements.
 metadata:
-  version: "2.38.3"
+  version: "2.39.0"
 ---
 
 # Verification gap analysis
@@ -47,6 +47,10 @@ Automated tests and agent self-evaluations frequently exhibit false success when
    - Verify that test assertions, criteria, or constraints are never weakened, relaxed, or skipped to make a failing suite pass.
    - Check git diff for removed assertions, widened regexes, softened error checks, or deleted test files.
    - Guard the baseline floor: any change that lowers the verification bar must be flagged and rejected immediately.
+
+7. **What a check does not prove**:
+   - For each check name the claim it leaves open (a passing unit test does not prove the packaged artifact works) and write its scanned scope: the files, inputs or sample it actually covered. A clean result over a sample is not a result over the whole.
+   - A skipped check, a run that executed zero tests, or a filter that matched nothing is not a pass; call it unverified.
 
 ## Analysis steps
 

@@ -31,6 +31,7 @@ describe("harnix skill", () => {
       "grilling",
       "decision-discipline",
       "plan-critique",
+      "pre-ready-risk",
     ]);
     expect(skills.get("harnix-implement")).toEqual([
       "feedback",
@@ -52,9 +53,9 @@ describe("harnix skill", () => {
       "cookbook-notes",
       "cookbook-commands",
     ]);
-    expect(skills.get("harnix-review")).toEqual(["multi-lens", "finding-triage"]);
-    expect(skills.get("harnix-research")).toEqual(["scouting-isolation"]);
-    expect(skills.get("harnix-debug")).toEqual(["feedback-loop"]);
+    expect(skills.get("harnix-review")).toEqual(["multi-lens", "finding-triage", "disclosure"]);
+    expect(skills.get("harnix-research")).toEqual(["scouting-isolation", "source-verification"]);
+    expect(skills.get("harnix-debug")).toEqual(["feedback-loop", "rival-hypotheses"]);
   });
 
   it("should_return_byte_identical_canonical_content_for_one_skill", () => {
@@ -108,7 +109,9 @@ describe("harnix skill", () => {
     expect(() => reportSkillReference("harnix-plan", "nope")).toThrow(
       /Available: replan, migration, epic, epic-git, multi-repo, ready-review, grilling/u,
     );
-    expect(() => reportSkillReference("harnix-review", "anything")).toThrow(/Available: multi-lens, finding-triage/u);
+    expect(() => reportSkillReference("harnix-review", "anything")).toThrow(
+      /Available: multi-lens, finding-triage, disclosure/u,
+    );
     expect(() => reportSkillReference("harnix-plan", "__proto__")).toThrow(/Unknown reference/u);
     expect(() => reportSkillReference("harnix-unknown", "replan")).toThrow(/Unknown Harnix skill/u);
   });

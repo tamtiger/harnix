@@ -1,0 +1,294 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-213801-skill-content-scan-doctor",
+  "title": "Finding doctor quét nội dung đáng ngờ trong skill ngoài và đóng epic bằng bản minor",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thêm finding doctor chỉ đọc cảnh báo nội dung đáng ngờ trong skill và guide của dự án (nguồn ngoài), rồi đóng epic bằng bản minor sau một lượt harnix-review trên toàn diff.",
+  "nonGoals": [],
+  "epicId": "20261124-213757-external-skill-lessons",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Finding doctor mới `skill-suspicious-content` (thuộc `DOCTOR_FINDING_CODES`, mức `warning`, không fixable) quét chỉ đọc skill và guide của dự án trong `.harnix/spec/skills` và `.harnix/spec/guides` bằng regex thuần TypeScript, không mạng, không ghi file; chỉ gồm rule độ chính xác cao: chỉ dẫn ghi đè hay giấu hành động khỏi người dùng, pipe-to-shell, đọc credential (`~/.ssh`, `.aws`), gửi biến môi trường ra mạng, ký tự Unicode vô hình hoặc bidi. Không có rule base64 vì dễ bắt nhầm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-doctor-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mỗi rule có fixture sinh ra finding và có fixture sạch (kể cả văn bản bàn về bảo mật một cách hợp lệ) không bị bắt; skill do Harnix sở hữu trong `src/skills` không bị quét; mức severity theo quy ước doctor và quyết định mức được ghi thành một decision vì ảnh hưởng exit code.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Chạy thật `harnix doctor` bằng CLI build trên một dự án tạm có skill độc hại và skill sạch (thêm vào một script `scripts/exercise-*.mjs`), xác nhận finding xuất hiện đúng và `doctor` không ghi gì.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-doctor-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Member cuối đóng epic: `pnpm version:sync <X.(Y+1).0> --fold-dev` kèm CHANGELOG, tài liệu và `pnpm selfhost:sync` nếu template đổi, và chạy `harnix-review` một lần trên toàn bộ diff epic trước finish.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-chk-focused-4"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-doctor",
+      "description": "Exercise: chạy harnix doctor bằng CLI build thật trên dự án tạm có skill độc hại và skill sạch",
+      "command": "node scripts/exercise-skill-scan.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/exercise-skill-scan.mjs",
+        "src/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T22:30:06.377+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d8954c61dad25db6e52eb9f48138f04d52a2a0f2d8fe089873f45d3eb0041524",
+      "durationMs": 9265
+    },
+    {
+      "id": "ev-chk-exercise-doctor-1",
+      "checkId": "chk-exercise-doctor",
+      "recordedAt": "2026-11-24T22:30:09.311+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-scan.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7fc83fbd4a9968c594f8ee7d7ba3d32d5261c6c80794dd2a5dcb8cf4c3d8458e",
+      "durationMs": 1704
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T22:32:09.478+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c0b45cdc69281b893bea8e6a13756c1cbb538848eece06e86d584ac22b1ba91b",
+      "durationMs": 115627
+    },
+    {
+      "id": "ev-chk-exercise-doctor-2",
+      "checkId": "chk-exercise-doctor",
+      "recordedAt": "2026-11-24T22:32:25.906+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. Chạy dist/cli.js doctor trên dự án tạm: 2 file độc hại (skill và guide) bị cảnh báo warning không fixable, skill sạch không bị gắn cờ, thông điệp không lặp nội dung, .harnix/spec không bị ghi, bỏ file độc hại thì hết finding.",
+      "artifactPaths": [],
+      "inputDigest": "7fc83fbd4a9968c594f8ee7d7ba3d32d5261c6c80794dd2a5dcb8cf4c3d8458e"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T22:53:35.584+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "7778f94fe209f0fc925b98df48e5b6585c2460b5847d72b7dba75ddd81da843c",
+      "durationMs": 8751
+    },
+    {
+      "id": "ev-chk-exercise-doctor-3",
+      "checkId": "chk-exercise-doctor",
+      "recordedAt": "2026-11-24T22:53:38.376+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-scan.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b4babe07e6e91702eb8be9f2596625940d3c995d1e92eae20d13ba1ad5e59e8e",
+      "durationMs": 1664
+    },
+    {
+      "id": "ev-chk-focused-3",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T22:54:39.599+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7118aa42ced8793950787d172f5dcf2c4646de81d4e48f6c6fb1a15f7b997c8f",
+      "durationMs": 8495
+    },
+    {
+      "id": "ev-chk-exercise-doctor-4",
+      "checkId": "chk-exercise-doctor",
+      "recordedAt": "2026-11-24T22:54:42.406+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-scan.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b4babe07e6e91702eb8be9f2596625940d3c995d1e92eae20d13ba1ad5e59e8e",
+      "durationMs": 1675
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T22:56:29.671+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a1cd7940e640524925ac542e71de26f3061dfa21605e722de4ca140f5e2b05ff",
+      "durationMs": 105807
+    },
+    {
+      "id": "ev-chk-focused-4",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T22:59:58.043+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "60e073df582b5574d2d19dac465900b6c353037e28e0f25b557e10dc4410f9ba",
+      "durationMs": 9741
+    },
+    {
+      "id": "ev-chk-exercise-doctor-5",
+      "checkId": "chk-exercise-doctor",
+      "recordedAt": "2026-11-24T23:00:01.130+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-skill-scan.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b4babe07e6e91702eb8be9f2596625940d3c995d1e92eae20d13ba1ad5e59e8e",
+      "durationMs": 1813
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T23:01:57.461+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7f3a16b23a58ec4db58f1e84da9aa7a3a6f438c73602f35ca84fb64d767f819c",
+      "durationMs": 114649
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "package.json",
+    "scripts/exercise-skill-scan.mjs",
+    "src/core/doctor/**",
+    "test/README.md",
+    "test/integration/commands/doctor.test.ts",
+    "test/unit/core/doctor/**",
+    "test/workflow/**"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T21:38:01.429+07:00",
+  "updatedAt": "2026-11-24T23:03:31.536+07:00",
+  "decisions": [
+    {
+      "id": "dec-severity-warning",
+      "text": "Finding skill-suspicious-content ra mức warning (đúng quy ước finding mới), một mã duy nhất, chỉ rule chính xác cao, bỏ rule base64.",
+      "rationale": "Người dùng chốt 2026-11-24. Nội dung đáng ngờ trong skill là rủi ro bảo mật thật nên đáng làm doctor đỏ; chỉ quét skill và guide của dự án nên hiếm khi xuất hiện; có thể hạ xuống info nếu false positive thực tế gây phiền."
+    },
+    {
+      "id": "dec-rules-precision",
+      "text": "Rule env-exfiltration chỉ bắt đẩy cả môi trường (printenv, env, os.environ, process.env nguyên khối) ra mạng, không bắt một biến trong header; pipe-to-shell cần URL; credential-read cần lệnh đọc với đường dẫn kho credential; rule ghi đè bỏ qua khối code, code inline và chuỗi trích dẫn; không có rule base64.",
+      "rationale": "Một token trong header Authorization và 'curl | sh' nhắc trong cảnh báo là dùng hợp lệ phổ biến; finding là warning nên đổi exit code, nên ưu tiên độ chính xác hơn độ phủ."
+    },
+    {
+      "id": "trace-epic-review",
+      "text": "Review độc lập toàn diff epic bởi reviewer riêng (chỉ đọc, không nhận kết luận của người viết): verdict ban đầu not-ready với 6 finding. F1 ReDoS PIPE_TO_SHELL, F2 lỗi gõ test:gates bỏ qua instruction-budget và skill-scan-exercise, F3 false positive câu cảnh báo, F4 phạm vi quét và cắt im lặng, F5 hồi quy tiền tố của suggestSkills, F6 lời văn disclosure. Cả 6 đã sửa test-first, các check chạy lại exit 0; chưa có lượt review thứ hai độc lập trên bản sửa.",
+      "rationale": "Đáp ứng tiêu chí ac-4: một lượt harnix-review trên toàn diff epic trước finish; ghi rõ bản sửa chưa được reviewer thứ hai kiểm."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-scan-recall",
+      "text": "Rule regex tiếng Anh/Việt theo mẫu cố định: bỏ sót lời ghi đè diễn đạt khác, nội dung đặt trong khối code hay chuỗi trích dẫn, và URL dựng lúc chạy (false negative); ngược lại một skill hợp lệ dùng đúng mẫu (ví dụ tài liệu cài đặt dùng curl URL | sh) sẽ bị cảnh báo và làm doctor thoát 1 (false positive). Không thay được việc đọc skill trước khi nhập; có thể hạ xuống info nếu phiền.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-scan-evasion",
+      "text": "Rule quét skill là heuristic: kẻ tấn công có thể đặt từ phủ định (never, do not, không) trước câu độc để né, dòng lệnh dài hơn trần khoảng giữa (200 đến 300 ký tự) không khớp, và learned.md cùng project-facts không được quét (ngoài phạm vi đã duyệt). Một kết quả sạch không chứng minh file an toàn; finding info báo khi lần quét bị cắt. (Mitigation: Giữ rule chính xác cao, test hiệu năng và fixture độc/sạch, tài liệu nói rõ giới hạn; mở rộng phạm vi chỉ khi người dùng duyệt.)",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-24T23:03:31.536+07:00"
+}

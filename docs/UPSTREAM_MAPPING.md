@@ -340,6 +340,20 @@ Khảo sát ngày 2026-10-27 trên `microsoft/hve-core` (`eae87ecfcb5c6cc51f94e2
 | Bác bỏ finding | `microsoft/hve-core` | `src/skills/harnix-review/references/finding-triage.md` | `adapt` | CONFIRMED/DISPROVED/DOWNGRADED, một đích xử lý cho mỗi finding, `Not assessed` tách `Pass`; dùng chung cho `harnix-security-lens`. |
 | Mạng lưới agent bắt buộc và hạ tầng đi kèm | `microsoft/hve-core` | — | `remove` | Từ chối subagent bắt buộc, dịch vụ ngoài và ngôn ngữ prompt riêng của nguồn. |
 
+### 8.8 External skill lessons mapping (research-agent-skills, thinking-framework-skills)
+
+Khảo sát ngày 2026-11-24 (SHA ở `docs/UPSTREAM_BASELINE.md` mục 2.6); viết lại bằng lời riêng, không chép văn bản:
+
+| Khái niệm nguồn | Xuất xứ upstream | Harnix target | Phân loại | Nội dung thích nghi |
+|---|---|---|---|---|
+| Premortem, điều kiện chịu lực, cửa một chiều hay hai chiều | `product-on-purpose/thinking-framework-skills` | `src/skills/harnix-plan/references/pre-ready-risk.md` | `adapt` | Ba lượt trước `ready`: chi phí đảo ngược buộc Full, killer condition thành criterion hoặc spike, rủi ro có tripwire, giảm thiểu và điều kiện dừng ghi bằng `--add-risk`; có mục khi nào không dùng. |
+| Giả thuyết đối thủ và dấu hiệu kỳ vọng | `product-on-purpose/thinking-framework-skills` (process tracing) | `src/skills/harnix-debug/references/rival-hypotheses.md` | `adapt` | Ghi dấu hiệu kỳ vọng trước khi xem bằng chứng, lý do loại thành ràng buộc phủ định, "chưa đủ để phân biệt" là kết quả hợp lệ, không nới invariant check khi chưa loại trừ đầu vào. |
+| Kiểm chứng nguồn và phạm vi của kết luận phủ định | `KalarisLabs/research-agent-skills` (citation-verification, exploratory-data-analysis) | `src/skills/harnix-research/references/source-verification.md` | `adapt` | Nhãn verified, unverified, unverifiable, wrong; lỗi mạng không phải bằng chứng; tách Evidence, Inference, Assumption; "không thấy" chỉ đúng trong phạm vi đã quét. |
+| Phần review phải công bố: mục không kiểm được kể cả rỗng, đã thử bác bỏ gì, reviewer độc lập chỉ nhận luận đề và bằng chứng | `johnsondatascience/claude-code-skills` (ý tưởng, không chép), `product-on-purpose/thinking-framework-skills` (red team) | `src/skills/harnix-review/references/disclosure.md` | `adapt` | Ba mục bắt buộc của bản review, không nhân đôi phân loại và verdict của `finding-triage`. |
+| Mỗi check nêu điều nó không chứng minh, phạm vi đã quét, skip hoặc 0 test không phải pass | `KalarisLabs/research-agent-skills` (exploratory-data-analysis, opentrons-integration) | `src/skills/harnix-verification-gap/SKILL.md` (mục 7) | `adapt` | Lời hướng dẫn; CLI đã từ chối chạy 0 test ở `run-check.ts`. |
+| Tiêu chí không đạt được thì chuyển replan kèm điều gì sẽ giải quyết được | `johnsondatascience/claude-code-skills` (escalation giữa các tầng, ý tưởng) | `src/skills/harnix-implement/references/discoveries.md` | `adapt` | Dùng luồng `replan` sẵn có, không thêm transition hay cờ. |
+| Scorecard điểm, scanner ngoài, điều phối nhiều agent, skill miền | cả ba repo | — | `remove` | Từ chối vì điểm bị thổi, cần mạng hoặc dịch vụ ngoài, hoặc cần subagent bắt buộc. |
+
 ## 9. Removal verification
 
 Release scan must prove absence outside allowed research/migration/license contexts:

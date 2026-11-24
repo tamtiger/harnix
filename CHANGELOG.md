@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.39.0] - 2026-11-24
+
+### Added
+
+- Test định tuyến và tham chiếu skill: harnix skill --suggest khớp theo token Unicode (bỏ stopword kể cả use, hậu tố -ing và -ed, tiền tố từ 4 ký tự, prompt không liên quan trả rỗng) với sàn hit@1, hit@3 và kích hoạt nhầm trong skill-routing-cases.json; test bắt skill, reference, lệnh và cờ treo trong nguồn skill; scripts/exercise-skill-routing.mjs chạy CLI build thật.
+- Ba reference suy luận ngắn: pre-ready-risk (harnix-plan), rival-hypotheses (harnix-debug), source-verification (harnix-research), diễn đạt lại từ ý tưởng của repo ngoài kèm provenance
+- Thêm reference disclosure cho harnix-review (Could-Not-Verify, đã thử bác bỏ, reviewer độc lập), mục check không chứng minh gì trong harnix-verification-gap và lời replan kèm điều gì sẽ giải quyết trong discoveries
+- harnix doctor thêm finding skill-suspicious-content (warning) quét skill, reference và guide của dự án bằng rule độ chính xác cao, chỉ đọc và không mạng; regex có trần (không ReDoS), câu cảnh báo có từ phủ định không bị cờ, và một finding info báo khi lần quét bị cắt; pnpm test:gates sửa lỗi thiếu dấu cách làm bỏ instruction-budget và có test chặn lặp lại
+
 ## [2.38.3] - 2026-11-24
 
 ### Fixed

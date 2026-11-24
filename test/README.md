@@ -34,6 +34,10 @@ Harnix strictly enforces a 1:1 file mirroring structure in `test/unit/test-struc
 
 - `builders.ts`: `buildTaskV3`, `buildTaskV2`, `buildTaskV1`, `buildCheck`, `buildEvidence`, `buildCriterion`,
   `buildEpic`, `createTestProject`, plus the fixed clock and zone (`at`, `fixedClock`, `TEST_TIMEZONE`).
+- `skill-reference-audit.ts`: `findDanglingSkillReferences(skills, program)` lists a `harnix-*` skill, a `--reference`
+  topic, a `harnix <command>` or a `--flag` named in skill text that does not exist (used by
+  `test/workflow/skill-reference-audit.test.ts`; routing floors live in `test/workflow/skill-routing-cases.json`). `test/workflow/reasoning-references.test.ts` pins the registered topic, the one pointer line and the promised rules of three reasoning references; `test/workflow/review-verify-wording.test.ts` pins the review `disclosure` reference, the "does not prove" rule of `harnix-verification-gap` and the replan wording of `harnix-implement --reference discoveries`.
+- `test/unit/core/doctor/skill-content-rules.test.ts` and `skill-content-finding.test.ts` pin the `skill-suspicious-content` doctor finding (each rule fires, every packaged skill stays clean, read-only); `test/workflow/skill-content-benign.test.ts` (warnings about the threats stay clean), `skill-content-performance.test.ts` (hostile input is scanned well under a second (budget 2 s under load)) and `skill-content-limits.test.ts` (file and finding limits with an `info` notice, any case of `.md`) cover the cross-cutting behavior; `test/workflow/test-gates-script.test.ts` checks that every token of the `test:gates` script is an existing test file; `test/workflow/skill-scan-exercise.test.ts` checks `scripts/exercise-skill-scan.mjs`, which runs the built `harnix doctor` on hostile and clean skills.
 - `temporary-repository.ts`: `useTemporaryRepositories()` disposable project roots.
 - `temporary-user-home.ts`: disposable user homes. Tests never touch a real user profile.
 

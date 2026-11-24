@@ -11,6 +11,7 @@ const expectedReferences: Record<string, string[]> = {
     "migration",
     "multi-repo",
     "plan-critique",
+    "pre-ready-risk",
     "ready-review",
     "replan",
   ],
@@ -28,9 +29,9 @@ const expectedReferences: Record<string, string[]> = {
     "technical-recap",
     "workflow-routing",
   ],
-  "harnix-review": ["finding-triage", "multi-lens"],
-  "harnix-research": ["scouting-isolation"],
-  "harnix-debug": ["feedback-loop"],
+  "harnix-review": ["disclosure", "finding-triage", "multi-lens"],
+  "harnix-research": ["scouting-isolation", "source-verification"],
+  "harnix-debug": ["feedback-loop", "rival-hypotheses"],
 };
 
 describe("skill catalog references", () => {

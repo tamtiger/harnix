@@ -1,0 +1,83 @@
+{
+  "note": "Routing cases for suggestSkills over the canonical skills only. Prompts are written the way a person asks, not copied from a skill description. A near-miss case (shouldTrigger false) names the skill that must NOT come first. Floors only ever rise: raise them when the scorer improves, never lower one to make a change pass, and never add words to a skill description just to win a case.",
+  "floors": { "hit1": 0.54, "hit3": 0.79, "falseTrigger": 0.2 },
+  "cases": [
+    { "query": "tests pass sometimes and fail on rerun", "expect": "harnix-flaky-test", "shouldTrigger": true },
+    { "query": "intermittent timing failure in ci", "expect": "harnix-flaky-test", "shouldTrigger": true },
+    {
+      "query": "rename a database column without breaking old clients",
+      "expect": "harnix-migration-safety",
+      "shouldTrigger": true
+    },
+    { "query": "drop a table and keep rollback possible", "expect": "harnix-migration-safety", "shouldTrigger": true },
+    {
+      "query": "user supplied filename could escape the upload folder",
+      "expect": "harnix-security-lens",
+      "shouldTrigger": true
+    },
+    { "query": "passing user input into a shell command", "expect": "harnix-security-lens", "shouldTrigger": true },
+    { "query": "prove the endpoint works by actually calling it", "expect": "harnix-exercise", "shouldTrigger": true },
+    { "query": "drive the browser page and record what happened", "expect": "harnix-exercise", "shouldTrigger": true },
+    {
+      "query": "my tests pass but I doubt they catch anything",
+      "expect": "harnix-verification-gap",
+      "shouldTrigger": true
+    },
+    {
+      "query": "green suite yet important behavior never asserted",
+      "expect": "harnix-verification-gap",
+      "shouldTrigger": true
+    },
+    {
+      "query": "estimate work breakdown for this service split",
+      "expect": "harnix-arch-review",
+      "shouldTrigger": true
+    },
+    {
+      "query": "fix the bug without breaking what already works",
+      "expect": "harnix-bugfix-preserve",
+      "shouldTrigger": true
+    },
+    {
+      "query": "compare several refactoring paths and tradeoffs",
+      "expect": "harnix-sequential-thinking",
+      "shouldTrigger": true
+    },
+    { "query": "crash after my change, find the root cause", "expect": "harnix-debug", "shouldTrigger": true },
+    { "query": "failing test that I cannot explain", "expect": "harnix-debug", "shouldTrigger": true },
+    { "query": "look over this diff before merge", "expect": "harnix-review", "shouldTrigger": true },
+    {
+      "query": "which library should we adopt, check compatibility",
+      "expect": "harnix-research",
+      "shouldTrigger": true
+    },
+    { "query": "break this request into acceptance criteria", "expect": "harnix-plan", "shouldTrigger": true },
+    { "query": "start an epic with several related tasks", "expect": "harnix-plan", "shouldTrigger": true },
+    { "query": "write the failing test first then the change", "expect": "harnix-implement", "shouldTrigger": true },
+    { "query": "finish the task with fresh evidence", "expect": "harnix-verify", "shouldTrigger": true },
+    { "query": "migrat", "expect": "harnix-migration-safety", "shouldTrigger": true },
+    { "query": "debugging a failure", "expect": "harnix-debug", "shouldTrigger": true },
+    { "query": "lỗi crash sau khi sửa, cần debug", "expect": "harnix-debug", "shouldTrigger": true },
+    {
+      "query": "this test fails every single time on my machine",
+      "expect": "harnix-flaky-test",
+      "shouldTrigger": false
+    },
+    { "query": "add a new column with a default value", "expect": "harnix-security-lens", "shouldTrigger": false },
+    { "query": "plan how to implement the new command", "expect": "harnix-review", "shouldTrigger": false },
+    {
+      "query": "review the architecture of the whole system design",
+      "expect": "harnix-verify",
+      "shouldTrigger": false
+    },
+    { "query": "explain what this function does", "expect": "harnix-exercise", "shouldTrigger": false }
+  ],
+  "nonEmpty": ["testing", "migrat", "debugging"],
+  "noMatch": [
+    "bake a chocolate cake for the party",
+    "what is the weather like today",
+    "hướng dẫn nấu phở bò ngon",
+    "kiểm thử dịch vụ thanh toán",
+    "use"
+  ]
+}

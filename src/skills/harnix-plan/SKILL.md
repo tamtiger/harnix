@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.38.3"
+  version: "2.39.0"
 ---
 
 # Plan a Harnix task
@@ -44,6 +44,6 @@ Everything but Bypass is tracked. **Lite**: localized, low-risk, obvious contrac
 
 Optionally critique a Full plan (`harnix skill harnix-plan --reference plan-critique`). Run the ready self-review (`harnix skill harnix-plan --reference ready-review`) and fix every gap. `harnix workflow --transition ready/ready --dry-run` tests the conditions without changing state. Then `harnix workflow --transition ready/ready` (a Full task adds `--reviewed`; the gate rejects hard placeholder tokens, criterion ids missing from `plan.md` and criteria without a focused required check). A plan-only request, a Full task or an Epic stops here (`nextStage: await`): present the summary, key decisions and checklist, and wait for explicit approval before implementation. An authorized Lite task continues with `harnix-implement` without another approval.
 
-Technique skills: before freezing obligations, `harnix skill harnix-verification-gap`; schema, contract or data migration: `harnix skill harnix-migration-safety`.
+Technique skills: before freezing obligations, `harnix skill harnix-verification-gap`; schema, contract or data migration: `harnix skill harnix-migration-safety`. A Full or hard-to-undo plan: `harnix skill harnix-plan --reference pre-ready-risk`.
 
 Exit: Bypass or nothing to persist: answer without task changes. Unresolved user decision or authority: persist the resumable state and report one blocker. Ready: stop (await) as above, or hand an authorized Lite task to `harnix-implement`.

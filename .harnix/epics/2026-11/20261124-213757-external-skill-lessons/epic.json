@@ -1,0 +1,9 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261124-213757-external-skill-lessons",
+  "title": "Học từ 3 repo skill ngoài: kiểm skill, suy luận trước ready, review và quét an toàn",
+  "goal": "Áp dụng phần chuyển được từ research-agent-skills, thinking-framework-skills và claude-code-skills vào harnix mà không nhập nguyên skill: test định tuyến và tham chiếu skill, reference suy luận cho plan/debug/research, lời văn review/verify, và finding doctor quét skill ngoài.",
+  "createdAt": "2026-11-24T21:37:57.429+07:00",
+  "updatedAt": "2026-11-24T21:37:57.429+07:00"
+}

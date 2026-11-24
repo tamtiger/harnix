@@ -9,6 +9,7 @@ import {
   readOptionalSafe,
 } from "src/core/doctor/project-legacy.js";
 import { inspectExerciseRunbook } from "src/core/doctor/exercise-runbook-finding.js";
+import { inspectSkillContent } from "src/core/doctor/skill-content-finding.js";
 import { inspectTrackedRuntimeFiles, type GitReader } from "src/core/doctor/project-runtime.js";
 import { inspectStorageLayout } from "src/core/doctor/layout-finding.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
@@ -95,6 +96,7 @@ export async function diagnoseProjectSection(
   await inspectStorageLayout(root, findings);
   await inspectTrackedRuntimeFiles(root, findings, git);
   await inspectExerciseRunbook(root, findings);
+  await inspectSkillContent(root, findings);
   await inspectSensitiveFiles(root, findings);
   await inspectPermissions(root, manifest, findings);
   const repoMap = await diagnoseRepoMap(root);

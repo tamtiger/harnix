@@ -34,6 +34,7 @@ export const PROJECT_FINDING_CODES = [
   "profile-conflict",
   "project-not-initialized",
   "secret-exposure",
+  "skill-suspicious-content",
   "task-active-cancelled",
   "task-active-completed",
   "task-check-cwd-missing",
