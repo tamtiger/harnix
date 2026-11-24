@@ -76,6 +76,13 @@ describe("workflow flag validation", () => {
     expect(() => assertCommandShape("setCheck", { brief: true }, [])).not.toThrow();
   });
 
+  it("tells a --set-paths caller with operands to use the repeatable --relevant-path and --relevant-spec", () => {
+    expect(() => assertCommandShape("setPaths", {}, ["src/a.ts", "src/b.ts"])).toThrow(
+      /--set-paths --relevant-path <path> \[--relevant-path <path>\.\.\.\] \[--relevant-spec <path>\]/u,
+    );
+    expect(() => assertCommandShape("setCheck", {}, ["x"])).not.toThrow(/--relevant-path/u);
+  });
+
   it("explains that --learn reads a candidate from stdin when a note flag is passed to it", () => {
     expect(() => assertFlagGroups("learn", { text: "t" })).toThrow(/--learn reads .*candidate.* from stdin/u);
     expect(() => assertFlagGroups("learn", { rationale: "r" })).toThrow(/--learn reads .*candidate.* from stdin/u);

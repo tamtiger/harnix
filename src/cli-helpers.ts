@@ -291,7 +291,9 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
     !options.refresh &&
     !options.events
   )
-    throw new Error("--workspace requires repo-map --query, --events, or --refresh.");
+    throw new Error(
+      "--workspace requires repo-map --query, --events, or --refresh.\nGợi ý: --refs, --outline, --tests và --impact chạy trong một project: harnix repo-map --refs <symbol> --path <path>, hoặc đứng trong thư mục project đó.",
+    );
   if (options.limit !== undefined && actions.length === 0)
     throw new Error("--limit is not valid without a repo-map query, outline, refs, tests, or impact action.");
 }
@@ -303,4 +305,5 @@ export interface StatusCliOptions {
   checks?: boolean;
   limit: string;
   workspace?: boolean | string;
+  task?: string;
 }

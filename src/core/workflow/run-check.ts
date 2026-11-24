@@ -70,7 +70,7 @@ function assertDeclaredCommand(declared: ValidationCheckV3, argv: readonly strin
   }
   if (!sameCommand(declared.command, argv))
     throw new Error(
-      `Workflow run-check command differs from the command declared by check ${declared.id}. The declared command is: ${describeCommand(splitCommand(declared.command))}`,
+      `Workflow run-check command differs from the command declared by check ${declared.id}. The declared command is: ${describeCommand(splitCommand(declared.command))}. Rerun exactly: harnix workflow --run-check ${declared.id} -- ${describeCommand(splitCommand(declared.command))}`,
     );
 }
 

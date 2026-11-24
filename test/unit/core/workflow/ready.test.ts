@@ -317,4 +317,18 @@ describe("workflow ready inspection", () => {
     const noFiles = await inspectReadyConditions(join(root, ".harnix"), task);
     expect(noFiles.issues).toContain("Full tasks require non-empty prd.md and plan.md at ready.");
   });
+
+  it("adds a non-blocking exercise advisory for an observable criterion without an exercise check", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const base = taskV3("planning", "planning");
+    const task = {
+      ...base,
+      acceptanceCriteria: [{ ...base.acceptanceCriteria[0]!, text: "Endpoint GET /orders trả HTTP 200" }],
+    };
+    const result = await inspectReadyConditions(join(root, ".harnix"), task);
+    expect(result.advisories.some((advisory) => advisory.includes("harnix skill harnix-exercise"))).toBe(true);
+    expect(result.issues.some((issue) => issue.includes("exercise"))).toBe(false);
+  });
 });

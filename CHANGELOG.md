@@ -4,6 +4,24 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.38.1] - 2026-11-24
+
+### Fixed
+
+- harnix doctor hạ exercise-runbook-missing xuống mức info để thiếu .harnix/spec/exercise.md không còn làm ok false hay exit code 1
+
+## [2.38.0] - 2026-11-24
+
+### Added
+
+- ready dry-run cảnh báo tiêu chí hành vi quan sát được thiếu check exercise, verify-plan báo runbook .harnix/spec/exercise.md, evidence ghi mode full/partial/code-only
+- workflow --init-epic tạo epic cùng mọi member bằng cờ (không cần JSON), status --task đọc task khác ở mọi trạng thái, và hint repo-map nêu đúng cờ đi với cờ
+
+### Changed
+
+- Hint lỗi nêu sẵn lệnh đúng: thứ tự --add-criterion trước --set-check, đường lùi bằng --reason và ready/ready, --set-paths với --relevant-path, --run-check in lệnh chạy lại, executable không khởi động được nêu mã lỗi và chương trình thật, lỗi symlink user-global trỏ tới doctor --global
+- status --checks hiện durationMs, finish --brief thêm commitAdvice, doctor cảnh báo thiếu exercise.md, reference runbook cho harnix-exercise
+
 ## [2.37.0] - 2026-11-19
 
 ### Added

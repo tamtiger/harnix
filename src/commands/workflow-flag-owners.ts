@@ -21,10 +21,14 @@ const baselineOwner = (name: string, pick: (flags: WorkflowFlags) => string | un
   actions: ["setBaseline"],
 });
 
-const initOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefined): FlagOwner => ({
+const initOwner = (
+  name: string,
+  pick: (flags: WorkflowFlags) => string | undefined,
+  actions: readonly string[] = ["init"],
+): FlagOwner => ({
   name,
   isSet: (f) => pick(f) !== undefined,
-  actions: ["init"],
+  actions,
 });
 
 import { REASON_RULES } from "src/core/workflow/reason-rules.js";
@@ -97,7 +101,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--command",
     isSet: (f) => f.command !== undefined,
-    actions: ["setCheck", "replaceCheck", "init"],
+    actions: ["setCheck", "replaceCheck", "init", "initEpic"],
   },
   {
     name: "--scope",
@@ -117,7 +121,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--input",
     isSet: (f) => listed(f.input),
-    actions: ["setCheck", "replaceCheck", "init"],
+    actions: ["setCheck", "replaceCheck", "init", "initEpic"],
   },
   {
     name: "--reason",
@@ -142,12 +146,13 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"] },
   { name: "--mitigation", isSet: (f) => f.mitigation !== undefined, actions: ["addRisk"] },
   taskOwner,
-  initOwner("--title", (f) => f.title),
-  initOwner("--slug", (f) => f.slug),
+  initOwner("--title", (f) => f.title, ["init", "initEpic"]),
+  initOwner("--slug", (f) => f.slug, ["init", "initEpic"]),
+  { name: "--member", isSet: (f) => listed(f.member), actions: ["initEpic"] },
   initOwner("--prd-file", (f) => f.prdFile),
   initOwner("--plan-file", (f) => f.planFile),
   initOwner("--mode", (f) => f.mode),
-  initOwner("--goal", (f) => f.goal),
+  initOwner("--goal", (f) => f.goal, ["init", "initEpic"]),
   {
     name: "--relevant-path",
     isSet: (f) => listed(f.relevantPath),
@@ -161,7 +166,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--dry-run",
     isSet: (f) => f.dryRun === true,
-    actions: ["transition"],
+    actions: ["transition", "initEpic"],
   },
   {
     name: "--cwd",

@@ -15,6 +15,7 @@ import {
   reportProjectCriteria,
 } from "./commands/status.js";
 import { resolveStatusMode } from "./commands/status-mode.js";
+import { withTargetTask } from "./commands/internal-workflow.js";
 import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
@@ -91,11 +92,15 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--checks", "Print a concise list of the task's checks with scope, command and freshness")
     .option("--limit <count>", "Maximum required checks when --explain is set (1-50)", "20")
     .option("--workspace [path]", "Read-only Git table (branch, changes, upstream) of the sub-repositories")
+    .option(
+      "--task <task-id>",
+      "Describe this task instead of the active one (read-only; the active pointer never moves)",
+    )
     .action(async (options: StatusCliOptions, command: Command) => {
       const now = programOptions.statusClock?.() ?? Date.now();
       const mode = resolveStatusMode(options, command.getOptionValueSource("limit") === "cli");
       const cwd = process.cwd();
-      const result =
+      const result = await withTargetTask(options.task, async () =>
         mode === "workspace"
           ? await inspectWorkspaceGitStatus(cwd, typeof options.workspace === "string" ? options.workspace : undefined)
           : mode === "checks"
@@ -106,7 +111,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
                 ? await summarizeProjectStatus(cwd, now)
                 : mode === "explain"
                   ? await explainProjectStatus(cwd, parseReportLimit(options.limit, "status"), now)
-                  : await inspectProjectStatus(cwd, now);
+                  : await inspectProjectStatus(cwd, now),
+      );
       process.stdout.write(`${JSON.stringify(result)}
 `);
     });

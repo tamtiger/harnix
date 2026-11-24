@@ -7,6 +7,7 @@ import { refreshRepoMap } from "src/core/repo-map/service.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
 import { runGit } from "src/utils/git.js";
+import { findExerciseRunbook } from "src/core/spec/exercise-runbook.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { detectEcosystemVerify, type EcosystemVerifyResult } from "./verify-detection.js";
 import { detectWorkspaces, type WorkspacePackage } from "./workspace-detection.js";
@@ -44,6 +45,8 @@ export interface VerifyPlan {
   commands: VerifyCommandConfig;
   packages: PackageVerifyPlan[];
   warnings: string[];
+  /** `.harnix/spec/exercise.md` when the repository keeps a run-for-real runbook there. */
+  runbook?: string | undefined;
   impact?: ImpactVerification | undefined;
 }
 
@@ -83,6 +86,7 @@ export async function buildVerifyPlan(projectRoot: string, options?: VerifyPlanO
     impact = await computeImpactVerification(root, options.impact, rootDetected, commands.test);
   }
 
+  const runbook = await findExerciseRunbook(root);
   return {
     generator: "harnix",
     schemaVersion: 1,
@@ -90,6 +94,7 @@ export async function buildVerifyPlan(projectRoot: string, options?: VerifyPlanO
     commands,
     packages: await scopePackages(root, packages, options),
     warnings,
+    ...(runbook ? { runbook } : {}),
     ...(impact ? { impact } : {}),
   };
 }

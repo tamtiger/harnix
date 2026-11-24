@@ -36,6 +36,7 @@ describe("workflow handlers", () => {
         "evidence",
         "finish",
         "init",
+        "initEpic",
         "inspect",
         "learn",
         "migrate",

@@ -38,6 +38,8 @@ export type { WorkflowSaveArtifacts, WorkflowSaveEnvelope } from "./envelope.js"
 export { finishWorkflow, finishWorkflowReport, finishWorkflowTask } from "./finish.js";
 export type { FinishLearningReport, FinishReport, WorkflowFinishDependencies } from "./finish.js";
 export { inspectWorkflow } from "./inspect.js";
+export { initEpicWorkflow } from "./init-epic.js";
+export type { InitEpicOptions, InitEpicResult } from "./init-epic.js";
 export { initTaskWorkflow } from "./init-task.js";
 export type { InitTaskOptions } from "./init-task.js";
 export { recordLearningWorkflow, recordWorkflowLearning } from "./learn.js";
@@ -74,5 +76,5 @@ export { assertValidCheckInputs, validateCheckInputs } from "./check-input-valid
 export type { CheckInputValidationResult } from "./check-input-validator.js";
 export { syncPlanChecklistPass, tickPlanChecklist, tickWorkflow } from "./plan-sync.js";
 export type { TickPlanResult, WorkflowTickResult } from "./plan-sync.js";
-export { withTargetTask } from "./target-task.js";
+export { resolveReadableTask, withTargetTask } from "./target-task.js";
 export { transitionWorkflow } from "./transition.js";

@@ -4,6 +4,7 @@ import { dirname, basename } from "node:path";
 import { artifactFindings } from "./ready-artifacts.js";
 import { assertSuiteGateReady } from "./suite-gate.js";
 import { suiteWithoutTests } from "./suite-command.js";
+import { exerciseAdvisories } from "./exercise-advisory.js";
 
 import { globby } from "globby";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
@@ -113,7 +114,11 @@ async function readyFindings(
       ...(await suiteGateIssues(projectRootOf(harnixRoot), task)),
       ...artifact.issues,
     ],
-    advisories: [...artifact.advisories, ...(await suiteWithoutTestsAdvisories(projectRootOf(harnixRoot), task))],
+    advisories: [
+      ...artifact.advisories,
+      ...(await suiteWithoutTestsAdvisories(projectRootOf(harnixRoot), task)),
+      ...exerciseAdvisories(task),
+    ],
   };
 }
 

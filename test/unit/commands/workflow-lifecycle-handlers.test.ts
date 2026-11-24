@@ -18,7 +18,7 @@ const context = (root: string, flags: WorkflowContext["flags"]): WorkflowContext
 
 describe("workflow lifecycle handlers", () => {
   it("exposes init, setBaseline and epicOrder", () => {
-    expect(Object.keys(LIFECYCLE_HANDLERS).sort()).toEqual(["epicOrder", "init", "setBaseline"]);
+    expect(Object.keys(LIFECYCLE_HANDLERS).sort()).toEqual(["epicOrder", "init", "initEpic", "setBaseline"]);
   });
 
   it("init creates a task from flags and --brief reports only its state", async () => {
@@ -31,6 +31,25 @@ describe("workflow lifecycle handlers", () => {
     );
 
     expect(result).toMatchObject({ status: "planning", checkpoint: "planning" });
+  });
+
+  it("initEpic creates the epic from flags, and its dry run writes nothing", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const flags = {
+      title: "Epic plain",
+      slug: "plain-epic",
+      member: ["First|first-one", "Second|second-one"],
+      command: "pnpm test",
+    };
+
+    const plan = await LIFECYCLE_HANDLERS.initEpic!(context(root, { ...flags, dryRun: true }));
+    const created = await LIFECYCLE_HANDLERS.initEpic!(context(root, { ...flags, brief: true }));
+
+    expect(plan).toMatchObject({ dryRun: true, members: [{ title: "First" }, { title: "Second" }] });
+    expect(plan).not.toHaveProperty("task");
+    expect(created).toMatchObject({ dryRun: false, task: { status: "planning", checkpoint: "planning" } });
   });
 
   it("epicOrder splits the epic id from the task ids and reports an unknown epic", async () => {

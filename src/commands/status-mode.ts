@@ -6,6 +6,7 @@ export interface StatusModeFlags {
   criteria?: boolean | undefined;
   checks?: boolean | undefined;
   workspace?: boolean | string | undefined;
+  task?: string | undefined;
 }
 
 type Conflict = "explain" | "summary" | "criteria" | "checks" | "limit";
@@ -31,6 +32,8 @@ function joinFlags(names: readonly string[]): string {
 
 /** Picks the projection `harnix status` prints and rejects options that cannot be combined with it. */
 export function resolveStatusMode(flags: StatusModeFlags, limitGiven: boolean): StatusMode {
+  if (flags.workspace !== undefined && flags.task !== undefined)
+    throw new Error("--task cannot be combined with --workspace; --workspace reads Git, not a task.");
   for (const { mode, flag, refuses } of STANDALONE) {
     const selected = mode === "workspace" ? flags.workspace !== undefined : flags[mode] === true;
     if (!selected) continue;

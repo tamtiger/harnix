@@ -30,6 +30,8 @@ export interface InitTaskOptions {
   input?: string[] | undefined;
   followUp?: string | undefined;
   epic?: string | undefined;
+  /** An epic id that is created in the same save (`--init-epic`), so it is not looked up on disk. */
+  epicPending?: string | undefined;
   /** False for `--no-activate`: the task is created without touching the active pointer. */
   activate?: boolean | undefined;
   /** Repository-relative directory of the package the task is about: its test command and inputs become the default. */
@@ -167,7 +169,15 @@ function resolveSlug(title: string, slug: string | undefined, targetIssue: strin
   );
 }
 
-export async function initTaskWorkflow(root: string, options: InitTaskOptions): Promise<TaskRecordV3> {
+export interface PreparedInitTask {
+  candidate: TaskRecordV3;
+  artifacts: { prd: string; plan: string } | undefined;
+  /** Id of the default check the notice names (check-suite or check-1), when one was created. */
+  autoId: string | undefined;
+}
+
+/** The valid planning task `--init` would save, without saving it. */
+export async function prepareInitTask(root: string, options: InitTaskOptions): Promise<PreparedInitTask> {
   const title = options.title?.trim();
   if (!title) {
     throw new Error("workflow --init requires a non-empty --title.");
@@ -185,7 +195,12 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   const slug = resolveSlug(title, options.slug, target.issue);
   const id = `${prefix}-${slug}`;
 
-  const { epicId, followUpOf, relevantPaths, relevantSpecs } = await resolveLineage(root, options);
+  const lineage = await resolveLineage(
+    root,
+    options.epicPending === undefined ? options : { ...options, epic: undefined },
+  );
+  const { followUpOf, relevantPaths, relevantSpecs } = lineage;
+  const epicId = options.epicPending ?? lineage.epicId;
 
   const declared = (options.checks ?? []).map((spec) => declaredCheck(spec, cwd));
   const base = command === undefined ? undefined : defaultCheck(title, command, projectTest, criteria, inputs, cwd);
@@ -216,8 +231,12 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     updatedAt: now,
   };
 
-  const artifacts = initArtifacts(mode, candidate, options);
+  return { candidate, artifacts: initArtifacts(mode, candidate, options), autoId: base?.id };
+}
 
+export async function initTaskWorkflow(root: string, options: InitTaskOptions): Promise<TaskRecordV3> {
+  const { candidate, artifacts, autoId } = await prepareInitTask(root, options);
+  const { title, goal } = candidate;
   const similar = await loadSimilarTasks(root, { title, goal });
   const saved = (await saveWorkflow(
     root,
@@ -226,7 +245,6 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   )) as TaskRecordV3;
   const notice = similarTaskNotice(similar);
   if (notice !== undefined) process.stderr.write(notice);
-  const autoId = base?.id;
   process.stderr.write(checksNotice(candidate.validationPlan, autoId));
   return saved;
 }

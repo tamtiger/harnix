@@ -69,7 +69,7 @@ function assertCheckCriteria(check: ValidationCheckV2, criterionIds: ReadonlySet
   if (missing.length > 0) {
     const valid = Array.from(criterionIds).sort().join(", ");
     throw new TaskValidationError(
-      `TaskRecord ${label} validation criterion reference is invalid: unknown criterion ${missing.join(", ")} in check "${check.id}" (valid: ${valid || "none"}).`,
+      `TaskRecord ${label} validation criterion reference is invalid: unknown criterion ${missing.join(", ")} in check "${check.id}" (valid: ${valid || "none"}). Declare the criterion first: harnix workflow --add-criterion ${missing[0]} --text "<text>" before --set-check.`,
     );
   }
 }

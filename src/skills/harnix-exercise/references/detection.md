@@ -2,6 +2,8 @@
 
 Pick the cheapest signal first; stop when one kind has clear evidence. Never ask the user for a fact the repository answers.
 
+Runbook first: when `harnix verify-plan` returns `runbook` (`.harnix/spec/exercise.md`, a user-owned file with the start command, port and tools of this repository), read it before choosing a kind or a tool and follow it; without that file, detect as below.
+
 ## Kind
 
 | Signal in the repository | Kind |

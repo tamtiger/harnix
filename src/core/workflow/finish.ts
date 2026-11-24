@@ -9,6 +9,7 @@ import { nowInstant } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
+import { finishCommitAdvice, type FinishCommitAdvice } from "./finish-advice.js";
 import { scanTaskSecrets, type SecretAdvisory } from "./secret-scan.js";
 import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
@@ -36,6 +37,8 @@ export interface FinishReport {
   baselineAuthorized: string[];
   /** Present only when a file of the task shows a sign of a secret; advice, never a reason to refuse a finish. */
   secretAdvisory?: SecretAdvisory;
+  /** A commit message proposal and changed files outside relevantPaths; advice only, finish never commits. */
+  commitAdvice: FinishCommitAdvice;
 }
 
 export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
@@ -107,6 +110,7 @@ async function finishLocked(
   const secretAdvisory = await scanTaskSecrets(root, finished);
   return {
     task: finished,
+    commitAdvice: await finishCommitAdvice(root, finished),
     ...(secretAdvisory === undefined ? {} : { secretAdvisory }),
     baselineAuthorized: finished.validationPlan
       .filter((check) => authorizedRedBaseline(finished, check))

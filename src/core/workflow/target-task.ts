@@ -1,7 +1,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { loadTask, resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
-import { taskFilePath } from "src/core/tasks/task-location.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
 import { isMissingPathError } from "src/utils/errno.js";
+import { unknownIdError } from "src/utils/suggest.js";
 
 const TASK_ID = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const targets = new AsyncLocalStorage<{ id: string }>();
@@ -31,4 +32,21 @@ export async function resolveEditableTask(harnixRoot: string): Promise<TaskRecor
   if (task.status === "completed" || task.status === "cancelled")
     throw new Error(`--task ${id} is ${task.status}; a terminal task cannot be edited.`);
   return task;
+}
+
+/**
+ * The task a read-only projection (`status --task <id>`) describes: the `--task` target of any status, including a
+ * terminal one, otherwise the active task. An unknown id is answered with the valid ids and the nearest one.
+ */
+export async function resolveReadableTask(harnixRoot: string): Promise<TaskRecord | undefined> {
+  const id = targetTaskId();
+  if (id === undefined) return resolveActiveTask(harnixRoot);
+  if (!TASK_ID.test(id)) throw new Error(`--task must be a task id (YYYYMMDD-HHMMSS-slug), not ${id}.`);
+  try {
+    return await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
+  } catch (error: unknown) {
+    if (!isMissingPathError(error)) throw error;
+    const known = (await listTaskIds(harnixRoot)).reverse();
+    throw unknownIdError(`--task ${id}: task not found.`, "task", id, known);
+  }
 }

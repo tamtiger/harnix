@@ -84,6 +84,9 @@ describe("user-global paths", () => {
     await expect(resolveSafeUserPath(roots.kiro, "skills/harnix-implement/SKILL.md")).rejects.toBeInstanceOf(
       UnsafeUserPathError,
     );
+    await expect(resolveSafeUserPath(roots.kiro, "skills/harnix-implement/SKILL.md")).rejects.toThrow(
+      /harnix doctor --global.*CLAUDE_CONFIG_DIR, CODEX_HOME, XDG_CONFIG_HOME/u,
+    );
   });
 
   describe("linked entries inside an environment-overridden root", () => {

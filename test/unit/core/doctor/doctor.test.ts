@@ -1,7 +1,10 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "src/commands/init.js";
 import { runDoctor, type DoctorDeps } from "src/core/doctor/doctor.js";
+import { doctorExitCode } from "src/core/doctor/exit-code.js";
 import { GlobalManagedTransactionError } from "src/core/global/managed-files.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
@@ -50,6 +53,28 @@ describe("doctor run", () => {
     expect(report.globalIntegrations).toHaveLength(6);
     expect(report.summary.fixed).toBe(0);
     expect(calls).toEqual({ project: 0, global: 0 });
+  });
+
+  it("reports the missing exercise runbook as info that never adds to the warning count or the exit code", async () => {
+    const { root, homeResolver, commandLookup } = await setup();
+    await writeFile(join(root, "package.json"), JSON.stringify({ scripts: { test: "vitest" } }));
+    const baseline = await runDoctor(
+      { root, homeResolver, commandLookup, environment: {} },
+      deps({ project: 0, global: 0 }),
+    );
+    await writeFile(join(root, "package.json"), JSON.stringify({ scripts: { start: "node a.js" } }));
+
+    const report = await runDoctor(
+      { root, homeResolver, commandLookup, environment: {} },
+      deps({ project: 0, global: 0 }),
+    );
+
+    expect(report.project.findings).toContainEqual(
+      expect.objectContaining({ code: "exercise-runbook-missing", severity: "info" }),
+    );
+    expect(report.summary).toEqual(baseline.summary);
+    expect(report.ok).toBe(baseline.ok);
+    expect(doctorExitCode(report)).toBe(doctorExitCode(baseline));
   });
 
   it("fixes only project state on a project-only --fix", async () => {

@@ -287,10 +287,15 @@ export function runCheckProcess(
           platform,
         );
     }, dependencies.timeoutMs ?? TIMEOUT_MS);
-    child.once("error", () => {
+    child.once("error", (error: NodeJS.ErrnoException) => {
       clearTimeout(timer);
       stopForwarding?.();
-      reject(new Error(`Could not start executable ${executable}.`));
+      const code = typeof error?.code === "string" ? ` (${error.code})` : "";
+      reject(
+        new Error(
+          `Could not start executable ${executable}${code}. If it is a shim or launcher, declare the real program instead, for example python -m pytest rather than pytest.`,
+        ),
+      );
     });
     const stopForwarding =
       platform !== "win32" && child.pid !== undefined ? forwardInterruptsToGroup(child.pid) : undefined;

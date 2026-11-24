@@ -10,7 +10,8 @@ import {
   type RequiredCheckState,
   type VerificationInputChange,
 } from "src/core/verification/check-report.js";
-import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
+import { TaskValidationError } from "src/core/tasks/task.js";
+import { resolveReadableTask } from "src/core/workflow/index.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -74,7 +75,7 @@ export async function reportProjectChecks(cwd: string, limit: number, now = Date
   if (project.kind !== "ready") throw await missingProjectError("Checks", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
-  const task = await resolveActiveTask(harnixRoot).catch(redactChecksParserError);
+  const task = await resolveReadableTask(harnixRoot).catch(redactChecksParserError);
   const base = {
     generator: "harnix" as const,
     schemaVersion: 1 as const,

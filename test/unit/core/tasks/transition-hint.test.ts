@@ -32,6 +32,14 @@ describe("transitionHint", () => {
     expect(text).not.toContain("then harnix workflow");
   });
 
+  it("names the valid way back: edit the obligation with --reason, then re-enter ready from replan", () => {
+    const text = hint("verifying", "in_progress");
+    expect(text).toContain("--set-check");
+    expect(text).toContain("--set-criterion");
+    expect(text).toContain("--reason");
+    expect(text).toContain("harnix workflow --transition ready/ready");
+  });
+
   it("states that a terminal status has no transitions", () => {
     expect(hint("completed", "planning")).toBe("completed is terminal and has no further transitions");
   });

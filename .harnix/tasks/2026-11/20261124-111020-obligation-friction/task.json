@@ -1,0 +1,146 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-111020-obligation-friction",
+  "epicId": "20261124-111018-session-feedback-fixes",
+  "title": "Giảm ma sát khi khai báo obligation: gộp lỗi ready, hint đúng thứ tự, slug tự sinh",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Agent không phải đoán thứ tự và cú pháp: lỗi ready/dry-run được gom một lần, hint của các lệnh sửa obligation in sẵn lệnh đúng, và --init tự sinh slug khi title có dấu.",
+  "nonGoals": [
+    "Không đổi hợp đồng đóng băng của TaskRecord v3, chuyển trạng thái hay hook protocol",
+    "Không thêm package, bin, daemon hay surface nền tảng mới",
+    "Không thêm transition mới (verifying→in_progress vẫn bị cấm; chỉ in sẵn chuỗi lệnh replan hợp lệ)",
+    "Không nới quy tắc bất biến của check đã pass"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-2",
+      "text": "Lỗi `unknown criterion … in check` nêu thứ tự đúng và lệnh sửa (`--add-criterion <id> --text <t>` trước `--set-check`); gợi ý của `Illegal transition` đi lùi về trước (ví dụ verifying → in_progress) in sẵn cách hợp lệ: sửa obligation bằng `--set-check` hoặc `--set-criterion` kèm `--reason`, rồi `--transition ready/ready` khi checkpoint là replan. Có test pin nội dung.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bốn thông báo được pin bằng test: lỗi operand của `--set-paths` nêu `--relevant-path <path>` (lặp được) và `--relevant-spec`; lỗi `--run-check` lệch lệnh khai báo in sẵn lệnh `--run-check <id> -- <argv đã khai báo>`; lỗi không khởi động được executable nêu mã lỗi và gợi ý chạy chương trình thật (ví dụ `python -m pytest` thay cho shim); lỗi symlink của user-global nêu `harnix doctor --global` và các biến dời root (`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `XDG_CONFIG_HOME`), không in đường dẫn tuyệt đối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Tài liệu, skills và template liên quan được đồng bộ, selfhost:sync chạy khi cần, phiên bản nâng một lần theo chính sách member epic kèm CHANGELOG.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/**",
+    "package.json",
+    "src/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI contract, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-5"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-5"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T11:31:23.102+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4369a5fa3dbd0cfb2e42071ba3fbb9ac527674441ffd269f96feaa9b89b8b20e",
+      "durationMs": 8449
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-24T11:33:26.519+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "018741b2de4b89e180c15f251262c9aa7fa524b8134a9db2d3842e51ab7aac98",
+      "durationMs": 119387
+    }
+  ],
+  "decisions": [
+    {
+      "id": "dec-no-auto-slug",
+      "text": "Không tự sinh slug từ title có dấu và bỏ tiêu chí gộp lỗi ready",
+      "rationale": "AGENTS.md buộc ID task là slug tiếng Anh nên slug bỏ dấu tiếng Việt vi phạm quy ước; lỗi hiện tại đã in sẵn lệnh --slug đúng. Dry-run ready đã gom mọi issue (test collects every independent issue in one pass)."
+    },
+    {
+      "id": "dec-docs-synced",
+      "text": "Đã rà README, AGENTS.md, PRD, WORKFLOW, template và skills: chỉ đổi nội dung hint nên không cần sửa ngoài CHANGELOG; template workflow.md không đổi nên không chạy selfhost:sync",
+      "rationale": "AGENTS.md đã nêu hint phải nêu lệnh đúng; không đổi cờ, enum hay hợp đồng đóng băng"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-rerun-truncated",
+      "text": "Lệnh chạy lại trong thông báo run-check dùng describeCommand nên bị cắt bằng ... khi lệnh khai báo quá dài; hint khi thiếu criterion không nhắc --reason cần sau planning (Mitigation: dùng harnix status --checks để xem lệnh đầy đủ)",
+      "severity": "low"
+    }
+  ],
+  "createdAt": "2026-11-24T11:10:18.543+07:00",
+  "updatedAt": "2026-11-24T11:33:43.146+07:00",
+  "completedAt": "2026-11-24T11:33:43.146+07:00"
+}

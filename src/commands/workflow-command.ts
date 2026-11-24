@@ -57,7 +57,17 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--preflight", "Inspect bounded workflow routing metadata")
     .option("--expected-task <task-id>", "Verify active task matches this expected task ID for --preflight")
     .option("--init", "Initialize a new task record with boilerplate obligations")
-    .option("--title <title>", "Task title for --init")
+    .option(
+      "--init-epic",
+      "Create an epic and all its member tasks from flags: --title, --slug, --goal and 2+ --member",
+    )
+    .option(
+      "--member <title|slug>",
+      "Member task of --init-epic as '<title>|<english-slug>' (repeat, in run order)",
+      collect,
+      [],
+    )
+    .option("--title <title>", "Task title for --init, or epic title for --init-epic")
     .option(
       "--task <task-id>",
       "Edit (or, with --cancel, cancel) this unfinished task instead of the active one (the active pointer stays unless it names that task)",

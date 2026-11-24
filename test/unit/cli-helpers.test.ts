@@ -152,6 +152,12 @@ describe("validateRepoMapOptions --format", () => {
       expect(() => validateRepoMapOptions(options)).toThrow(/--source-only requires repo-map --query/u);
   });
 
+  it("tells which repo-map actions --workspace works with and where --refs runs instead", () => {
+    expect(() => validateRepoMapOptions({ refs: "run", workspace: true })).toThrow(
+      /--workspace requires repo-map --query, --events, or --refresh\.\nGợi ý: .*--refs.*(project|--path)/su,
+    );
+  });
+
   it("accepts --offset only with --refs and parses it as an integer up to 10000", () => {
     expect(() => validateRepoMapOptions({ offset: "20", refs: "run" })).not.toThrow();
     expect(() => validateRepoMapOptions({ offset: "20", outline: "src/a.ts" })).not.toThrow();

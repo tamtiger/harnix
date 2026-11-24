@@ -6,6 +6,8 @@ export interface WorkflowFlags {
   inspect?: boolean;
   preflight?: boolean;
   init?: boolean;
+  initEpic?: boolean;
+  member?: string[];
   batch?: boolean;
   save?: boolean;
   snapshot?: boolean;
@@ -169,14 +171,21 @@ function assertIdFlagValues(flags: WorkflowFlags): void {
   }
 }
 
+const SET_PATHS_HINT =
+  "--set-paths nhận từng đường dẫn qua cờ lặp được: harnix workflow --set-paths --relevant-path <path> [--relevant-path <path>...] [--relevant-spec <path>].";
+const OPERAND_HINT =
+  "Chỉ --run-check nhận đối số (đặt sau dấu --); cờ giá trị nhận token kế tiếp làm giá trị, nên bỏ đối số thừa hoặc đặt id ngay sau cờ.";
+
+/** The operand rejection; `--set-paths` names its own repeatable path flags because that is where operands are guessed. */
+function operandMessage(action: string, operands: string[]): string {
+  return `workflow does not accept operands: ${operands.join(" ")}\nGợi ý: ${action === "setPaths" ? SET_PATHS_HINT : OPERAND_HINT}`;
+}
+
 export function assertCommandShape(action: string, flags: WorkflowFlags, operands: string[]): void {
   assertIdFlagValues(flags);
   if (action === "runCheck" && operands.length === 0)
     throw new Error("workflow --run-check requires an executable after --.");
-  if (action !== "runCheck" && operands.length > 0)
-    throw new Error(
-      `workflow does not accept operands: ${operands.join(" ")}\nGợi ý: Chỉ --run-check nhận đối số (đặt sau dấu --); cờ giá trị nhận token kế tiếp làm giá trị, nên bỏ đối số thừa hoặc đặt id ngay sau cờ.`,
-    );
+  if (action !== "runCheck" && operands.length > 0) throw new Error(operandMessage(action, operands));
   if (flags.brief === true && flags.full === true)
     throw new Error("--brief and --full are mutually exclusive.\nGợi ý: Chọn một trong --brief hoặc --full.");
   if (flags.brief === true && !BRIEF_ACTIONS.has(action))

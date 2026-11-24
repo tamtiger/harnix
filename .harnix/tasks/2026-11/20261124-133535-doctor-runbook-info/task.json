@@ -1,0 +1,106 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-133535-doctor-runbook-info",
+  "title": "Hạ finding exercise-runbook-missing xuống info để doctor không đỏ CI",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Finding exercise-runbook-missing chỉ là gợi ý nên không được làm harnix doctor thoát exit 1 ở repo có entry point chạy được mà thiếu .harnix/spec/exercise.md.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix doctor trên một dự án chỉ có finding exercise-runbook-missing có ok true và exit code 0; finding vẫn xuất hiện trong báo cáo với severity info, mã vẫn nằm trong DOCTOR_FINDING_CODES và tài liệu ghi đúng mức info.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:gates",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T13:41:29.115+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fd5c6cc5b750d41aef472fc5763b55e5188b0c1a10b0f35e1ab7e4b5d8e36f5f",
+      "durationMs": 9801
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-24T13:44:06.973+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2ea74f250316030d3ab784b10a7ebc6d9d16a370017829f4b3c15a7017ab2606",
+      "durationMs": 151933
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T13:35:35.270+07:00",
+  "updatedAt": "2026-11-24T13:44:16.722+07:00",
+  "decisions": [
+    {
+      "id": "dec-info-level",
+      "text": "Hạ exercise-runbook-missing xuống severity info thay vì warning",
+      "rationale": "doctor đã hỗ trợ info và ok chỉ tính errors và warnings, nên info giữ finding trong báo cáo mà không đổi exit code; không cần cờ hay ngoại lệ mới trong doctorExitCode; AGENTS.md cho phép finding mới ra mức nhẹ trước."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-info-hidden",
+      "text": "Finding info có thể bị bỏ qua vì doctor không đỏ; chấp nhận vì đây chỉ là gợi ý và skill harnix-exercise đã nhắc runbook.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-24T13:44:16.722+07:00"
+}

@@ -244,7 +244,9 @@ function emptyRefsResult(
 function assertRefsOptions(options: RepoMapRefsOptions): void {
   const symbol = options.symbol.trim();
   if (!symbolIdentifierPattern.test(symbol)) {
-    throw new Error("Refs symbol must be a valid identifier or code of 1 to 128 characters.");
+    throw new Error(
+      "Refs symbol must be a valid identifier of 1 to 128 characters ([A-Za-z0-9_$]; no : - or spaces).\nGợi ý: harnix repo-map --query <text> tìm văn bản dạng tự do.",
+    );
   }
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 20) {
     throw new Error("Refs limit must be an integer between 1 and 20.");

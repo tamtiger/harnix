@@ -1,6 +1,6 @@
 import { readConfig } from "src/core/config/config.js";
 import { createNoActiveTaskAudit, createTaskAudit, type TaskAuditResultV1 } from "src/core/tasks/task-audit.js";
-import { resolveActiveTask } from "src/core/tasks/task.js";
+import { resolveReadableTask } from "src/core/workflow/index.js";
 import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
@@ -9,6 +9,6 @@ export async function auditProjectTask(cwd: string, now = Date.now()): Promise<T
   if (project.kind !== "ready") throw await missingProjectError("Audit", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
-  const task = await resolveActiveTask(harnixRoot);
+  const task = await resolveReadableTask(harnixRoot);
   return task === undefined ? createNoActiveTaskAudit() : createTaskAudit(project.root, harnixRoot, task, now);
 }

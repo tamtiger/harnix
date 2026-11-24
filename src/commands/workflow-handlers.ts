@@ -296,6 +296,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       : {
           ...briefTask(report.task),
           learning: report.learning,
+          commitAdvice: report.commitAdvice,
           ...(report.baselineAuthorized.length > 0 ? { baselineAuthorized: report.baselineAuthorized } : {}),
           ...(report.secretAdvisory === undefined ? {} : { secretAdvisory: report.secretAdvisory }),
         };

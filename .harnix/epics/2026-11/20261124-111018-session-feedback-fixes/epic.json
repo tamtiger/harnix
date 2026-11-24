@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261124-111018-session-feedback-fixes",
+  "title": "Sửa các vấn đề dùng Harnix rút ra từ 47 session cũ",
+  "goal": "Giảm ma sát và rủi ro khi dùng Harnix dựa trên bằng chứng từ 47 session ở 7 repo: buộc kiểm chạy thật sau implement, giảm lỗi khai báo obligation, lấp khoảng trống bề mặt CLI và tăng tốc verify/finish.",
+  "nonGoals": [
+    "Không đổi hợp đồng đóng băng TaskRecord v3, hook protocol hay chuyển trạng thái",
+    "Không thêm package, bin, daemon, telemetry hay nền tảng mới",
+    "Không tự động commit, branch, push",
+    "Không sửa lỗi shell của agent (heredoc) ngoài việc ghi hướng dẫn nếu cần"
+  ],
+  "createdAt": "2026-11-24T11:10:18.543+07:00",
+  "updatedAt": "2026-11-24T11:10:18.543+07:00"
+}

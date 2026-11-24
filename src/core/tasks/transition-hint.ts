@@ -26,7 +26,7 @@ export function transitionHint(
   const start = FORWARD.indexOf(from);
   const end = FORWARD.indexOf(to);
   if (start < 0 || end <= start)
-    return `${legalText}. No step leads back to ${to}; revise obligations with a flag edit and --reason (checkpoint replan) instead`;
+    return `${legalText}. No step leads back to ${to}; revise obligations with a flag edit and --reason instead (--set-check or --set-criterion; a check edit at verifying resumes verifying/verifying, elsewhere it stays at checkpoint replan until harnix workflow --transition ready/ready)`;
   const steps = FORWARD.slice(start + 1, end + 1).map((status) => STEP[status] ?? "");
   return `${legalText}. To reach ${to}: ${steps.join(", then ")}`;
 }

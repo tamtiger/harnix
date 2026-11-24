@@ -1,0 +1,193 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-111022-verify-speed-and-finish",
+  "epicId": "20261124-111018-session-feedback-fixes",
+  "title": "Tăng tốc phản hồi verify và gọn bước finish; đóng epic bằng bản minor",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Giảm token và lượt thao tác lúc verify và finish: run-checks in tóm tắt gọn kèm tên test hỏng, status --checks hiện thời lượng, finish đề xuất commit và cảnh báo file ngoài paths; member cuối đóng epic.",
+  "nonGoals": [
+    "Không đổi hợp đồng đóng băng của TaskRecord v3, chuyển trạng thái hay hook protocol",
+    "Không thêm package, bin, daemon hay surface nền tảng mới",
+    "Không tự commit, branch hay push",
+    "Không đổi cơ chế circuit breaker trước khi kiểm lại bằng chứng (chỉ ghi nhận kết quả kiểm)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-2",
+      "text": "`harnix status --checks` hiện `durationMs` của lần pass gần nhất cho từng check để chọn check nhanh chạy trước.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "`harnix workflow --finish --brief` kèm gợi ý thông điệp commit (không commit) và cảnh báo (không chặn) khi working tree có file thay đổi ngoài `relevantPaths` của task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Tài liệu, skills, template được đồng bộ, selfhost:sync chạy; phiên bản đóng epic bằng bản minor `pnpm version:sync <X.(Y+1).0> --fold-dev` kèm CHANGELOG; chạy harnix-review một lần trên toàn bộ diff epic trước finish.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Gợi ý thiếu runbook, không ghi file: khi repo có entry point chạy được (script start, dev hoặc serve, hoặc bin trong package.json) mà chưa có `.harnix/spec/exercise.md` có nội dung, `harnix doctor` in finding `exercise-runbook-missing` mức warning, không fixable, trỏ tới `harnix skill harnix-exercise --reference runbook`; mã nằm trong `DOCTOR_FINDING_CODES` kèm fixture sinh ra nó; không lệnh nào tạo hay sửa file đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "`harnix skill harnix-exercise --reference runbook` in mẫu `exercise.md` (lệnh khởi động, cổng, công cụ, dữ liệu cô lập, cách dừng) và có một dòng trỏ tới nó trong SKILL.md; ngân sách token và checklist SKILL.md vẫn đạt.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "`harnix-exercise` hướng dẫn agent, sau lần chạy thật đầu tiên thành công, đề xuất tạo `.harnix/spec/exercise.md` từ lệnh đã dùng và chỉ ghi khi người dùng đồng ý rõ ràng (không ghi tự động); `harnix-verify` hoặc `harnix-implement` nhắc đọc file này khi có.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/**",
+    "package.json",
+    "src/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI contract, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-24T12:00:24.523+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bỏ vế \"harnix update nhắc một dòng\": update không chạy chẩn đoán doctor, nên thêm đường nhắc riêng là phạm vi thừa so với bằng chứng; doctor là nơi cảnh báo.",
+      "artifactPaths": [
+        ".harnix/tasks/20261124-111022-verify-speed-and-finish/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-24T12:03:51.669+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ec4422fd3c6ebbc0d562721a1938667c836b4ffb586b5d26ededf6a342ac067c",
+      "durationMs": 9582
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-24T12:05:59.735+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d902210b97dfedb1ebecf57893ee5480897f19df527bbee7a62db8a29dd4093a",
+      "durationMs": 123768
+    }
+  ],
+  "decisions": [
+    {
+      "id": "dec-ac1-ac4-already-done",
+      "text": "Bỏ ac-1 và ac-4 sau khi đối chiếu code: --run-check/--run-checks đã trả result, exitCode, durationMs mỗi check và outputTail tối đa 10 mục khi fail (brief bỏ tail); breaker đã truyền currentDigest nên digest mới được chạy lại và test retry-guard \"allows rerun after two failures when input digest changes\" đã ghim hành vi.",
+      "rationale": "Không thêm code thừa; chỉ ghi kết quả kiểm (breaker không đổi theo ràng buộc epic)."
+    },
+    {
+      "id": "dec-runbook-doctor-only",
+      "text": "Gợi ý thiếu exercise.md chỉ ở doctor (warning, không fixable); harnix update và init không tạo file này vì .harnix/spec là vùng người dùng sở hữu.",
+      "rationale": "Giữ ranh giới không ghi khi không có yêu cầu rõ; người dùng đã yêu cầu chỉ gợi ý."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-doctor-warning-exit",
+      "text": "Finding exercise-runbook-missing là warning nên doctor ok:false (exit 1 nếu không có --allow-warnings) với repo có start/dev/serve hoặc bin mà chưa có runbook; hợp lệ theo chính sách warning-trước-error nhưng có thể làm đỏ CI đang chạy doctor. (Mitigation: Không fixable, người dùng tắt bằng --allow-warnings hoặc viết runbook; chưa nâng lên error.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-outside-paths-deleted",
+      "text": "commitAdvice.outsidePaths bỏ sót file đã xóa nằm ngoài relevantPaths (không thể so khớp glob với file không còn); chọn bỏ sót thay vì báo nhầm.",
+      "severity": "low"
+    }
+  ],
+  "createdAt": "2026-11-24T11:10:18.543+07:00",
+  "updatedAt": "2026-11-24T12:06:10.817+07:00",
+  "completedAt": "2026-11-24T12:06:10.817+07:00"
+}

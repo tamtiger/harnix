@@ -1,4 +1,9 @@
-import { initTaskWorkflow, setBaselineWorkflow, setEpicOrderWorkflow } from "src/commands/internal-workflow.js";
+import {
+  initEpicWorkflow,
+  initTaskWorkflow,
+  setBaselineWorkflow,
+  setEpicOrderWorkflow,
+} from "src/commands/internal-workflow.js";
 import {
   parseJson,
   presentTask,
@@ -87,6 +92,20 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       await resolveTaskDirectory(await resolveSafeHarnixPath(context.root), task.id),
     );
     return { ...(presentTask(context, task) as object), taskDir: taskDir.split(sep).join("/") };
+  },
+  initEpic: async (context) => {
+    const { flags } = context;
+    const result = await initEpicWorkflow(context.root, {
+      title: flags.title,
+      slug: flags.slug,
+      goal: flags.goal,
+      members: flags.member,
+      command: flags.command,
+      input: flags.input?.flatMap(splitGlobList),
+      dryRun: flags.dryRun === true,
+    });
+    const { task, ...plan } = result;
+    return task === undefined ? plan : { ...plan, task: presentTask(context, task) };
   },
   epicOrder: async ({ root, flags }) => {
     const [epicId, ...taskIds] = [flags.epicOrder].flat().flatMap((item) => splitList(item as string));

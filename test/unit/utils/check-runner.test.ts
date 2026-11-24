@@ -160,6 +160,18 @@ describe("check runner on Windows", () => {
     expect(options).toMatchObject({ shell: false, windowsVerbatimArguments: true });
   });
 
+  it("names the error code and the real program to run when a launcher cannot start", async () => {
+    const child = fakeChild();
+    const spawner: ProcessSpawner = vi.fn(() => child as never);
+    const run = runCheckProcess("pytest.exe", ["-q"], "C:\\repo", {
+      platform: "win32",
+      spawner,
+      lookup: () => "C:\\shims\\pytest.exe",
+    });
+    child.emit("error", Object.assign(new Error("spawn UNKNOWN"), { code: "UNKNOWN" }));
+    await expect(run).rejects.toThrow(/Could not start executable pytest\.exe \(UNKNOWN\).*python -m pytest/u);
+  });
+
   it("kills the whole process tree with taskkill when a check times out", async () => {
     const child = fakeChild(777);
     const killer = vi.fn();

@@ -2,7 +2,7 @@
 name: harnix-exercise
 description: Use when an implemented behavior must be proven by running it for real, by calling an API endpoint, running a CLI or driving a browser with generated test cases and recorded evidence.
 metadata:
-  version: "2.37.0"
+  version: "2.38.1"
 ---
 
 # Exercise the behavior for real
@@ -43,4 +43,5 @@ Detail on demand:
 - Calling an API for real: `harnix skill harnix-exercise --reference api`
 - Running a CLI or a library as its consumer: `harnix skill harnix-exercise --reference cli`
 - Driving a browser through a page flow: `harnix skill harnix-exercise --reference web`
+- The repository's own start and probe notes, and how to propose them: `harnix skill harnix-exercise --reference runbook`
 - Limits that always apply (isolation, secrets, ports, installs): `harnix skill harnix-exercise --reference safety`

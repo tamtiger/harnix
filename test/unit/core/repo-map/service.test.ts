@@ -204,6 +204,16 @@ describe("repository map service", () => {
     expect(last.truncated).toBe(false);
     expect(last.nextOffset).toBeUndefined();
   });
+  it.each(["Pay_Core:00908", "init-epic", "a b"])(
+    "names the accepted characters and --query for refs symbol %s",
+    async (symbol) => {
+      const root = await temporaryRepository();
+
+      await expect(refsRepoMap({ limit: 20, root, symbol })).rejects.toThrow(
+        /\[A-Za-z0-9_\$\].*\nGợi ý: harnix repo-map --query <text>/su,
+      );
+    },
+  );
   it("reports missing cache when refsRepoMap runs before refreshRepoMap", async () => {
     const root = await temporaryRepository();
     const refs = await refsRepoMap({ limit: 20, root, symbol: "PaymentService" });

@@ -9,6 +9,7 @@ export const PROJECT_FINDING_CODES = [
   "config-invalid",
   "config-outdated",
   "config-packages-drift",
+  "exercise-runbook-missing",
   "fix-step-failed",
   "journal-evidence-unlinked",
   "journal-malformed",

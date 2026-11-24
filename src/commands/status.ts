@@ -9,11 +9,12 @@ import {
   type StatusSummaryResultV1,
 } from "src/core/status.js";
 import { detailPublicEpic, findNextEpic, type PublicEpicDetailResult } from "src/commands/epic.js";
-import { resolveActiveTask, TaskValidationError, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
+import { TaskValidationError, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
 import { suiteGateProblem } from "src/core/workflow/suite-gate.js";
 import { baselineAssessment, type BaselineAssessment } from "src/core/workflow/baseline-status.js";
+import { latestPassDurationMs } from "src/core/workflow/check-duration.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
-import { taskContextDrift } from "src/core/workflow/index.js";
+import { resolveReadableTask, taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { readGitContext, runGit } from "src/utils/git.js";
@@ -41,7 +42,7 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
   if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
-  const task = await resolveActiveTask(harnixRoot);
+  const task = await resolveReadableTask(harnixRoot);
   if (task === undefined) {
     let epicContext;
     const next = await findNextEpic(project.root).catch(() => undefined);
@@ -145,7 +146,7 @@ export async function reportProjectCriteria(cwd: string): Promise<StatusCriteria
   const project = await findInitializedProject({ cwd });
   if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
-  const task = await resolveActiveTask(harnixRoot);
+  const task = await resolveReadableTask(harnixRoot);
   if (task === undefined) return { taskId: null, criteria: [] };
 
   const criteria: StatusCriteriaItem[] = task.acceptanceCriteria.map((c) => {
@@ -169,6 +170,11 @@ export async function reportProjectCriteria(cwd: string): Promise<StatusCriteria
   };
 }
 
+function durationField(task: TaskRecord, checkId: string): { durationMs?: number } {
+  const durationMs = latestPassDurationMs(task, checkId);
+  return durationMs === undefined ? {} : { durationMs };
+}
+
 function baselineField(task: TaskRecord, check: ValidationCheck): { baseline?: BaselineAssessment } {
   const baseline = baselineAssessment(task, check);
   return baseline === undefined ? {} : { baseline };
@@ -182,6 +188,8 @@ export interface StatusChecksItem {
   readonly command?: string;
   /** Freshness of a required check; a check that is not required has no state to judge. */
   readonly state: RequiredCheckState | "optional";
+  /** Milliseconds the newest passing run took, when it recorded one; lets a caller run the fast checks first. */
+  readonly durationMs?: number;
   /** Present when the check declares a baseline: whether finish accepts its red run, and why not yet. */
   readonly baseline?: BaselineAssessment;
 }
@@ -197,7 +205,7 @@ export async function listProjectChecks(cwd: string, now = Date.now()): Promise<
   const project = await findInitializedProject({ cwd });
   if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
-  const task = await resolveActiveTask(harnixRoot);
+  const task = await resolveReadableTask(harnixRoot);
   if (task === undefined) return { taskId: null, checks: [] };
   const states = new Map(
     (await inspectRequiredChecks(project.root, harnixRoot, task, now)).map((item) => [item.id, item.state]),
@@ -211,6 +219,7 @@ export async function listProjectChecks(cwd: string, now = Date.now()): Promise<
       criterionIds: check.criterionIds ?? [],
       ...(check.command === undefined ? {} : { command: check.command }),
       state: states.get(check.id) ?? "optional",
+      ...durationField(task, check.id),
       ...baselineField(task, check),
     })),
   };

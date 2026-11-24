@@ -107,6 +107,18 @@ describe("task validation contracts", () => {
     ).toThrow(/unknown criterion ac-missing.*valid: ac-valid/iu);
   });
 
+  it("tells the caller to declare the criterion before the check that names it", () => {
+    const fixture = taskV2Fixture();
+    const check = fixture.validationPlan[0]!;
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [{ id: "ac-valid", text: "valid", status: "pending", evidenceIds: [] }],
+        validationPlan: [{ ...check, criterionIds: ["ac-missing"] }],
+      }),
+    ).toThrow(/--add-criterion ac-missing --text .* before --set-check/iu);
+  });
+
   it("requires repository inputs for behavioral TaskRecord v2 checks and digests for passing evidence", () => {
     const fixture = taskV2Fixture();
     expect(() =>

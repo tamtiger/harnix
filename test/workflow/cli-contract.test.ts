@@ -76,6 +76,7 @@ describe("CLI command contract", () => {
       "--checks",
       "--limit",
       "--workspace",
+      "--task",
     ]);
     expect(tasks?.options.map((option) => option.long)).toEqual([
       "--limit",
@@ -100,6 +101,8 @@ describe("CLI command contract", () => {
       "--preflight",
       "--expected-task",
       "--init",
+      "--init-epic",
+      "--member",
       "--title",
       "--task",
       "--slug",
@@ -215,7 +218,7 @@ describe("a wrong command answers with the corrected one", () => {
 
   it.each([
     [["workflow", "--transition", "ready"], /ready\/ready/u],
-    [["status", "--criteria", "--task", "x"], /--task không thuộc harnix status; nó dùng với harnix workflow/u],
+    [["status", "--criteria", "--input", "x"], /--input không thuộc harnix status; nó dùng với harnix/u],
     [["workflow", "--run-check", "chek", "--", "pnpm", "test"], /check hợp lệ: check\. Có phải ý bạn là check\?/u],
     [["workflow", "--remove-risk", "r-9"], /chưa có risk nào/u],
     [["skill", "harnix-plann"], /Có phải ý bạn là harnix-plan\?/u],

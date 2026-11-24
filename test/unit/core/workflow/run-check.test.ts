@@ -119,6 +119,16 @@ describe("workflow --run-check", () => {
     expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
   });
 
+  it("prints the exact rerun command for a run that differs from the declared one", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const { runner } = fakeRunner(0);
+
+    await expect(runCheckWorkflow(root, "check", ["node", "-e", "0"], { runner, now: NOW })).rejects.toThrow(
+      /Rerun exactly: harnix workflow --run-check check -- pnpm test/u,
+    );
+  });
+
   it("rejects a required check that declares no command without running or recording anything", async () => {
     const root = await temporaryRepository();
     await commandlessImplementingTaskV3(root);

@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, parse, resolve, win32 } from "node:path";
 import { getPlatform, PLATFORM_IDS, type PlatformId, type PlatformRoot } from "src/core/platform/registry.js";
 import { isMissingPathError } from "src/utils/errno.js";
 import { isContainedPath } from "src/utils/paths.js";
+import { PATH_LINK_MESSAGE, ROOT_LINK_MESSAGE } from "./user-path-hints.js";
 
 export class UnsafeUserPathError extends Error {
   override name = "UnsafeUserPathError";
@@ -259,13 +260,13 @@ export async function resolveSafeUserPath(root: UserPathRoot, userRelativePath: 
 
   const realRoot = await realpathIfExists(root.path);
   if (realRoot !== undefined && !isContainedPath(root.containmentAnchor, realRoot)) {
-    throw new UnsafeUserPathError("The user root escapes its verified containment boundary through a symbolic link.");
+    throw new UnsafeUserPathError(ROOT_LINK_MESSAGE);
   }
   const realExistingAncestor = await findRealExistingAncestor(candidate);
   const containmentBoundary = realRoot ?? root.containmentAnchor;
   const linkedInsideHome = root.linkBoundary !== undefined && isContainedPath(root.linkBoundary, realExistingAncestor);
   if (!isContainedPath(containmentBoundary, realExistingAncestor) && !linkedInsideHome) {
-    throw new UnsafeUserPathError("The requested path escapes the user root through a symbolic link.");
+    throw new UnsafeUserPathError(PATH_LINK_MESSAGE);
   }
 
   return candidate;

@@ -1,7 +1,7 @@
 {
   "extractorVersion": 2,
   "generator": "harnix",
-  "inventoryFingerprint": "34c8bed5a801ff67b89ecb4a7d26f9a64a3b310df25a364b1cfb3400e9a284f2",
+  "inventoryFingerprint": "d41d96db67bd5615311797f5b4f4820fe5a6d460881e8d595f3f975d862f14b0",
   "records": [
     {
       "byteLength": 351,
@@ -20,7 +20,7 @@
       "path": ".gitattributes"
     },
     {
-      "byteLength": 128,
+      "byteLength": 119,
       "contentHash": "e239c568f6359f4bd40cfaf35f50ba07b46fd08903ce6c3113440a286fbf099b",
       "extension": "",
       "headings": [],
@@ -31,7 +31,7 @@
       "path": ".gitignore"
     },
     {
-      "byteLength": 933,
+      "byteLength": 964,
       "contentHash": "f0d7116d961d8dfba430fdb98275bb79338b0cfd1725c74b016cf63b059e9e0c",
       "extension": "mjs",
       "headings": [],
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "byteLength": 76,
+      "byteLength": 84,
       "contentHash": "c8796409ecfb9849ba817956e4ca3be66e43f9780c75baec06a58a70036a8d09",
       "extension": "",
       "headings": [],
@@ -77,8 +77,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 51092,
-      "contentHash": "0728fd5b20379ce15c45e886851e18d16c68335fc496a7f0e444ec1d9efd503d",
+      "byteLength": 52287,
+      "contentHash": "c3d95c3398f7d1de54306c195c611d8240bf877b329404fde7ae7e67212e9b67",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -119,26 +119,26 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 107109,
-      "contentHash": "02cbaee58b89d9d846dc40df823e71a9159c176f91b33d370256b1112a05da0b",
+      "byteLength": 109055,
+      "contentHash": "c18c7b3f956f2aecd6472fb8a84b1d919b6ee12108a4a1f07d020d2d6be9a067",
       "extension": "md",
       "headings": [
         "Added",
         "Changed",
         "Changelog",
         "Fixed",
-        "[2.32.1] - 2026-11-12",
-        "[2.32.2] - 2026-11-12",
-        "[2.32.3] - 2026-11-12",
-        "[2.32.4] - 2026-11-13",
-        "[2.33.0] - 2026-11-14",
         "[2.33.1] - 2026-11-15",
         "[2.33.2] - 2026-11-15",
         "[2.34.0] - 2026-11-16",
         "[2.35.0] - 2026-11-16",
         "[2.35.1] - 2026-11-16",
         "[2.36.0] - 2026-11-16",
-        "[2.36.1] - 2026-11-17"
+        "[2.36.1] - 2026-11-17",
+        "[2.36.2] - 2026-11-17",
+        "[2.37.0] - 2026-11-19",
+        "[2.38.0-dev.1] - 2026-11-24",
+        "[2.38.0-dev.2] - 2026-11-24",
+        "[2.38.0-dev.3] - 2026-11-24"
       ],
       "identifiers": [
         "b",
@@ -156,7 +156,7 @@
       "path": "CHANGELOG.md"
     },
     {
-      "byteLength": 34523,
+      "byteLength": 35184,
       "contentHash": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
       "extension": "",
       "headings": [],
@@ -191,8 +191,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 51741,
-      "contentHash": "15d7ea21f486f4e872e14302aa2e56c494a3e38859f24a07bb96a097252884e4",
+      "byteLength": 53264,
+      "contentHash": "482d75424a683ffeff9d907bcced60806fd25d9b881bfe55a5f76f4bdd53c07f",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -221,7 +221,7 @@
       "path": "README.md"
     },
     {
-      "byteLength": 39014,
+      "byteLength": 39450,
       "contentHash": "0f9d1b5c9cacafce0c6cfe4f4bc2d912e85e1b74f7f884cf232807f9be20f384",
       "extension": "md",
       "headings": [
@@ -255,7 +255,7 @@
       "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 44672,
+      "byteLength": 45675,
       "contentHash": "9ef7cc0565024fb42d711ae38195ae7dc7ff952541ffed30fcf1049dc5bed59c",
       "extension": "json",
       "headings": [],
@@ -266,8 +266,8 @@
       "path": "docs/HARNESS_FEATURE_PROVENANCE.json"
     },
     {
-      "byteLength": 41008,
-      "contentHash": "795a4231e500a524979cbf3c4746d68883f92f9732632a783254ee86014b8b63",
+      "byteLength": 42678,
+      "contentHash": "ed45143d44fb6bf2740e8500ffa0cfb4523c72f61b54a61bae01b95bd7e96cac",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
@@ -298,8 +298,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 104622,
-      "contentHash": "00f5bbf32336adabd0ed355f68933cef350290379ac5f23c3ba0b51e2127a75c",
+      "byteLength": 106723,
+      "contentHash": "70623346be663a19898acafae666b8e276fafc1853967ef8177a97e2b2c9a63d",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -323,6 +323,7 @@
         "ClassName",
         "ID",
         "IInterface",
+        "a",
         "ch",
         "ho",
         "in",
@@ -343,8 +344,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 83714,
-      "contentHash": "1ecde0660e9f02d3d59d404c6fae50e1c45ac015afd1783298072fdbfd3be9df",
+      "byteLength": 85370,
+      "contentHash": "75cf6116fa0368b3ce24f9d91824b39f46d2f626c6a7ab2986e292ad672c41f2",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -383,8 +384,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 195506,
-      "contentHash": "dd854c9d3967a0f97ece84f0236c9e4e53371f55b5cc5c372a1d58d314913f0e",
+      "byteLength": 195740,
+      "contentHash": "16ae2fadf71262092b3897374a2c7b063da4a801887d5aeee0d7fd495071d7c7",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -500,7 +501,7 @@
       "path": "docs/OVERHAUL_DECISIONS.md"
     },
     {
-      "byteLength": 11576,
+      "byteLength": 11687,
       "contentHash": "b1ed5f0f75e388424bd218482e3171bbd86912037805843b5c7d891146da5692",
       "extension": "md",
       "headings": [
@@ -537,8 +538,8 @@
       "path": "docs/RULE_OWNERSHIP.md"
     },
     {
-      "byteLength": 22166,
-      "contentHash": "d1c207aa297e1b179f2e8496b442fc2b486b677a163aea69d9edcc9bec4c4fc9",
+      "byteLength": 23521,
+      "contentHash": "cb39502dce31accce32a904f26a2c04dbcec8dc63b8a326222a4bffcbcf570dd",
       "extension": "md",
       "headings": [
         "1. Mục đích và thời điểm chốt",
@@ -547,6 +548,7 @@
         "2.2 Upstream skill libraries baseline 2026-10-14",
         "2.3 Symbolic code navigation baseline 2026-10-16",
         "2.4 Skill-quality baseline 2026-10-27",
+        "2.5 Runtime-exercise sources 2026-11-19",
         "3. Kiểm chứng bảo toàn PRD",
         "4. Baseline kỹ thuật Trellis",
         "5. Nội dung nguồn được xem xét",
@@ -555,7 +557,6 @@
         "Trellis",
         "Upstream Baseline",
         "addyosmani/agent-skills",
-        "frt-public-projects/ai-native-client",
         "mattpocock/skills"
       ],
       "identifiers": [
@@ -568,8 +569,8 @@
       "path": "docs/UPSTREAM_BASELINE.md"
     },
     {
-      "byteLength": 41052,
-      "contentHash": "d95130e1ff43e71f333d74bf96b5df83c7107f187e847cd803e730fd4ac97c4d",
+      "byteLength": 43713,
+      "contentHash": "43c042d20a4c691f0f43653e0b7f0e5318dc56cee0516d6ca7f07a1e234d3705",
       "extension": "md",
       "headings": [
         "1. Nguyên tắc mapping",
@@ -600,7 +601,7 @@
       "path": "docs/UPSTREAM_MAPPING.md"
     },
     {
-      "byteLength": 22989,
+      "byteLength": 23372,
       "contentHash": "600c0b6a9723d662d27a8e660076a586ad1916827bde70e17224299a6ec2d0c6",
       "extension": "md",
       "headings": [
@@ -787,7 +788,7 @@
       "path": "docs/prompts/review-refactor-claude-setup.md"
     },
     {
-      "byteLength": 11510,
+      "byteLength": 11385,
       "contentHash": "6ca43f9984ab4c6ffe97e07b5d7d94b4d3713a24a1d215969ed7142233f10212",
       "extension": "md",
       "headings": [
@@ -926,8 +927,8 @@
       ]
     },
     {
-      "byteLength": 2666,
-      "contentHash": "b78c4bbeb4411cf55a2fc938474979e747067be502b4559c13576ceac90e9d2c",
+      "byteLength": 2672,
+      "contentHash": "e69aea712e1613f4d7fc0cc9c629feaefab1c5de7fbb66e915ae60189473fe22",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -939,7 +940,7 @@
       "path": "package.json"
     },
     {
-      "byteLength": 99527,
+      "byteLength": 102624,
       "contentHash": "2a251b776a5e248d9f487fbaa591cac24dcd45f59e59700fa12332603543df61",
       "extension": "yaml",
       "headings": [],
@@ -1023,12 +1024,11 @@
         "slice",
         "split",
         "summaries",
-        "summary",
         "version"
       ]
     },
     {
-      "byteLength": 4394,
+      "byteLength": 4503,
       "contentHash": "fab21a151ea86170fae433ef30fee952ede3e4a60238935e1762d4c04141fe3f",
       "extension": "py",
       "headings": [],
@@ -1194,7 +1194,8 @@
         "size",
         "skills",
         "split",
-        "stdout"
+        "stdout",
+        "url"
       ]
     },
     {
@@ -1248,7 +1249,8 @@
         "recursive",
         "seconds",
         "stdout",
-        "trees"
+        "trees",
+        "url"
       ]
     },
     {
@@ -1379,8 +1381,8 @@
         "slice",
         "split",
         "stdout",
-        "tests",
         "transition",
+        "url",
         "work",
         "workspace"
       ]
@@ -1422,7 +1424,8 @@
         "recursive",
         "split",
         "stdout",
-        "tarball"
+        "tarball",
+        "url"
       ]
     },
     {
@@ -1472,7 +1475,8 @@
         "sequence",
         "stdout",
         "steps",
-        "tarball"
+        "tarball",
+        "url"
       ]
     },
     {
@@ -1744,7 +1748,6 @@
         "assertExpectedGlobalSurfaces",
         "assertLockfileSources",
         "assertNoDeadPackagedImports",
-        "assertNoProjectLocalPlatformSurfaces",
         "assertNonHarnixContextNoOutput",
         "assertNonHarnixContextPerformance",
         "assertSetupExitContract",
@@ -1785,6 +1788,7 @@
         "stdout",
         "structuredSecretPatterns",
         "toTarArgumentPath",
+        "url",
         "walk",
         "workspace"
       ]
@@ -1841,7 +1845,6 @@
         "header",
         "legacy",
         "live",
-        "pattern",
         "plus",
         "separator",
         "sources"
@@ -1896,6 +1899,7 @@
         "resolve",
         "stdout",
         "template",
+        "url",
         "workflowTemplate"
       ]
     },
@@ -2027,7 +2031,8 @@
         "skills",
         "slice",
         "split",
-        "stdout"
+        "stdout",
+        "url"
       ]
     },
     {
@@ -2081,7 +2086,8 @@
         "split",
         "stdout",
         "suite",
-        "tests"
+        "tests",
+        "url"
       ]
     },
     {
@@ -2153,6 +2159,7 @@
         "slice",
         "stdout",
         "template",
+        "url",
         "usage",
         "used",
         "visible"
@@ -2302,6 +2309,7 @@
         "split",
         "stdout",
         "template",
+        "url",
         "version"
       ]
     },
@@ -2386,6 +2394,7 @@
       "language": "typescript",
       "references": [
         "Provenance",
+        "Server",
         "TechnologyDescriptor",
         "catalog",
         "composer",
@@ -2448,7 +2457,6 @@
         "kind",
         "label",
         "language",
-        "number",
         "provenance",
         "rule",
         "skill",
@@ -2529,7 +2537,6 @@
         "label",
         "language",
         "must",
-        "number",
         "order",
         "override",
         "presentGuides",
@@ -2674,7 +2681,6 @@
         "integer",
         "listing",
         "must",
-        "number",
         "older",
         "options",
         "process",
@@ -2685,8 +2691,8 @@
       ]
     },
     {
-      "byteLength": 13070,
-      "contentHash": "7b4fd509403fddcbff8218421895567310b7a73713c10b0a0f6c507993ca5b44",
+      "byteLength": 13322,
+      "contentHash": "78a17fd6cee0aec6ff669442f05bd73af757b85eb59ecb2e6cd8982dd086bbf2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2776,6 +2782,7 @@
         "errors",
         "events",
         "exact",
+        "extra",
         "fixed",
         "folders",
         "format",
@@ -2785,11 +2792,11 @@
         "hook",
         "installed",
         "integer",
+        "kiro",
         "managed",
         "normalizeRepositoryPath",
         "note",
         "notice",
-        "number",
         "partial",
         "payload",
         "per",
@@ -2804,7 +2811,6 @@
         "splitHint",
         "starts",
         "stdout",
-        "tests",
         "workspace"
       ]
     },
@@ -2908,7 +2914,6 @@
         "env",
         "hints",
         "isHookProtocolInvocation",
-        "number",
         "packageVersion",
         "publicCliError",
         "redactPublicErrorMessage",
@@ -3057,8 +3062,8 @@
       ]
     },
     {
-      "byteLength": 15535,
-      "contentHash": "f6eb03272adefec05f97f7fc919e4e1f4817bd63ad4e0e6a014da57e7122e5f4",
+      "byteLength": 15903,
+      "contentHash": "1d208a29866ae035a411b945d7b0bafe37f897f53a132afb3cd33193540685e3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3091,6 +3096,7 @@
         "./commands/doctor.js",
         "./commands/epic.js",
         "./commands/internal-context-cli.js",
+        "./commands/internal-workflow.js",
         "./commands/learning.js",
         "./commands/mem.js",
         "./commands/pause.js",
@@ -3143,7 +3149,6 @@
         "live",
         "managed",
         "matrix",
-        "outside",
         "page",
         "parsePlatformId",
         "parseReportLimit",
@@ -3160,7 +3165,8 @@
         "refs",
         "registerTasksCommand",
         "registry",
-        "rejected"
+        "rejected",
+        "reportProjectContext"
       ]
     },
     {
@@ -3213,7 +3219,6 @@
         "invocation",
         "isPlatformId",
         "must",
-        "number",
         "own",
         "payload",
         "process",
@@ -3226,6 +3231,7 @@
         "slice",
         "stream",
         "unchanged",
+        "url",
         "workspace"
       ]
     },
@@ -3278,7 +3284,6 @@
         "kind",
         "missingProjectError",
         "mode",
-        "number",
         "options",
         "planArchive",
         "planned",
@@ -3294,8 +3299,8 @@
       ]
     },
     {
-      "byteLength": 928,
-      "contentHash": "aff5c0a5910fe8e71d6ea58883b0d839d046d38a9b9b92d6d22ee7bf030f0865",
+      "byteLength": 936,
+      "contentHash": "31f8966cd74f448bd27fa31ad34e87079a34fcdd46db83d6e529240bda7f9c69",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3308,7 +3313,7 @@
       "importTargets": [
         "src/core/config/config.js",
         "src/core/tasks/task-audit.js",
-        "src/core/tasks/task.js",
+        "src/core/workflow/index.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js"
       ],
@@ -3325,13 +3330,13 @@
         "missingProjectError",
         "readConfig",
         "ready",
-        "resolveActiveTask",
+        "resolveReadableTask",
         "resolveSafeHarnixPath"
       ]
     },
     {
-      "byteLength": 5928,
-      "contentHash": "f0e0d997b64d89d2cda5424332ca48ca6c285f1a47cec1350f01ac2c4a123762",
+      "byteLength": 5977,
+      "contentHash": "f2afcc814d8d2b5601f9111f2fdcba600c25873d692874400bb1d9d272f8b37a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3375,6 +3380,7 @@
         "src/core/tasks/task.js",
         "src/core/verification/check-report.js",
         "src/core/workflow/baseline-status.js",
+        "src/core/workflow/index.js",
         "src/utils/order.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js",
@@ -3404,17 +3410,15 @@
         "kind",
         "missingProjectError",
         "mode",
-        "number",
         "order",
         "pending",
         "readConfig",
         "ready",
         "reasonCodes",
         "report",
-        "resolveActiveTask",
+        "resolveReadableTask",
         "resolveSafeHarnixPath",
         "slice",
-        "summary",
         "total",
         "truncated",
         "unavailable"
@@ -3478,7 +3482,6 @@
         "kind",
         "maxEntries",
         "missingProjectError",
-        "number",
         "readConfig",
         "ready",
         "reasonCodes",
@@ -3487,7 +3490,6 @@
         "resolveSafeHarnixPath",
         "selectionChanges",
         "slice",
-        "summary",
         "taskContextDrift",
         "unavailable"
       ]
@@ -3603,9 +3605,9 @@
         "message",
         "mode",
         "named",
+        "newest",
         "nextEpicMember",
         "notice",
-        "number",
         "order",
         "orderEpicMembers",
         "process",
@@ -4018,11 +4020,12 @@
         "lookup",
         "malformed",
         "max",
+        "must",
         "none",
-        "number",
-        "outside",
         "per",
         "process",
+        "proved",
+        "read",
         "readConfig",
         "registry",
         "resolveActiveTask",
@@ -4032,7 +4035,6 @@
         "safeSlice",
         "shouldElideContext",
         "slice",
-        "truncated",
         "unavailable",
         "used",
         "workspace"
@@ -4149,6 +4151,7 @@
         "compareCodeUnits",
         "createSourcePathsLoader",
         "currentInstant",
+        "developer",
         "effectiveLearningStatus",
         "findInitializedProject",
         "findLowValueLearning",
@@ -4156,6 +4159,7 @@
         "given",
         "integer",
         "journalFilePath",
+        "journalPath",
         "learnedPathPrefixes",
         "learnedSpecStats",
         "listing",
@@ -4163,8 +4167,6 @@
         "missingProjectError",
         "must",
         "notes",
-        "number",
-        "order",
         "part",
         "promoteLearning",
         "proposal",
@@ -4182,10 +4184,10 @@
         "similar",
         "similarLearning",
         "slice",
-        "spec",
         "split",
         "store",
         "unchanged",
+        "url",
         "workspace"
       ]
     },
@@ -4319,7 +4321,6 @@
         "learning",
         "malformed",
         "max",
-        "number",
         "options",
         "order",
         "rankEntriesBM25",
@@ -4442,8 +4443,8 @@
       ]
     },
     {
-      "byteLength": 10657,
-      "contentHash": "a55b03b184d9164dbf335b439fb5b142c8e689ffa3d325203aaa15eb60a6084d",
+      "byteLength": 10789,
+      "contentHash": "aa4593d0fe45c6e56fba15d123c4985149ee80efabf6dbe8a22214625fe940ea",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4520,7 +4521,6 @@
         "fallback",
         "formatQueryResults",
         "fresh",
-        "goal",
         "hints",
         "impactRepoMap",
         "impactRepoMapTests",
@@ -4528,7 +4528,6 @@
         "inventoryFingerprint",
         "isMissingPathError",
         "matrix",
-        "number",
         "outlineRepoMap",
         "parseRepoMapDepth",
         "parseRepoMapFormat",
@@ -4555,7 +4554,9 @@
         "resolveWorkspaceRoot",
         "split",
         "statusWorkspaceRepoMap",
-        "summarizeSkipped"
+        "summarizeSkipped",
+        "taskTerms",
+        "taskWords"
       ]
     },
     {
@@ -4776,7 +4777,6 @@
         "all",
         "compareCodeUnits",
         "kind",
-        "number",
         "options",
         "order",
         "reportSkillCatalog",
@@ -4854,8 +4854,8 @@
       ]
     },
     {
-      "byteLength": 1915,
-      "contentHash": "62cd43849373b3ac900922954594de49549452490f1d24fad62e40c1339e6427",
+      "byteLength": 2112,
+      "contentHash": "dcffa9ee5f06d3f9c31c315b9f10cade21cc81d70e528ccd0e73e93dc4c700a7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4882,14 +4882,14 @@
         "options",
         "order",
         "plain",
+        "reads",
         "slice",
-        "summary",
         "workspace"
       ]
     },
     {
-      "byteLength": 9152,
-      "contentHash": "0920d587ffd8465c66ca11f1de94503f54601fa100dceeba9123e7a4bd6a32ca",
+      "byteLength": 9625,
+      "contentHash": "6a16f617005dfad4049e7bffa6db06ba79a94b863311defd9413d3e38a3703bf",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4921,6 +4921,8 @@
         "created",
         "criteria",
         "detail",
+        "durationField",
+        "durationMs",
         "epicContext",
         "explainProjectStatus",
         "git",
@@ -4951,6 +4953,7 @@
         "src/core/tasks/task.js",
         "src/core/verification/check-report.js",
         "src/core/workflow/baseline-status.js",
+        "src/core/workflow/check-duration.js",
         "src/core/workflow/index.js",
         "src/core/workflow/suite-gate.js",
         "src/core/workspace/git-status.js",
@@ -4977,6 +4980,7 @@
         "createActiveStatus",
         "createNoActiveStatus",
         "detailPublicEpic",
+        "duration",
         "findInitializedProject",
         "findNextEpic",
         "finish",
@@ -4984,23 +4988,22 @@
         "gate",
         "inspectRequiredCheckEvidence",
         "inspectRequiredChecks",
+        "latestPassDurationMs",
         "met",
         "missingProjectError",
         "modes",
         "needs",
+        "newest",
         "nextTask",
-        "number",
         "optional",
-        "other",
         "payload",
-        "pending",
         "readConfig",
         "readGitContext",
         "readWorkspaceGitStatus",
         "readiness",
         "reportProjectChecks",
         "resolve",
-        "resolveActiveTask",
+        "resolveReadableTask",
         "resolveSafeHarnixPath",
         "resolveWorkspaceRoot",
         "retired",
@@ -5161,12 +5164,13 @@
         "ignores",
         "isMissingPathError",
         "kiro",
+        "legacy",
         "migrateConfig",
         "migrateLegacyEpics",
         "migrateStorageLayout",
+        "month",
         "moved",
         "obsolete",
-        "order",
         "packageVersion",
         "readConfig",
         "readManifest",
@@ -5181,7 +5185,6 @@
         "selection",
         "sha256",
         "skipped",
-        "spec",
         "template",
         "unchanged",
         "workflowTemplate",
@@ -5264,8 +5267,8 @@
       ]
     },
     {
-      "byteLength": 11541,
-      "contentHash": "969020bac465592f06a674a1119330cef076a2e3d2c1702da178a517074335bd",
+      "byteLength": 11875,
+      "contentHash": "03d2f77039bb6ac922c12c37c2a55d8bdf50e39e6b1f348bcae234d31267449c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5312,12 +5315,14 @@
       "language": "typescript",
       "references": [
         "Check",
+        "IDs",
         "WORKFLOW_HANDLERS",
         "acceptance",
         "accepts",
         "after",
         "assertCommandShape",
         "assertFlagGroups",
+        "before",
         "captured",
         "cmd",
         "completed",
@@ -5327,7 +5332,6 @@
         "focused",
         "fresh",
         "glob",
-        "goal",
         "handlers",
         "hints",
         "inspect",
@@ -5339,7 +5343,6 @@
         "needs",
         "none",
         "note",
-        "outside",
         "payload",
         "per",
         "pnpm",
@@ -5355,10 +5358,10 @@
         "selectActions",
         "set",
         "severity",
-        "slug",
         "specs",
         "stdout",
-        "transition"
+        "transition",
+        "withTargetTask"
       ]
     },
     {
@@ -5427,8 +5430,8 @@
       ]
     },
     {
-      "byteLength": 5882,
-      "contentHash": "e8d645b6ba7db1d92ab5d54602421115829afe818760e7deb9f4fc4a0e142d03",
+      "byteLength": 6101,
+      "contentHash": "ba3bd3e68397abf4159078c078b9b43efcebbea8ab2e29501f1d4cfaabf1586a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5489,21 +5492,22 @@
         "severity",
         "slug",
         "spec",
-        "summary",
         "title",
         "transition",
         "used"
       ]
     },
     {
-      "byteLength": 11851,
-      "contentHash": "5958a7f160b83f54a1132f1723d1e8b9c75cb1bd597034182c34c6aa9e444b7f",
+      "byteLength": 12401,
+      "contentHash": "7e2837a484db8eacfa2f4349f33c96458be5a1cee17420c6fdb0861d125bef9b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "BATCHABLE_ACTIONS",
         "Error",
         "ID_FLAGS",
+        "OPERAND_HINT",
+        "SET_PATHS_HINT",
         "SWITCH_ACTIONS",
         "Set",
         "VALUE_ACTIONS",
@@ -5519,6 +5523,7 @@
         "isEvidenceFlagsMode",
         "name",
         "nonBatchable",
+        "operandMessage",
         "owner",
         "selectAction",
         "selectActions",
@@ -5576,14 +5581,14 @@
         "rationale",
         "reads",
         "relevant",
+        "rest",
         "set",
         "severity",
         "slot",
         "slug",
-        "spec",
         "specs",
-        "title",
-        "transition"
+        "transition",
+        "where"
       ]
     },
     {
@@ -5665,13 +5670,12 @@
         "set",
         "size",
         "split",
-        "subject",
-        "summary"
+        "subject"
       ]
     },
     {
-      "byteLength": 11151,
-      "contentHash": "0a202a9232f2ae91f2c970590ccd72f6f87208a1b76d533fceecefc2834c16ab",
+      "byteLength": 11196,
+      "contentHash": "f437c81ed502d3890bbc948206112966690a9c335a4164008f2ee576fcf4911a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5762,8 +5766,8 @@
       ]
     },
     {
-      "byteLength": 5018,
-      "contentHash": "0e65b42ceb825d4d96e1ba93666a02a130b5b03d9fe8f4b8b013efcd78227bb0",
+      "byteLength": 5524,
+      "contentHash": "7a7ca2b7202414669cfef101229318f15e9421d2e6f330bb78b12ffc52d2b882",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5779,6 +5783,7 @@
         "resolveChecks",
         "resolveCriteria",
         "resolveInput",
+        "result",
         "stringList",
         "task",
         "taskDir"
@@ -5814,6 +5819,7 @@
         "goal",
         "handler",
         "handlers",
+        "initEpicWorkflow",
         "initTaskWorkflow",
         "lint",
         "location",
@@ -6198,7 +6204,6 @@
         "legacyStackIds",
         "lint",
         "mode",
-        "number",
         "older",
         "override",
         "persisted",
@@ -6294,7 +6299,6 @@
         "mode",
         "must",
         "normalizeRepositoryPath",
-        "number",
         "order",
         "packageKeys",
         "platformIds",
@@ -6438,10 +6442,8 @@
         "language",
         "level",
         "link",
-        "matched",
         "max",
         "normalizeRepositoryPath",
-        "number",
         "order",
         "plus",
         "refreshed",
@@ -6490,7 +6492,6 @@
         "guides",
         "instead",
         "kind",
-        "number",
         "omitted",
         "prefixes",
         "read",
@@ -6604,7 +6605,6 @@
         "maxEntries",
         "neutralizeContextMarkers",
         "normalizeRepositoryPath",
-        "number",
         "order",
         "pointerLine",
         "prefixes",
@@ -6703,6 +6703,7 @@
         "compareCodeUnits",
         "context",
         "createSourcePathsLoader",
+        "descriptor",
         "does",
         "getPlatform",
         "goal",
@@ -6716,8 +6717,6 @@
         "loadLearnedSpecBlock",
         "location",
         "normalizeRepositoryPath",
-        "number",
-        "order",
         "part",
         "picked",
         "planning",
@@ -6738,6 +6737,7 @@
         "summarizeLearning",
         "taskFilePath",
         "time",
+        "topics",
         "workspace"
       ]
     },
@@ -6826,7 +6826,6 @@
         "inventory",
         "inventoryFingerprint",
         "normalizeRepositoryPath",
-        "number",
         "order",
         "resolveSafeProjectPath",
         "selectedGuidePaths",
@@ -7061,7 +7060,6 @@
         "logicalPath",
         "managed",
         "message",
-        "number",
         "options",
         "other",
         "partial",
@@ -7081,7 +7079,6 @@
         "severity",
         "sortFindings",
         "step",
-        "summary",
         "total",
         "updated",
         "warning"
@@ -7110,8 +7107,7 @@
         "errors",
         "globalIntegrations",
         "invalid",
-        "report",
-        "summary"
+        "report"
       ]
     },
     {
@@ -7362,8 +7358,8 @@
         "logicalPath",
         "malformed",
         "managed",
-        "matched",
         "memberMatchers",
+        "message",
         "obsolete",
         "override",
         "preserveUnownedRoot",
@@ -7884,6 +7880,7 @@
         "compareCodeUnits",
         "completed",
         "contains",
+        "count",
         "does",
         "errors",
         "fail",
@@ -7894,13 +7891,12 @@
         "isDirectory",
         "isFile",
         "isMissingPathError",
+        "learning",
         "listTaskDirectoryNames",
         "location",
         "malformed",
         "must",
         "normalizeRepositoryPath",
-        "number",
-        "order",
         "other",
         "packagePaths",
         "per",
@@ -8069,7 +8065,6 @@
         "loadTask",
         "location",
         "mode",
-        "number",
         "old",
         "planning",
         "prd",
@@ -8338,7 +8333,6 @@
         "orderEpicMembers",
         "override",
         "page",
-        "pattern",
         "readProjectTimezone",
         "recursive",
         "reported",
@@ -8406,7 +8400,6 @@
         "mode",
         "month",
         "monthBucket",
-        "number",
         "options",
         "reads",
         "scan",
@@ -8694,7 +8687,6 @@
         "instead",
         "kind",
         "message",
-        "number",
         "offset",
         "outside",
         "override",
@@ -8780,7 +8772,6 @@
         "kind",
         "layout",
         "managed",
-        "number",
         "offset",
         "other",
         "parseCanonicalJsonPointer",
@@ -8972,6 +8963,7 @@
         "atomicWriteFile",
         "before",
         "buildPlans",
+        "bytes",
         "compareCodeUnits",
         "contains",
         "defaultJsonMemberMatcher",
@@ -8988,7 +8980,6 @@
         "markUnownedSkillUnitCollisions",
         "namespaced",
         "normalizeGlobalPath",
-        "number",
         "obsolete",
         "prepareDesired",
         "preserve",
@@ -9066,7 +9057,6 @@
         "invalid",
         "managed",
         "must",
-        "number",
         "order",
         "selector",
         "slice",
@@ -9117,7 +9107,6 @@
         "kind",
         "malformed",
         "managed",
-        "number",
         "selector",
         "slice",
         "withEol"
@@ -9219,7 +9208,6 @@
         "markersOverlap",
         "must",
         "normalizeUserRelativePath",
-        "number",
         "order",
         "parseCanonicalJsonPointer",
         "platformRecords",
@@ -9604,7 +9592,6 @@
         "hook",
         "hooks",
         "invalid",
-        "number",
         "outcome",
         "rest",
         "safe",
@@ -9764,7 +9751,6 @@
         "matchers",
         "memberMatchers",
         "namespaced",
-        "number",
         "obsolete",
         "options",
         "override",
@@ -9788,6 +9774,7 @@
         "stable",
         "unchanged",
         "unit",
+        "updated",
         "used",
         "where"
       ]
@@ -9910,7 +9897,6 @@
         "logicalPath",
         "managed",
         "must",
-        "number",
         "options",
         "order",
         "own",
@@ -10050,14 +10036,12 @@
         "learning",
         "max",
         "normalize",
-        "number",
         "order",
         "recordedAt",
         "score",
         "set",
         "slice",
         "statement",
-        "summary",
         "taskId",
         "terms",
         "via",
@@ -10122,13 +10106,11 @@
         "isMissingPathError",
         "kind",
         "note",
-        "number",
         "options",
         "recordedAt",
         "recursive",
         "resolve",
         "set",
-        "summary",
         "taskId",
         "validateLearningCandidate"
       ]
@@ -10200,7 +10182,6 @@
         "learning",
         "marker",
         "note",
-        "number",
         "order",
         "oversized",
         "own",
@@ -10215,6 +10196,7 @@
         "spec",
         "split",
         "statement",
+        "url",
         "where"
       ]
     },
@@ -10271,7 +10253,6 @@
         "learning",
         "marker",
         "notes",
-        "number",
         "parseLearnedBlocks",
         "planLearningReview",
         "prefixes",
@@ -10346,8 +10327,8 @@
         "hook",
         "kind",
         "learning",
+        "newest",
         "notes",
-        "number",
         "order",
         "oversized",
         "parseLearnedBlocks",
@@ -10356,6 +10337,7 @@
         "relevanceScore",
         "resolveSafeProjectPath",
         "slice",
+        "url",
         "work"
       ]
     },
@@ -10432,7 +10414,6 @@
         "learning",
         "must",
         "notes",
-        "number",
         "observationCandidateId",
         "order",
         "promoted",
@@ -10447,7 +10428,6 @@
         "step",
         "store",
         "stored",
-        "summary",
         "taskId",
         "threshold"
       ]
@@ -10510,7 +10490,8 @@
         "risks",
         "slice",
         "step",
-        "title"
+        "title",
+        "url"
       ]
     },
     {
@@ -10640,8 +10621,6 @@
       "language": "typescript",
       "references": [
         "contains",
-        "cut",
-        "number",
         "other",
         "part",
         "segment",
@@ -10697,6 +10676,7 @@
         "journalPath",
         "kind",
         "learning",
+        "newest",
         "promoted",
         "readLearningStates",
         "recordedAt",
@@ -10704,7 +10684,6 @@
         "slice",
         "store",
         "stored",
-        "summary",
         "taskId"
       ]
     },
@@ -10787,6 +10766,7 @@
         "signature",
         "split",
         "table",
+        "url",
         "word",
         "words",
         "work"
@@ -10838,10 +10818,10 @@
         "instead",
         "learning",
         "live",
+        "newest",
         "normalize",
         "normalizeObservation",
         "notes",
-        "number",
         "observation",
         "order",
         "other",
@@ -10931,6 +10911,7 @@
         "hooks",
         "kind",
         "learning",
+        "newest",
         "order",
         "per",
         "read",
@@ -10990,8 +10971,8 @@
         "isTaskSpecific",
         "kind",
         "learning",
+        "newest",
         "notes",
-        "number",
         "options",
         "order",
         "override",
@@ -11012,6 +10993,7 @@
         "spec",
         "statement",
         "store",
+        "url",
         "values"
       ]
     },
@@ -11064,7 +11046,6 @@
         "invalid",
         "learning",
         "normalize",
-        "number",
         "observation",
         "order",
         "promoted",
@@ -11458,9 +11439,7 @@
         "more",
         "must",
         "none",
-        "number",
         "opencode",
-        "order",
         "override",
         "payload",
         "pending",
@@ -11471,15 +11450,41 @@
         "readiness",
         "registry",
         "set",
+        "shape",
         "split",
+        "steps",
         "subject",
         "used",
         "variable"
       ]
     },
     {
-      "byteLength": 14307,
-      "contentHash": "cf77287601db55c1c0df60231015646260f1f2a6bcfb2506f1be857cdbd0947e",
+      "byteLength": 501,
+      "contentHash": "9825f6f76ebf91ebee699afdb7d0f7b5411b3c4c85b439974444fbdc53d725bd",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "LINK_HINT",
+        "PATH_LINK_MESSAGE",
+        "ROOT_LINK_MESSAGE"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/platform/user-path-hints.ts",
+      "language": "typescript",
+      "references": [
+        "escapes",
+        "link",
+        "none",
+        "requested",
+        "set",
+        "where"
+      ]
+    },
+    {
+      "byteLength": 14269,
+      "contentHash": "6359f67caaab1061fe57b9ccb5a2afea8c0d9a1808f6c4ce110af3f9170be398",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11549,6 +11554,7 @@
         "shapeRoots"
       ],
       "importTargets": [
+        "./user-path-hints.js",
         "node:fs/promises",
         "node:os",
         "node:path",
@@ -11561,7 +11567,9 @@
       "path": "src/core/platform/user-paths.ts",
       "language": "typescript",
       "references": [
+        "PATH_LINK_MESSAGE",
         "PLATFORM_IDS",
+        "ROOT_LINK_MESSAGE",
         "actual",
         "all",
         "are",
@@ -11570,7 +11578,6 @@
         "cannot",
         "captured",
         "child",
-        "cli",
         "codex",
         "complete",
         "display",
@@ -11580,6 +11587,7 @@
         "fields",
         "filesystem",
         "getPlatform",
+        "hints",
         "inside",
         "inspect",
         "isContainedPath",
@@ -11590,7 +11598,6 @@
         "malformed",
         "must",
         "named",
-        "outside",
         "partial",
         "process",
         "profile",
@@ -11605,7 +11612,6 @@
         "segment",
         "set",
         "signature",
-        "spec",
         "split",
         "used",
         "variable"
@@ -11657,7 +11663,6 @@
         "flat",
         "kind",
         "makeResult",
-        "number",
         "options",
         "order",
         "partial",
@@ -11722,7 +11727,6 @@
         "kind",
         "mode",
         "must",
-        "number",
         "per",
         "reasons",
         "ref",
@@ -11803,10 +11807,11 @@
         "event",
         "head",
         "message",
-        "number",
         "options",
         "order",
         "payload",
+        "send",
+        "server",
         "split"
       ]
     },
@@ -11912,7 +11917,6 @@
         "ignore",
         "inventoryRepository",
         "mod",
-        "number",
         "order",
         "readConfig",
         "ready",
@@ -11966,7 +11970,6 @@
         "generic",
         "language",
         "load",
-        "pattern",
         "read",
         "replaced",
         "repoMapRecordLimits",
@@ -12023,11 +12026,9 @@
         "language",
         "lock",
         "must",
-        "number",
         "order",
         "override",
         "partial",
-        "pattern",
         "repoMapRecordLimits",
         "set",
         "size",
@@ -12039,8 +12040,8 @@
       ]
     },
     {
-      "byteLength": 4944,
-      "contentHash": "f9a69d502a1e74e1eb2f976f9ca10f2bc85bac765cfbcf2a56d9db926e860486",
+      "byteLength": 5509,
+      "contentHash": "854d1567cf254161d9b29eee523cf8369c61ac2ddc521b6be6a60ca8fa161982",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12060,6 +12061,8 @@
         "fileKind",
         "hasSensitiveOutline",
         "headings",
+        "insideTests",
+        "isTestPath",
         "language",
         "languageByExtension",
         "match",
@@ -12104,13 +12107,13 @@
         "lock",
         "max",
         "mod",
+        "named",
         "order",
         "other",
         "packagePath",
         "packageRoots",
         "pnpm",
         "repoMapRecordLimits",
-        "secretValue",
         "selectNames",
         "sha256",
         "size",
@@ -12118,6 +12121,7 @@
         "spec",
         "specs",
         "symbols",
+        "template",
         "tests"
       ]
     },
@@ -12193,7 +12197,6 @@
         "inventoryRepository",
         "isMissingPathError",
         "isOlderExtractorCache",
-        "number",
         "old",
         "older",
         "read",
@@ -12255,7 +12258,6 @@
         "compareCodeUnits",
         "kind",
         "limits",
-        "number",
         "order",
         "per",
         "set"
@@ -12319,7 +12321,6 @@
         "must",
         "normalize",
         "normalizeRepositoryPath",
-        "number",
         "order",
         "posix",
         "slice",
@@ -12396,7 +12397,6 @@
         "level",
         "must",
         "normalizeRepositoryPath",
-        "number",
         "options",
         "order",
         "posix",
@@ -12479,7 +12479,6 @@
         "must",
         "needs",
         "normalizeRepositoryPath",
-        "number",
         "options",
         "order",
         "read",
@@ -12547,13 +12546,10 @@
         "link",
         "literal",
         "makeResult",
-        "matched",
         "named",
         "nearestPaths",
-        "number",
         "options",
         "oversized",
-        "pattern",
         "projectFileExists",
         "read",
         "readRepoMap",
@@ -12575,8 +12571,8 @@
       ]
     },
     {
-      "byteLength": 3055,
-      "contentHash": "462b182546ccca5618d911e101a3e982c40b1acfe100223f6ac90a01ff37ce7b",
+      "byteLength": 3827,
+      "contentHash": "b5d6daa7aead9f42de4f95d2ca931860bb5af15a93e21c10b3aeb12d4e966641",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12585,13 +12581,16 @@
         "assertOutlineOptions",
         "filterSymbols",
         "list",
+        "listed",
         "makeResult",
         "makeSymbol",
         "needle",
         "normalized",
+        "pageSymbols",
         "qualified",
         "signature",
-        "stripComments"
+        "stripComments",
+        "truncated"
       ],
       "importTargets": [
         "./types.js",
@@ -12606,6 +12605,7 @@
       "references": [
         "RepoMapSymbolKind",
         "RepoMapSymbolOutlineV1",
+        "all",
         "characters",
         "compareCodeUnits",
         "endLine",
@@ -12613,23 +12613,62 @@
         "integer",
         "kind",
         "language",
+        "more",
         "must",
         "normalizeRepositoryPath",
-        "number",
+        "offset",
         "options",
         "order",
+        "page",
         "rawSig",
         "ready",
+        "set",
         "skipped",
         "slice",
         "symbol",
-        "symbols",
-        "truncated"
+        "symbols"
       ]
     },
     {
-      "byteLength": 14125,
-      "contentHash": "ef612901706372b1d7770cc81b30961f02ec07c132e6df57528b3d362ba9650d",
+      "byteLength": 1283,
+      "contentHash": "92850bcfb930f2c45ae35c834abc95d70d3e4c2bc6cd9c26084669b105fe2f19",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "extractMarkdownSymbols",
+        "headings",
+        "i",
+        "inFence",
+        "lastContent",
+        "match",
+        "nextPeer",
+        "secretValue",
+        "trimmed"
+      ],
+      "importTargets": [
+        "./outline-helpers.js",
+        "./types.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/repo-map/outline-markdown.ts",
+      "language": "typescript",
+      "references": [
+        "Array",
+        "RepoMapSymbolOutlineV1",
+        "heading",
+        "idx",
+        "level",
+        "makeSymbol",
+        "max",
+        "slice",
+        "symbols"
+      ]
+    },
+    {
+      "byteLength": 13291,
+      "contentHash": "387926dded325cefbd14cfc0ddb41b4f3e76b71d68b5136cf9559b5069079ebb",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12661,17 +12700,14 @@
         "extractBraceLanguageSymbols",
         "extractFileSymbols",
         "extractGoSymbols",
-        "extractMarkdownSymbols",
         "extractPythonSymbols",
         "findBraceBlockEnd",
         "findPyEnd",
         "findStmtEnd",
         "fnMatch",
         "funcMatch",
-        "headings",
         "i",
         "ignoredDirs",
-        "inFence",
         "inTriple",
         "indent",
         "isBlock",
@@ -12681,19 +12717,15 @@
         "k",
         "kind",
         "languageByExtension",
-        "lastContent",
         "line",
         "lines",
-        "listed",
         "m",
-        "match",
         "matchAttr",
         "matchTopBrace",
         "methodMatch",
         "methodPart",
         "methodRe",
         "name",
-        "nextPeer",
         "paren",
         "preceding",
         "prev",
@@ -12723,6 +12755,7 @@
         "./inventory.js",
         "./outline-body.js",
         "./outline-helpers.js",
+        "./outline-markdown.js",
         "./types.js",
         "node:fs/promises",
         "node:path",
@@ -12733,7 +12766,6 @@
       "path": "src/core/repo-map/outline.ts",
       "language": "typescript",
       "references": [
-        "Array",
         "assertOutlineOptions",
         "attachSymbolBodies",
         "bin",
@@ -12741,22 +12773,21 @@
         "claude",
         "codex",
         "defaultRepoMapLimits",
+        "extractMarkdownSymbols",
         "filterSymbols",
         "git",
-        "heading",
-        "idx",
         "inventory",
         "isFile",
         "isMissingPathError",
         "kiro",
-        "level",
         "makeResult",
         "makeSymbol",
         "max",
         "method",
-        "number",
+        "offset",
         "options",
         "override",
+        "pageSymbols",
         "part",
         "partial",
         "ready",
@@ -12768,6 +12799,7 @@
         "slice",
         "split",
         "stripComments",
+        "truncated",
         "variable"
       ]
     },
@@ -12810,7 +12842,6 @@
         "field",
         "form",
         "none",
-        "number",
         "order",
         "outside",
         "own",
@@ -12873,7 +12904,6 @@
         "link",
         "links",
         "more",
-        "number",
         "order",
         "other",
         "position",
@@ -12914,19 +12944,17 @@
         "link",
         "marker",
         "named",
-        "number",
         "refresh",
         "rest",
         "secretPath",
         "size",
         "skipped",
-        "slice",
-        "summary"
+        "slice"
       ]
     },
     {
-      "byteLength": 9829,
-      "contentHash": "432ebfe19204a06f47564d94949548e768771ccc0fac90d92bf460ccc404a013",
+      "byteLength": 10232,
+      "contentHash": "36a8211449120b2ff9d73f56ad7ad7765b01e94b45aa2357a6d0cafe5ad919c1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12976,6 +13004,7 @@
         "path",
         "prioritized",
         "prioritizedSet",
+        "quotedString",
         "realFile",
         "realRoot",
         "references",
@@ -13021,19 +13050,22 @@
         "exact",
         "extractFileSymbols",
         "findAffectedTests",
+        "inside",
         "integer",
         "invalid",
         "isFile",
         "language",
+        "load",
         "maxDepth",
+        "message",
         "more",
         "must",
         "normalizeRepositoryPath",
-        "number",
         "options",
         "order",
         "page",
         "phrase",
+        "quoted",
         "read",
         "reads",
         "ready",
@@ -13179,7 +13211,6 @@
         "must",
         "normalizeRepositoryPath",
         "normalizeTerm",
-        "number",
         "order",
         "own",
         "packagePath",
@@ -13196,8 +13227,8 @@
       ]
     },
     {
-      "byteLength": 9032,
-      "contentHash": "83b97bf7aa0f63eadb55357c120c053b88de1b4c43dba9fbfa5f1c3c1d015a7e",
+      "byteLength": 9193,
+      "contentHash": "ec3958dd005a1017d449256e5478ffb054ad67c2a4205db0cc93dad407322f70",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13219,6 +13250,7 @@
         "RepoMapTestsOptions",
         "RepoMapTestsResultV1",
         "RepoMapV1",
+        "contentMatches",
         "current",
         "diagnoseRepoMap",
         "extracted",
@@ -13261,6 +13293,7 @@
         "./search.js",
         "./store.js",
         "./symbol-matches.js",
+        "./test-content.js",
         "./tests.js",
         "./types.js",
         "src/utils/errno.js"
@@ -13285,6 +13318,7 @@
         "extractRepoMapFile",
         "extractRepoMapRecord",
         "findAffectedTests",
+        "findContentTests",
         "findDeclaredType",
         "findRepoMapReferences",
         "headings",
@@ -13297,7 +13331,6 @@
         "language",
         "limits",
         "nearestPaths",
-        "number",
         "options",
         "order",
         "other",
@@ -13394,7 +13427,6 @@
         "max",
         "must",
         "normalizeRepositoryPath",
-        "number",
         "older",
         "order",
         "other",
@@ -13464,7 +13496,6 @@
         "max",
         "none",
         "normalizeTerm",
-        "number",
         "order",
         "read",
         "score",
@@ -13476,6 +13507,65 @@
         "symbol",
         "symbols",
         "terms"
+      ]
+    },
+    {
+      "byteLength": 2456,
+      "contentHash": "fa436cbe34be793a71396e6376f1e7cb2f9835131900a359a847fcc87966e0a7",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MAX_SCANNED_TESTS",
+        "MIN_NAME_LENGTH",
+        "RegExp",
+        "RepoMapRecordV1",
+        "RepoMapV1",
+        "escaped",
+        "file",
+        "findContentTests",
+        "matched",
+        "metadata",
+        "names",
+        "outside",
+        "pattern",
+        "primaryNames",
+        "realRoot",
+        "record",
+        "resolvedRoot",
+        "stem",
+        "test",
+        "tests"
+      ],
+      "importTargets": [
+        "./types.js",
+        "node:fs/promises",
+        "node:path",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/repo-map/test-content.ts",
+      "language": "typescript",
+      "references": [
+        "are",
+        "basename",
+        "capped",
+        "compareCodeUnits",
+        "defaultRepoMapLimits",
+        "dependency",
+        "isFile",
+        "kind",
+        "links",
+        "load",
+        "lookup",
+        "order",
+        "own",
+        "posix",
+        "read",
+        "resolve",
+        "rest",
+        "size",
+        "slice"
       ]
     },
     {
@@ -13529,8 +13619,8 @@
       ]
     },
     {
-      "byteLength": 6993,
-      "contentHash": "4047cafdec754d4a36b29fcc86171ca3f357319ea8f2ee76cd469cb286eb532b",
+      "byteLength": 7233,
+      "contentHash": "a66b874b66657fab5fb61f853039fa1af7364eb9c2534a434c62b2e0f7b423e1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13595,15 +13685,17 @@
         "absent",
         "buildRepoMapGraph",
         "compareCodeUnits",
+        "contentMatches",
         "direct",
         "exact",
+        "findContentTests",
         "findConventionTests",
         "integer",
         "invalid",
         "kind",
+        "linked",
         "must",
         "normalizeRepositoryPath",
-        "number",
         "options",
         "order",
         "ready",
@@ -13619,8 +13711,8 @@
       ]
     },
     {
-      "byteLength": 4779,
-      "contentHash": "b38ca04ad30a8b260083cbf852dcd108da214727af602bc9ab597f20c0af9f92",
+      "byteLength": 5013,
+      "contentHash": "860ac197bd6cd9e146107df27eb00da82e2031287e81b97780dfbc37a4aec271",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13654,10 +13746,10 @@
         "absolutePath",
         "after",
         "are",
+        "before",
         "cache",
         "contentHash",
         "count",
-        "cut",
         "endLine",
         "extracted",
         "extractorVersion",
@@ -13669,15 +13761,15 @@
         "inventoryFingerprint",
         "kind",
         "language",
-        "matched",
         "maxFiles",
         "method",
         "more",
         "needs",
         "none",
-        "number",
+        "offset",
         "other",
         "packagePath",
+        "page",
         "per",
         "read",
         "ready",
@@ -13686,11 +13778,11 @@
         "score",
         "shared",
         "signature",
+        "skip",
         "skipped",
         "starts",
         "stored",
         "suggestions",
-        "symbol",
         "symbols",
         "taskTerms",
         "technologies",
@@ -13851,7 +13943,6 @@
         "memberSliceOfRootMap",
         "mod",
         "nested",
-        "number",
         "options",
         "order",
         "own",
@@ -13868,8 +13959,35 @@
         "skipped",
         "store",
         "summarizeSkipped",
-        "summary",
         "workspace"
+      ]
+    },
+    {
+      "byteLength": 738,
+      "contentHash": "c168123d906172a1da7505e4a853b5a7a4cbf43a9487a4e2a72b9f7dd52a4b2e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "EXERCISE_RUNBOOK_PATH",
+        "file",
+        "findExerciseRunbook"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/spec/exercise-runbook.ts",
+      "language": "typescript",
+      "references": [
+        "before",
+        "isFile",
+        "reads",
+        "runbook",
+        "runs",
+        "spec",
+        "split"
       ]
     },
     {
@@ -14091,7 +14209,6 @@
         "kind",
         "language",
         "matchesSafeGlob",
-        "number",
         "order",
         "readBoundedText",
         "safe",
@@ -14204,7 +14321,6 @@
         "lint",
         "loadHarnixIgnore",
         "lock",
-        "number",
         "order",
         "packagePath",
         "plus",
@@ -14289,7 +14405,6 @@
         "inspected",
         "isDirectory",
         "isFile",
-        "number",
         "order",
         "outside",
         "part",
@@ -14571,8 +14686,8 @@
       ]
     },
     {
-      "byteLength": 11224,
-      "contentHash": "96beb2ca2ba3df2722e3411d03575886bf4ee72e7cf25e4fa7c60ad5d4a67b1e",
+      "byteLength": 11509,
+      "contentHash": "dafea64525a8560360f651d34d987f0c2040d36ee0240879cc15fa6358396732",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14624,6 +14739,7 @@
         "result",
         "root",
         "rootDetected",
+        "runbook",
         "scope",
         "scopePackages",
         "scopePath",
@@ -14649,6 +14765,7 @@
         "src/core/repo-map/service.js",
         "src/core/repo-map/store.js",
         "src/core/repo-map/tests.js",
+        "src/core/spec/exercise-runbook.js",
         "src/core/tasks/task.js",
         "src/utils/git.js",
         "src/utils/order.js",
@@ -14667,7 +14784,6 @@
         "clean",
         "compareCodeUnits",
         "configured",
-        "cut",
         "detectEcosystemVerify",
         "detectWorkspaces",
         "detected",
@@ -14675,6 +14791,7 @@
         "dotnet",
         "dropped",
         "findAffectedTests",
+        "findExerciseRunbook",
         "git",
         "ignore",
         "inside",
@@ -14700,12 +14817,12 @@
         "runGit",
         "set",
         "slice",
+        "spec",
         "split",
         "store",
         "tests",
         "time",
         "top",
-        "values",
         "warning",
         "workspace"
       ]
@@ -14818,7 +14935,6 @@
         "modules",
         "nested",
         "normalizeRepositoryPath",
-        "number",
         "options",
         "order",
         "pnpm",
@@ -14915,7 +15031,6 @@
         "mode",
         "more",
         "nextTask",
-        "number",
         "pending",
         "planning",
         "problem",
@@ -15058,10 +15173,10 @@
         "locateTask",
         "lock",
         "mapWithLimit",
+        "month",
         "monthBucket",
-        "number",
         "open",
-        "order",
+        "options",
         "per",
         "planned",
         "read",
@@ -15175,7 +15290,6 @@
         "locks",
         "max",
         "must",
-        "number",
         "old",
         "optional",
         "order",
@@ -15240,7 +15354,6 @@
         "lock",
         "monthBucket",
         "moved",
-        "number",
         "options",
         "per",
         "recursive",
@@ -15293,7 +15406,6 @@
         "fresh",
         "instead",
         "lock",
-        "number",
         "part",
         "process",
         "ran",
@@ -15392,7 +15504,6 @@
         "location",
         "met",
         "mode",
-        "number",
         "order",
         "pending",
         "planHasChecklistItem",
@@ -15494,7 +15605,6 @@
         "mode",
         "more",
         "must",
-        "number",
         "options",
         "oversized",
         "partial",
@@ -15505,7 +15615,6 @@
         "resultTruncated",
         "size",
         "slice",
-        "summary",
         "taskFilePath",
         "taskId",
         "unavailable",
@@ -15648,7 +15757,6 @@
         "location",
         "recordedAt",
         "replan",
-        "summary",
         "taskId",
         "taskLogicalPath"
       ]
@@ -15892,7 +16000,6 @@
         "must",
         "nextAction",
         "note",
-        "number",
         "offset",
         "outcome",
         "page",
@@ -15903,6 +16010,7 @@
         "risks",
         "selectLatestEvidence",
         "severity",
+        "shown",
         "slice",
         "specs",
         "split",
@@ -15982,6 +16090,7 @@
       "path": "src/core/tasks/task-schema.ts",
       "language": "typescript",
       "references": [
+        "acceptanceCriteria",
         "accepts",
         "added",
         "allowUnsafeCompletedEvidenceArtifacts",
@@ -16007,7 +16116,6 @@
         "literal",
         "met",
         "nextAction",
-        "number",
         "older",
         "optional",
         "outside",
@@ -16307,8 +16415,8 @@
       ]
     },
     {
-      "byteLength": 10464,
-      "contentHash": "c399f10264fe1a341f7695875e49b52c44f9002e19b59ea3fb711755f0b4fb17",
+      "byteLength": 10575,
+      "contentHash": "0ba22a2b9133e0514befb3939663fc05b0ba26f421aa79c2e216d3affbf0239f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16369,6 +16477,7 @@
         "after",
         "are",
         "array",
+        "before",
         "byte",
         "carried",
         "cmd",
@@ -16383,6 +16492,7 @@
         "duplicates",
         "exact",
         "exitCode",
+        "expected",
         "fail",
         "format",
         "glob",
@@ -16393,8 +16503,6 @@
         "migrated",
         "must",
         "none",
-        "number",
-        "order",
         "own",
         "recordedAt",
         "retired",
@@ -16469,7 +16577,6 @@
         "residualRisks",
         "risk",
         "severity",
-        "summary",
         "updatedAt",
         "validId",
         "validate"
@@ -16533,11 +16640,14 @@
       "language": "typescript",
       "references": [
         "AcceptanceCriterion",
+        "Array",
         "TaskValidationOptions",
         "acceptance",
         "acceptanceCriterionKeys",
+        "are",
         "assertBlocker",
         "assertCancellation",
+        "assertExactKeys",
         "assertStatusCheckpointAndCompletion",
         "assertValidationCheckExtras",
         "checkScopes",
@@ -16545,7 +16655,6 @@
         "common",
         "completed",
         "criterionStatuses",
-        "durationMs",
         "ensureUnique",
         "evidenceFindingKeys",
         "evidenceResults",
@@ -16561,12 +16670,10 @@
         "isIsoTimestamp",
         "isOneOf",
         "met",
-        "number",
         "per",
         "replan",
         "runs",
         "severity",
-        "slug",
         "taskModes",
         "taskRecordKeys",
         "taskRecordV2Keys",
@@ -16652,8 +16759,8 @@
       ]
     },
     {
-      "byteLength": 1716,
-      "contentHash": "3e822cf78ba06b50b307dc747bcceaf204a95da29ced689576798fd6c58b80d3",
+      "byteLength": 1872,
+      "contentHash": "7f12efd50b4a488cc036b36cf7285dadd9d6027dc16229f18ce329b40fe63dca",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16690,6 +16797,7 @@
         "recorded",
         "replan",
         "revise",
+        "set",
         "slice",
         "stage",
         "statuses",
@@ -17015,7 +17123,6 @@
         "digest",
         "instead",
         "must",
-        "number",
         "other",
         "read",
         "slice",
@@ -17136,7 +17243,6 @@
         "glob",
         "literal",
         "marker",
-        "pattern",
         "segment",
         "set",
         "skipped",
@@ -17180,7 +17286,6 @@
         "max",
         "must",
         "newer",
-        "number",
         "older",
         "order",
         "rebuild",
@@ -17192,8 +17297,8 @@
       ]
     },
     {
-      "byteLength": 3091,
-      "contentHash": "aa99b31aed3507cea89b7c1d751a54414264c21a61ef0e56c9b0c76f221ea772",
+      "byteLength": 3129,
+      "contentHash": "e4f579a266ad4096fd73e029e9463e4297e7b6a34bce909565eda09ddc10981e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17332,7 +17437,6 @@
         "listTaskIds",
         "location",
         "normalizeCommand",
-        "number",
         "progress",
         "reads",
         "resolveSafeHarnixPath",
@@ -17427,7 +17531,6 @@
         "laterTimestamp",
         "must",
         "needs",
-        "number",
         "outside",
         "replan",
         "saveWorkflow",
@@ -17743,7 +17846,6 @@
         "resolveSafeHarnixPath",
         "saveTask",
         "searchJournal",
-        "summary",
         "targetTaskId",
         "taskId",
         "terminal",
@@ -17803,6 +17905,32 @@
         "set",
         "verificationRetryDisposition",
         "where"
+      ]
+    },
+    {
+      "byteLength": 729,
+      "contentHash": "01fb85375fb9c00deee81c387e3d8c86bf590a0d6f6b98a98a68bf3e6e8c5556",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "at",
+        "durationMs",
+        "evidence",
+        "latestPassDurationMs",
+        "newest"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/check-duration.ts",
+      "language": "typescript",
+      "references": [
+        "checkId",
+        "recorded",
+        "recordedAt"
       ]
     },
     {
@@ -17886,7 +18014,6 @@
         "glob",
         "ignore",
         "normalizeRepositoryPath",
-        "pattern",
         "set",
         "targetedSegments",
         "workspace"
@@ -17924,7 +18051,6 @@
         "focused",
         "full",
         "inside",
-        "number",
         "order",
         "ran",
         "recorded",
@@ -17978,11 +18104,8 @@
         "errors",
         "exitCode",
         "launcher",
-        "matched",
         "more",
         "none",
-        "number",
-        "pattern",
         "persisted",
         "pnpm",
         "proved",
@@ -18150,7 +18273,6 @@
         "learning",
         "met",
         "must",
-        "number",
         "order",
         "pair",
         "recordedAt",
@@ -18159,7 +18281,6 @@
         "skip",
         "skipped",
         "suite",
-        "summary",
         "waived"
       ]
     },
@@ -18397,6 +18518,7 @@
         "order",
         "part",
         "prd",
+        "send",
         "slice",
         "top",
         "unknownFieldsMessage",
@@ -18711,7 +18833,6 @@
         "must",
         "needs",
         "noActiveTaskError",
-        "number",
         "ran",
         "recordedAt",
         "resolveActiveTask",
@@ -18756,7 +18877,6 @@
         "instant",
         "invalid",
         "must",
-        "number",
         "old",
         "process",
         "recorded",
@@ -18808,6 +18928,49 @@
       ]
     },
     {
+      "byteLength": 1751,
+      "contentHash": "285c148af929af5a3c8ea958505d189d0e0bdae0e3a0370269934ad7541c9f5b",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "OBSERVABLE",
+        "Set",
+        "covered",
+        "description",
+        "exerciseAdvisories",
+        "fold",
+        "id",
+        "isExerciseCheck",
+        "uncovered"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/exercise-advisory.ts",
+      "language": "typescript",
+      "references": [
+        "acceptanceCriteria",
+        "cli",
+        "criterionIds",
+        "field",
+        "folded",
+        "lower",
+        "normalize",
+        "page",
+        "proven",
+        "ready",
+        "runs",
+        "skill",
+        "starts",
+        "tests",
+        "unit",
+        "waived"
+      ]
+    },
+    {
       "byteLength": 896,
       "contentHash": "0c303bbeb58f979bc54e4703803dfa5b36025eba1f2142ef00c4ff7114ddd9a4",
       "extension": "ts",
@@ -18841,12 +19004,64 @@
       ]
     },
     {
-      "byteLength": 7850,
-      "contentHash": "bca50e0bcd1954b5484ae47ce9f95ad3db84b26b2082e53c860366d3a7ad74e2",
+      "byteLength": 1990,
+      "contentHash": "ca7b5fa34aabc789d5986fe95370b4bfbf9b3319ba9336cc98afa3b76dd5e03e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "FinishCommitAdvice",
+        "MAX_OUTSIDE",
+        "SecretScanGitRunner",
+        "Set",
+        "advice",
+        "changed",
+        "covered",
+        "finishCommitAdvice",
+        "outside",
+        "patterns"
+      ],
+      "importTargets": [
+        "./secret-scan-changes.js",
+        "globby",
+        "src/core/tasks/task.js",
+        "src/core/verification/transient-directories.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/finish-advice.ts",
+      "language": "typescript",
+      "references": [
+        "absent",
+        "before",
+        "bounded",
+        "buildGlobIgnores",
+        "changedPaths",
+        "commit",
+        "contract",
+        "dot",
+        "finish",
+        "git",
+        "ignore",
+        "message",
+        "none",
+        "order",
+        "proposal",
+        "scan",
+        "skipped",
+        "slice",
+        "targetedSegments",
+        "title"
+      ]
+    },
+    {
+      "byteLength": 8139,
+      "contentHash": "cc7f0efe982de88d1697d1d09773ea971b4c98e0697265ea54ac64a10874d8ec",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Error",
+        "FinishCommitAdvice",
         "FinishLearningReport",
         "FinishReport",
         "FinishReportDependencies",
@@ -18889,6 +19104,7 @@
       ],
       "importTargets": [
         "./completion.js",
+        "./finish-advice.js",
         "./secret-scan.js",
         "./suite-gate.js",
         "./support.js",
@@ -18910,25 +19126,26 @@
       "path": "src/core/workflow/finish.ts",
       "language": "typescript",
       "references": [
+        "advice",
         "are",
         "assertTaskReadyForFinishing",
         "authorizedRedBaseline",
         "before",
         "clock",
+        "commit",
         "compareCodeUnits",
         "completionEvidenceIds",
         "currentInstant",
         "dependencies",
         "developer",
         "effectiveLearningStatus",
-        "evidenceIds",
         "extractObservations",
         "finish",
+        "finishCommitAdvice",
         "finishing",
         "gate",
         "instant",
         "journalFilePath",
-        "kind",
         "learning",
         "lock",
         "must",
@@ -18936,8 +19153,9 @@
         "note",
         "notes",
         "nowInstant",
-        "number",
         "order",
+        "outside",
+        "proposal",
         "readConfig",
         "readLearningStates",
         "recordedAt",
@@ -18950,9 +19168,7 @@
         "sign",
         "store",
         "suite",
-        "summary",
         "taskId",
-        "title",
         "transition",
         "transitionTask",
         "unsafe",
@@ -18985,8 +19201,8 @@
       ]
     },
     {
-      "byteLength": 3863,
-      "contentHash": "6db2f4477fa153d0fa3f80f32e46d413334b8bd9697a319b6cf304aeeea3508f",
+      "byteLength": 4006,
+      "contentHash": "f08ce2439992a33402bafddc8f3f6ad9bc3e3fc36bc9e62b264c628ec9a9769c",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -19004,6 +19220,7 @@
         "./evidence-flags.js",
         "./evidence.js",
         "./finish.js",
+        "./init-epic.js",
         "./init-task.js",
         "./inspect.js",
         "./learn.js",
@@ -19021,8 +19238,7 @@
         "./save.js",
         "./schema.js",
         "./set-criterion.js",
-        "./snapshot.js",
-        "./target-task.js"
+        "./snapshot.js"
       ],
       "kind": "source",
       "packagePath": "",
@@ -19037,6 +19253,8 @@
         "FinishLearningReport",
         "FinishReport",
         "ImplementationStrategy",
+        "InitEpicOptions",
+        "InitEpicResult",
         "InitTaskOptions",
         "MarkCriteriaInput",
         "RanCheck",
@@ -19074,9 +19292,7 @@
         "cancelWorkflowTask",
         "contextSelectionInput",
         "continueWorkflowTask",
-        "evidenceSupportsScope",
-        "finish",
-        "finishWorkflow"
+        "evidenceSupportsScope"
       ]
     },
     {
@@ -19137,7 +19353,6 @@
       "path": "src/core/workflow/init-checks-notice.ts",
       "language": "typescript",
       "references": [
-        "autoId",
         "created",
         "equivalentCommand",
         "full",
@@ -19187,7 +19402,6 @@
         "isDirectory",
         "layout",
         "lock",
-        "matched",
         "mod",
         "order",
         "other",
@@ -19201,6 +19415,99 @@
         "spec",
         "suite",
         "workspace"
+      ]
+    },
+    {
+      "byteLength": 5276,
+      "contentHash": "dd2cc7ffe0aa32ce9b3dc420f0115cecae20f4e9e7a99e74574dda803ae3086e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "EXAMPLE",
+        "InitEpicOptions",
+        "InitEpicResult",
+        "MemberSpec",
+        "PreparedInitTask",
+        "Set",
+        "baseMs",
+        "checkParams",
+        "cut",
+        "epic",
+        "epicId",
+        "epicSlug",
+        "goal",
+        "hintSlug",
+        "initEpicWorkflow",
+        "issues",
+        "members",
+        "now",
+        "parseMembers",
+        "parsed",
+        "prepared",
+        "rawMembers",
+        "resolved",
+        "seen",
+        "slug",
+        "spec",
+        "summary",
+        "task",
+        "timezone",
+        "title"
+      ],
+      "importTargets": [
+        "./flag-issues.js",
+        "./init-issues.js",
+        "./init-task.js",
+        "./save.js",
+        "./support.js",
+        "src/core/config/config.js",
+        "src/core/epics/epic.js",
+        "src/core/tasks/task.js",
+        "src/utils/clock.js",
+        "src/utils/paths.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/init-epic.ts",
+      "language": "typescript",
+      "references": [
+        "IDs",
+        "absent",
+        "all",
+        "asciiFold",
+        "clock",
+        "currentInstant",
+        "empty",
+        "epicMembers",
+        "epics",
+        "flag",
+        "flagIssueError",
+        "formatInstant",
+        "given",
+        "groups",
+        "idPrefix",
+        "invalid",
+        "issue",
+        "more",
+        "must",
+        "needs",
+        "options",
+        "order",
+        "own",
+        "per",
+        "planning",
+        "prepareInitTask",
+        "problem",
+        "readProjectTimezone",
+        "resolveSafeHarnixPath",
+        "rest",
+        "saveWorkflow",
+        "slice",
+        "slugOrIssue",
+        "specs",
+        "updatedAt",
+        "used"
       ]
     },
     {
@@ -19277,6 +19584,7 @@
         "followUpOf",
         "instead",
         "kind",
+        "lineage",
         "loadEpicRecord",
         "locateEpicFile",
         "location",
@@ -19398,17 +19706,16 @@
       ]
     },
     {
-      "byteLength": 10010,
-      "contentHash": "814110cbc169b9362ee6e889f19fd3552c8e899509884493af2c4364f5020d7c",
+      "byteLength": 10860,
+      "contentHash": "e501fbd11488f6c1d1cfc5a47e1b44f516e62a01b1ac57e0441bf67948360aac",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Error",
         "InitTaskOptions",
+        "PreparedInitTask",
         "SUITE_DESCRIPTION",
         "Set",
-        "artifacts",
-        "autoId",
         "base",
         "buildCriteria",
         "buildLintCheck",
@@ -19420,6 +19727,7 @@
         "declared",
         "declaredCheck",
         "defaultCheck",
+        "epicId",
         "given",
         "goal",
         "id",
@@ -19428,6 +19736,7 @@
         "isSuite",
         "issue",
         "issues",
+        "lineage",
         "lint",
         "mode",
         "notice",
@@ -19435,6 +19744,7 @@
         "packageDirectory",
         "plan",
         "prefix",
+        "prepareInitTask",
         "projectLintCommand",
         "projectTest",
         "projectTestCommand",
@@ -19486,10 +19796,12 @@
         "checksNotice",
         "clock",
         "cmd",
+        "commands",
         "compareCodeUnits",
         "currentInstant",
         "defaultCheckInputs",
         "dot",
+        "empty",
         "equivalentCommand",
         "flagIssueError",
         "focused",
@@ -19500,7 +19812,6 @@
         "must",
         "none",
         "normalizeRepositoryPath",
-        "order",
         "other",
         "pending",
         "per",
@@ -19517,7 +19828,6 @@
         "saveWorkflow",
         "similarTaskNotice",
         "slugOrIssue",
-        "spec",
         "specs",
         "suite",
         "template",
@@ -19644,7 +19954,6 @@
         "resolveSafeHarnixPath",
         "sourceTaskIds",
         "statement",
-        "summary",
         "taskFilePath",
         "taskId",
         "validateLearningEnvelope",
@@ -19776,7 +20085,6 @@
         "exact",
         "finished",
         "must",
-        "number",
         "order",
         "other",
         "preserve",
@@ -19900,7 +20208,6 @@
         "location",
         "met",
         "must",
-        "number",
         "old",
         "order",
         "pending",
@@ -19925,6 +20232,7 @@
         "taskLogicalPath",
         "unchanged",
         "updatedAt",
+        "validateTask",
         "waived",
         "waiver",
         "withoutUnprovenConfig"
@@ -20070,7 +20378,10 @@
         "compareCodeUnits",
         "contract",
         "currentInstant",
+        "decision",
+        "empty",
         "emptyInputs",
+        "flag",
         "flagIssueError",
         "focused",
         "goal",
@@ -20083,10 +20394,7 @@
         "noActiveTaskError",
         "notePlanMissingCriteria",
         "notice",
-        "number",
         "obligationsChanged",
-        "order",
-        "outside",
         "pending",
         "plain",
         "planning",
@@ -20251,11 +20559,8 @@
         "instead",
         "location",
         "lock",
-        "matched",
         "noActiveTaskError",
-        "number",
         "options",
-        "pattern",
         "recorded",
         "resolveActiveTask",
         "resolveSafeHarnixPath",
@@ -20274,13 +20579,14 @@
       ]
     },
     {
-      "byteLength": 10708,
-      "contentHash": "c0020b5ec350c2c20b098a28b4581288f4fe7bd1c4292cf3f103f398bb7b476d",
+      "byteLength": 11126,
+      "contentHash": "cfd37546bfcf0c5f78d37dfe97caf6beee146b884d3fe27d0450211ed0555ef7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Evidence",
         "GitContext",
+        "RUNTIME_BEHAVIOR",
         "RequiredCheckState",
         "RequiredChecks",
         "Set",
@@ -20289,6 +20595,7 @@
         "WorkflowPreflightResultV1",
         "activeTask",
         "base",
+        "behaviorText",
         "check",
         "contextDrift",
         "emptyRequiredChecks",
@@ -20360,17 +20667,18 @@
         "cancelled",
         "cannot",
         "checkFactsStale",
+        "clock",
         "commit",
         "compareCodeUnits",
         "completed",
         "configured",
+        "context",
         "contract",
         "detectVersionSkew",
         "extracted",
         "fail",
         "findEpicContext",
         "formatInstant",
-        "goal",
         "hash",
         "hooks",
         "idPrefix",
@@ -20378,7 +20686,6 @@
         "instant",
         "managed",
         "nextTask",
-        "number",
         "older",
         "preserve",
         "projectLearningSummary",
@@ -20539,7 +20846,6 @@
         "mitigation",
         "none",
         "normalize",
-        "number",
         "prd",
         "problem",
         "quote",
@@ -20608,8 +20914,8 @@
       ]
     },
     {
-      "byteLength": 6463,
-      "contentHash": "794c7c1b8489ad8ee45a0c7a4caeb1ac4b9f3dfa690fb787f8ca1b7825742342",
+      "byteLength": 6578,
+      "contentHash": "97e3b4cede78badfd9dc72e7f87f87d5b860197877a1483280d59ea02f4d8b5e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20641,6 +20947,7 @@
         "unbaselined"
       ],
       "importTargets": [
+        "./exercise-advisory.js",
         "./ready-artifacts.js",
         "./suite-command.js",
         "./suite-gate.js",
@@ -20675,6 +20982,7 @@
         "dotnet",
         "empty",
         "evaluated",
+        "exerciseAdvisories",
         "fail",
         "failed",
         "form",
@@ -20917,7 +21225,6 @@
         "resolveSafeHarnixPath",
         "saveWorkflow",
         "skipped",
-        "summary",
         "unknownIdError",
         "updatedAt"
       ]
@@ -20953,7 +21260,6 @@
         "failed",
         "failures",
         "inputDigest",
-        "number",
         "replacement",
         "report",
         "row",
@@ -21028,7 +21334,6 @@
         "legalCheckpoints",
         "literal",
         "none",
-        "number",
         "per",
         "persisted",
         "planning",
@@ -21045,8 +21350,8 @@
       ]
     },
     {
-      "byteLength": 7085,
-      "contentHash": "33a108caf14f97ee13848bcfe0dd63a34490c7e8319dcaffa286b457ad37d2fc",
+      "byteLength": 7198,
+      "contentHash": "19f116b6e9c07b680c0583f2c45010ad9b9cf055cf518fd16dc1f289ebeae521",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -21100,6 +21405,7 @@
       "references": [
         "Check",
         "appendEvidenceFlagsWorkflow",
+        "args",
         "argv",
         "assertRetryAllowed",
         "cache",
@@ -21121,7 +21427,6 @@
         "noTestsRan",
         "normalizeCheckCwd",
         "notice",
-        "number",
         "planning",
         "process",
         "ran",
@@ -21205,7 +21510,6 @@
         "inspectRequiredChecks",
         "inspection",
         "noActiveTaskError",
-        "number",
         "order",
         "orderChecks",
         "report",
@@ -21441,16 +21745,16 @@
         "selection",
         "semanticJsonEqual",
         "semanticTaskEqual",
+        "send",
         "setActiveTask",
         "targetTaskId",
         "taskFilePath",
-        "terminal",
-        "time"
+        "terminal"
       ]
     },
     {
-      "byteLength": 14916,
-      "contentHash": "7ccd77e3b9ce4dc031ebf5979c1af11f92f64837069f9d475c592c8d947f0a8e",
+      "byteLength": 15596,
+      "contentHash": "f13e1a06872007c71547a95f1e3888b9f41f95944a14f738278b5cced93f75c5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -21477,6 +21781,7 @@
         "acceptance",
         "acceptanceCriterionKeys",
         "accepts",
+        "advice",
         "after",
         "argv",
         "bare",
@@ -21499,7 +21804,6 @@
         "declaration",
         "does",
         "duplicate",
-        "durationMs",
         "epicIdPattern",
         "epicMembers",
         "evidenceResults",
@@ -21514,14 +21818,14 @@
         "fresh",
         "given",
         "glob",
-        "goal",
         "inside",
         "inspect",
         "launcher",
         "layout",
         "manifests",
         "met",
-        "migrated"
+        "migrated",
+        "mitigation"
       ]
     },
     {
@@ -21641,11 +21945,8 @@
         "group",
         "isFile",
         "learning",
-        "matched",
-        "number",
         "order",
         "outside",
-        "pattern",
         "problem",
         "read",
         "reads",
@@ -21769,9 +22070,9 @@
         "location",
         "mapWithLimit",
         "max",
+        "newest",
         "none",
         "notice",
-        "number",
         "observationTokens",
         "order",
         "read",
@@ -21994,7 +22295,6 @@
         "link",
         "modules",
         "must",
-        "order",
         "own",
         "part",
         "plus",
@@ -22007,6 +22307,7 @@
         "scripts",
         "segment",
         "selectLatestEvidence",
+        "server",
         "set",
         "slice",
         "solution",
@@ -22069,7 +22370,6 @@
         "loadEpicRecord",
         "localDate",
         "nowInstant",
-        "number",
         "problem",
         "read",
         "readConfig",
@@ -22083,7 +22383,6 @@
         "sources",
         "step",
         "summarizeLearning",
-        "summary",
         "terminal",
         "time",
         "timezone",
@@ -22092,8 +22391,8 @@
       ]
     },
     {
-      "byteLength": 1689,
-      "contentHash": "9049759b789401e783db768dce93c32de098c0b87a744eccb0b7e32e5d0519fa",
+      "byteLength": 2592,
+      "contentHash": "17555869b2a5f3fbdbc8224f7b6d599e24dfd452ffea9e89dcf5934d3d85190b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -22102,7 +22401,9 @@
         "TASK_ID",
         "TaskRecord",
         "id",
+        "known",
         "resolveEditableTask",
+        "resolveReadableTask",
         "targetTaskId",
         "targets",
         "task",
@@ -22112,7 +22413,8 @@
         "node:async_hooks",
         "src/core/tasks/task-location.js",
         "src/core/tasks/task.js",
-        "src/utils/errno.js"
+        "src/utils/errno.js",
+        "src/utils/suggest.js"
       ],
       "kind": "source",
       "packagePath": "",
@@ -22126,14 +22428,18 @@
         "inside",
         "instead",
         "isMissingPathError",
+        "listTaskIds",
         "loadTask",
         "location",
         "must",
+        "nearest",
+        "read",
         "resolveActiveTask",
         "saveWorkflow",
         "slug",
         "taskFilePath",
         "terminal",
+        "unknownIdError",
         "written"
       ]
     },
@@ -22419,7 +22725,6 @@
         "invocation",
         "locks",
         "message",
-        "number",
         "optional",
         "order",
         "other",
@@ -22509,7 +22814,6 @@
         "guides",
         "language",
         "matchesSafeGlob",
-        "number",
         "order",
         "safe",
         "selection",
@@ -22803,12 +23107,12 @@
       "language": "typescript",
       "references": [
         "GuideDescriptor",
+        "Server",
         "catalog",
         "common",
         "descriptor",
         "dotnet",
         "language",
-        "number",
         "spec",
         "technologies",
         "title",
@@ -23314,8 +23618,8 @@
       ]
     },
     {
-      "byteLength": 3587,
-      "contentHash": "fc5d7747e6e16c9cc37e8bf6c2f2d9b736e3874cecb2f1e45e1fe4d795de589e",
+      "byteLength": 3593,
+      "contentHash": "0886775d7cce912cb83cea20f2cce38f019535dc240737da64a945cc6c2f6f56",
       "extension": "md",
       "headings": [
         "Architecture design review",
@@ -23385,8 +23689,8 @@
       "path": "src/skills/harnix-arch-review/references/wbs-consolidation.md"
     },
     {
-      "byteLength": 2023,
-      "contentHash": "dbe5e5ed82cf1093d5c5e0c9eb931129cfa923ee21eb7ea7121e0b9d151440b7",
+      "byteLength": 2029,
+      "contentHash": "3aa6e3efd69d0c699fcc6ed6bbdd2a0cbeb0ea7bb15b4c2bf90aa9bc356f810c",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -23424,8 +23728,8 @@
       "path": "src/skills/harnix-bugfix-preserve/references/invariant-debugging.md"
     },
     {
-      "byteLength": 4741,
-      "contentHash": "75787cf4b46085e358a306635177a0ec8d75b07739d3da06446ef314880e5e21",
+      "byteLength": 4747,
+      "contentHash": "6b9f1b611e09b18f4131c23053cf380d0bab3ee62558d8a645d9e7d7d56ff431",
       "extension": "md",
       "headings": [
         "Capture",
@@ -23463,8 +23767,145 @@
       "path": "src/skills/harnix-debug/references/feedback-loop.md"
     },
     {
-      "byteLength": 2566,
-      "contentHash": "053016787de81f5810f32fc5c0914164e942456a67ac5435b436194f961ebbde",
+      "byteLength": 3693,
+      "contentHash": "48aea65cf0888a6899e0ce452466f83d2f627443195a8553c3fa9550468e0e14",
+      "extension": "md",
+      "headings": [
+        "Evidence and Rationale",
+        "Exercise the behavior for real",
+        "Procedure",
+        "Rules",
+        "When to use"
+      ],
+      "identifiers": [
+        "the",
+        "what"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/SKILL.md"
+    },
+    {
+      "byteLength": 3060,
+      "contentHash": "389d37b43ca94b7050036972a2b2f9fbe51d41ea6830c44ede953a0e41f5d026",
+      "extension": "md",
+      "headings": [
+        "Calling an API for real",
+        "Evidence",
+        "Sandbox and mock modes",
+        "Scenarios from the contract",
+        "Starting and stopping the target",
+        "Tool order"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/api.md"
+    },
+    {
+      "byteLength": 2124,
+      "contentHash": "3233305b3dbc1ca0d46839cc8d5bed1ea7589f5d9abcbfadefff4b2cb55f0d63",
+      "extension": "md",
+      "headings": [
+        "CLI",
+        "Evidence",
+        "Library",
+        "Running a CLI or a library as its consumer"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/cli.md"
+    },
+    {
+      "byteLength": 2878,
+      "contentHash": "a2e03080f6b09ea5082023674c4b759fda43e0c69a57d2f08d459f79c7c266a2",
+      "extension": "md",
+      "headings": [
+        "Degrading",
+        "Detecting the kind of project and the tools",
+        "Kind",
+        "Tools",
+        "When no safe target exists"
+      ],
+      "identifiers": [
+        "the"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/detection.md"
+    },
+    {
+      "byteLength": 2359,
+      "contentHash": "2481e8bdb3f2d2aacac4e1e96526af4be0a79a0a6fbc98ff567ffdec1df97f77",
+      "extension": "md",
+      "headings": [
+        "Quarantine",
+        "Recording",
+        "Recording and trusting a runtime result",
+        "Trusting a pass",
+        "What to report"
+      ],
+      "identifiers": [
+        "the",
+        "why"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/evidence.md"
+    },
+    {
+      "byteLength": 2201,
+      "contentHash": "1267442b4f7b479be710359dd3fdee8dbb0865e72770388aa4cc15e8a30cd6cc",
+      "extension": "md",
+      "headings": [
+        "Asking first",
+        "Isolation",
+        "Limits that always apply",
+        "Platforms",
+        "Processes and ports",
+        "Secrets and personal data",
+        "When a limit blocks the run"
+      ],
+      "identifiers": [
+        "the"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/safety.md"
+    },
+    {
+      "byteLength": 3067,
+      "contentHash": "ce1fd62eab34a1d0cb248494eeb025e8bc82786bb93b64e353cad8d56428f806",
+      "extension": "md",
+      "headings": [
+        "Driving a browser through a page flow",
+        "Flaky results",
+        "Mode to report",
+        "Observe, then act",
+        "Safety in the browser",
+        "Tool order",
+        "What to capture"
+      ],
+      "identifiers": [
+        "a",
+        "snapshot",
+        "what"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-exercise/references/web.md"
+    },
+    {
+      "byteLength": 2572,
+      "contentHash": "0c6332921a9c1454fd8eb23a615248b2cabf0239fb879bf8b6c7e66f9a06dd4c",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -23508,8 +23949,8 @@
       "path": "src/skills/harnix-flaky-test/references/concurrency-isolation.md"
     },
     {
-      "byteLength": 6893,
-      "contentHash": "18f9ff72bb7bae40a57fd364657718dc3fc0b10ffb91f90cd80753b020189eca",
+      "byteLength": 7130,
+      "contentHash": "4e2764abaf10248e9da1b8e0776010cec2c3277d341b5fa70bab4ab2df44b50a",
       "extension": "md",
       "headings": [
         "Documentation synchronization",
@@ -23631,8 +24072,8 @@
       "path": "src/skills/harnix-implement/references/feedback.md"
     },
     {
-      "byteLength": 3130,
-      "contentHash": "bfa901d9946ca5548e494947dc047ac14c5e2a599f3e99be76b41ce2451fb297",
+      "byteLength": 3136,
+      "contentHash": "315c5ad95cea52c5fc9c771fa0800a60fbd7fcd5cc725162789ff32f7e3a46d4",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23674,8 +24115,8 @@
       "path": "src/skills/harnix-migration-safety/references/zero-downtime-evolution.md"
     },
     {
-      "byteLength": 6291,
-      "contentHash": "e258e290ce99325ac47bc94c3599652e4fea945fffeb2bb2193ece461e195df8",
+      "byteLength": 6297,
+      "contentHash": "d3650a56154ba399e6e486dea86cab255635ca3ae0d673ae849b16fc9c645ad0",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -23731,8 +24172,8 @@
       "path": "src/skills/harnix-plan/references/epic-git.md"
     },
     {
-      "byteLength": 4754,
-      "contentHash": "5bde863782d4bdc7ab2b3cbd19fc0c556d4542f770e166176a08a5ac8895b6ac",
+      "byteLength": 4797,
+      "contentHash": "dbc7c3a49713bc180736e41dbfb73c18b09b26d9f70de8d4cb8425f63cede8bd",
       "extension": "md",
       "headings": [
         "Epics",
@@ -23848,8 +24289,8 @@
       "path": "src/skills/harnix-plan/references/replan.md"
     },
     {
-      "byteLength": 3974,
-      "contentHash": "58caa58ffdfb4c9dac060ed77938e7136db0fbf57083c70c86c45a0c74ce3208",
+      "byteLength": 3980,
+      "contentHash": "7cabbdcd787f6ddcb65657baa7d527a0b77485ea7b6c08fcfbce190f21b8e6ec",
       "extension": "md",
       "headings": [
         "Decide",
@@ -23886,8 +24327,8 @@
       "path": "src/skills/harnix-research/references/scouting-isolation.md"
     },
     {
-      "byteLength": 4374,
-      "contentHash": "c999c91669a93e4b31b163b06e9e02ec9cecb140619d068b15913c21c911d6c0",
+      "byteLength": 4380,
+      "contentHash": "e9f3214432184d9c19483510c8fd7f821255c7e84234d544af2548c2797402e7",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -23946,8 +24387,8 @@
       "path": "src/skills/harnix-review/references/multi-lens.md"
     },
     {
-      "byteLength": 3211,
-      "contentHash": "d1e94e8bb53a738247fbbb05856a9d299130e11a67480da283b4815c2394c074",
+      "byteLength": 3217,
+      "contentHash": "85607d7f51d6cfe3318c7182bede147bc52f1b136cf14884935424fe17e38d62",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -23988,8 +24429,8 @@
       "path": "src/skills/harnix-security-lens/references/injection-traversal-guardrails.md"
     },
     {
-      "byteLength": 2642,
-      "contentHash": "fb9b3a5dc5bd6d6505825b0773166c61fa11ebab67cdd2a7d0c5a7a634a34860",
+      "byteLength": 2648,
+      "contentHash": "c3edf7b844feadcd296acdfb64e744d129386d4f499ad359dd02c3fe241af9a4",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -24026,8 +24467,8 @@
       "path": "src/skills/harnix-sequential-thinking/references/multi-step-tree-search.md"
     },
     {
-      "byteLength": 3378,
-      "contentHash": "ba23ebc35b47c95b9c6912b67f679b88c96c1e6ed0357d633176ea0c037e2874",
+      "byteLength": 3384,
+      "contentHash": "2afc412cb56f410803306b5ecfed675152b5e9acf784fe13c9c6d0fa75492cd6",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -24061,8 +24502,8 @@
       "path": "src/skills/harnix-verification-gap/references/verification-blindspots.md"
     },
     {
-      "byteLength": 6653,
-      "contentHash": "7ad18b3215c2a4c3fcfccb9f5db1c0941b2f7e9c0d962999f4b69c2d4916ce2d",
+      "byteLength": 6914,
+      "contentHash": "b0a4754c4fd4e02c7a21a6c71a51ede50cd830b18fc92cab6759a870cb38c972",
       "extension": "md",
       "headings": [
         "Finish",
@@ -24256,8 +24697,8 @@
       "path": "src/skills/harnix-verify/references/workflow-routing.md"
     },
     {
-      "byteLength": 5712,
-      "contentHash": "5066f3af9059d7b042a3c4a2a7dba97373a5b6211489d68f4330cca1cf4d3008",
+      "byteLength": 6497,
+      "contentHash": "1ed3e60efec6d7b99f21df947c1941f3221765195b42ccf1feaaaa3bbcd37299",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -24286,6 +24727,13 @@
         "./harnix-arch-review/references/wbs-consolidation.md",
         "./harnix-bugfix-preserve/SKILL.md",
         "./harnix-bugfix-preserve/references/invariant-debugging.md",
+        "./harnix-exercise/SKILL.md",
+        "./harnix-exercise/references/api.md",
+        "./harnix-exercise/references/cli.md",
+        "./harnix-exercise/references/detection.md",
+        "./harnix-exercise/references/evidence.md",
+        "./harnix-exercise/references/safety.md",
+        "./harnix-exercise/references/web.md",
         "./harnix-flaky-test/SKILL.md",
         "./harnix-flaky-test/references/concurrency-isolation.md",
         "./harnix-migration-safety/SKILL.md",
@@ -24296,22 +24744,15 @@
         "./harnix-sequential-thinking/references/multi-step-tree-search.md",
         "./harnix-verification-gap/SKILL.md",
         "./harnix-verification-gap/references/verification-blindspots.md",
-        "archReviewSource",
         "bugfixPreserveSource",
-        "concurrencyIsolationReference",
-        "domainBriefsOperationsReference",
-        "domainBriefsReference",
+        "exerciseSource",
         "flakyTestSource",
-        "injectionTraversalReference",
-        "invariantDebuggingReference",
         "migrationSafetySource",
         "securityLensSource",
         "sequentialThinkingSource",
         "src/core/spec/project-skills.js",
         "verificationGapSource",
-        "wbsConsolidationReference",
-        "yaml",
-        "zeroDowntimeEvolutionReference"
+        "yaml"
       ],
       "kind": "source",
       "packagePath": "",
@@ -24320,6 +24761,8 @@
       "references": [
         "Array",
         "SkillTemplate",
+        "cli",
+        "detection",
         "empty",
         "invalid",
         "must",
@@ -24373,12 +24816,13 @@
         "instead",
         "literal",
         "load",
+        "must",
+        "nearest",
         "needs",
         "nextStage",
         "none",
         "open",
         "optional",
-        "outside",
         "per",
         "prune",
         "refs",
@@ -24389,7 +24833,6 @@
         "spans",
         "stage",
         "suite",
-        "tests",
         "transition",
         "unchanged",
         "unsafe",
@@ -24428,6 +24871,7 @@
       "references": [
         "LanguageId",
         "PackageConfig",
+        "Server",
         "TechnologyId",
         "all",
         "are",
@@ -24522,7 +24966,6 @@
         "fullPath",
         "lower",
         "measure",
-        "number",
         "own",
         "plus",
         "read",
@@ -24534,8 +24977,8 @@
       ]
     },
     {
-      "byteLength": 9030,
-      "contentHash": "2fe0b91d9df3f14411a9d915d3942bf4d10b661b3b7c7aac857f4c70ddfb73ca",
+      "byteLength": 9206,
+      "contentHash": "01c9c79f629a32912987705073456667fdcbcff20d082a2ed81aa17bf3b3addd",
       "extension": "md",
       "headings": [
         "Agent transport",
@@ -24644,7 +25087,6 @@
         "link",
         "mode",
         "must",
-        "number",
         "options",
         "process",
         "recursive",
@@ -24698,7 +25140,6 @@
         "instead",
         "integer",
         "must",
-        "number",
         "own",
         "pending",
         "process",
@@ -24708,8 +25149,8 @@
       ]
     },
     {
-      "byteLength": 12623,
-      "contentHash": "76cbf8c348c64fa2071ec7f8a21d8c60672b93b4d5c9b009bd1efcffdc124ef5",
+      "byteLength": 12886,
+      "contentHash": "5debceeb55a8ca01dd5b8c45514cb14e6fba696c1531c44c852a8e94cd7abf6a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -24739,6 +25180,7 @@
         "buildCmdInvocation",
         "candidate",
         "child",
+        "code",
         "collector",
         "command",
         "commandLine",
@@ -24746,6 +25188,7 @@
         "defaultSystemRoot",
         "directories",
         "directory",
+        "error",
         "exists",
         "extension",
         "extensions",
@@ -24805,6 +25248,7 @@
         "does",
         "dotnet",
         "env",
+        "ext",
         "fixed",
         "forwardInterruptsToGroup",
         "hook",
@@ -24812,7 +25256,6 @@
         "instead",
         "launcher",
         "link",
-        "number",
         "old",
         "per",
         "picked",
@@ -24883,7 +25326,6 @@
         "given",
         "legacy",
         "month",
-        "number",
         "offset",
         "order",
         "part",
@@ -24917,7 +25359,6 @@
         "all",
         "integer",
         "must",
-        "number",
         "order"
       ]
     },
@@ -25018,7 +25459,6 @@
         "isFile",
         "isMissingPathError",
         "lock",
-        "number",
         "ownerInspector",
         "parseHarnixFileLockRecord",
         "pending",
@@ -25137,7 +25577,6 @@
         "isValidProcessIdentity",
         "lockPath",
         "must",
-        "number",
         "options",
         "override",
         "packageVersion",
@@ -25181,7 +25620,6 @@
         "filesystem",
         "inspect",
         "isMissingPathError",
-        "number",
         "other",
         "size",
         "visible"
@@ -25264,7 +25702,6 @@
         "ignore",
         "instead",
         "lookup",
-        "number",
         "own",
         "plain",
         "process",
@@ -25359,10 +25796,7 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/utils/order.ts",
-      "language": "typescript",
-      "references": [
-        "number"
-      ]
+      "language": "typescript"
     },
     {
       "byteLength": 5356,
@@ -25455,7 +25889,6 @@
         "child",
         "detached",
         "group",
-        "number",
         "process",
         "running",
         "terminal"
@@ -25578,7 +26011,6 @@
       "references": [
         "bounded",
         "errorCode",
-        "number",
         "resolve"
       ]
     },
@@ -25616,7 +26048,6 @@
         "glob",
         "instead",
         "literal",
-        "number",
         "optional",
         "other",
         "set",
@@ -25668,7 +26099,6 @@
       "path": "src/utils/safe-slice.ts",
       "language": "typescript",
       "references": [
-        "number",
         "pair",
         "slice",
         "steps",
@@ -25720,7 +26150,6 @@
         "message",
         "more",
         "none",
-        "number",
         "other",
         "slice"
       ]
@@ -25787,7 +26216,6 @@
         "clean",
         "label",
         "legacy",
-        "number",
         "page",
         "read",
         "set"
@@ -25811,6 +26239,7 @@
       "path": "src/version.ts",
       "language": "typescript",
       "references": [
+        "url",
         "version"
       ]
     },
@@ -25897,7 +26326,6 @@
         "locateTask",
         "location",
         "mode",
-        "number",
         "old",
         "openTask",
         "other",
@@ -26001,7 +26429,6 @@
         "setActiveTask",
         "snapshotTree",
         "stdout",
-        "summary",
         "title",
         "total",
         "updatedAt",
@@ -26081,10 +26508,10 @@
         "initializeProject",
         "inputDigest",
         "invalid",
+        "kind",
         "legacy",
         "limits",
         "malformed",
-        "number",
         "pending",
         "process",
         "program",
@@ -26181,12 +26608,13 @@
         "kiro",
         "malformed",
         "maxEntries",
-        "number",
+        "persisted",
         "process",
         "program",
         "reasonCodes",
         "reasons",
         "recursive",
+        "report",
         "runCli",
         "saveContextManifest",
         "saveTask",
@@ -26198,7 +26626,6 @@
         "snapshotTree",
         "stdout",
         "taskMonth",
-        "title",
         "unavailable",
         "visible",
         "walk"
@@ -26295,10 +26722,10 @@
         "retained",
         "severity",
         "sourceTaskIds",
-        "taskId",
         "taskMonth",
         "terminal",
         "unsafe",
+        "url",
         "useTemporaryUserHomes",
         "warning",
         "workspace"
@@ -26371,8 +26798,8 @@
         "goal",
         "initializeProject",
         "live",
+        "newest",
         "nextTask",
-        "number",
         "old",
         "order",
         "page",
@@ -26628,7 +27055,6 @@
         "initializeProject",
         "learning",
         "listing",
-        "number",
         "outside",
         "process",
         "program",
@@ -26644,6 +27070,7 @@
         "saveTask",
         "similar",
         "size",
+        "sourceTaskIds",
         "spec",
         "stdout",
         "unit",
@@ -26699,7 +27126,6 @@
         "searchMemory",
         "sourceTaskIds",
         "statement",
-        "summary",
         "workspace"
       ]
     },
@@ -26875,7 +27301,9 @@
         "dependencies",
         "dependency",
         "dependents",
+        "developer",
         "digest",
+        "distance",
         "endLine",
         "exact",
         "format",
@@ -26884,8 +27312,6 @@
         "isDirectory",
         "isFile",
         "language",
-        "number",
-        "order",
         "process",
         "program",
         "ready",
@@ -27016,11 +27442,14 @@
         "all",
         "allowed",
         "app",
+        "args",
         "before",
         "buildEpic",
         "buildGatedTask",
         "cannot",
         "captured",
+        "cli",
+        "commands",
         "completed",
         "digest",
         "done",
@@ -27034,8 +27463,6 @@
         "malformed",
         "nested",
         "nextAction",
-        "number",
-        "order",
         "other",
         "oversized",
         "planning",
@@ -27054,7 +27481,6 @@
         "taskMonth",
         "terminal",
         "terminalTask",
-        "title",
         "unavailable",
         "updatedAt",
         "upsertEpic",
@@ -27063,8 +27489,8 @@
       ]
     },
     {
-      "byteLength": 8992,
-      "contentHash": "2cf7514ae6a3209b3f219b41f0aaea9916ac85e5fe7ceba9f56bf2d6c4b405cc",
+      "byteLength": 9230,
+      "contentHash": "8c9f8110fca770d31ec66b485a0d0d581dc1622df67ae6dc0589cee5d416064e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -27076,6 +27502,7 @@
         "customSkill",
         "defaultCatalog",
         "dotnet",
+        "exercise",
         "flaky",
         "found",
         "json",
@@ -27237,8 +27664,8 @@
         "met",
         "nested",
         "nextAction",
-        "number",
         "old",
+        "orders",
         "page",
         "pnpm",
         "process",
@@ -27327,11 +27754,10 @@
         "limits",
         "live",
         "malformed",
-        "matched",
         "message",
         "mode",
         "nested",
-        "number",
+        "newest",
         "old",
         "partial",
         "planning",
@@ -27672,13 +28098,13 @@
         "nested",
         "nextStage",
         "optional",
-        "outside",
         "overrides",
         "payload",
         "planning",
         "pnpm",
         "process",
         "program",
+        "read",
         "runCli",
         "runs",
         "set",
@@ -27742,13 +28168,12 @@
         "runCli",
         "split",
         "stdout",
-        "summary",
         "title"
       ]
     },
     {
-      "byteLength": 17803,
-      "contentHash": "9e2802435eea3b993635e7bad8d59a6e63222d38b1aeb59f709fe43d2d905898",
+      "byteLength": 18218,
+      "contentHash": "bf92d6688606eedd7c406fc85e2b03627b21418a4752ea8e7a4dcdaffcbb5ed2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -27810,6 +28235,7 @@
       "path": "test/integration/commands/workflow-flags.test.ts",
       "language": "typescript",
       "references": [
+        "Array",
         "TextDecoder",
         "accepts",
         "argv",
@@ -27826,7 +28252,6 @@
         "finishing",
         "focused",
         "followUpOf",
-        "goal",
         "guides",
         "implementingTaskV3",
         "initializeUtcProject",
@@ -27836,7 +28261,6 @@
         "nextStage",
         "note",
         "notice",
-        "number",
         "optional",
         "parentId",
         "pnpm",
@@ -27857,7 +28281,8 @@
         "stdout",
         "taskV3",
         "transition",
-        "upsertEpic"
+        "upsertEpic",
+        "writeProjectSource"
       ]
     },
     {
@@ -27934,12 +28359,13 @@
         "completed",
         "does",
         "done",
-        "durationMs",
         "extra",
         "fail",
         "finish",
+        "finished",
         "finishing",
         "finishingTask",
+        "fixture",
         "focused",
         "goal",
         "implementingTaskV3",
@@ -27961,7 +28387,6 @@
         "secretAdvisory",
         "set",
         "setActiveTask",
-        "slug",
         "stdout",
         "suite",
         "taskDir",
@@ -28100,7 +28525,6 @@
         "message",
         "must",
         "needs",
-        "number",
         "partial",
         "preserved",
         "process",
@@ -28113,6 +28537,7 @@
         "rollback",
         "rule",
         "runCli",
+        "server",
         "stdout",
         "useTemporaryUserHomes",
         "users"
@@ -28241,7 +28666,6 @@
         "initializeProject",
         "inspect",
         "inspected",
-        "number",
         "process",
         "program",
         "ran",
@@ -28335,7 +28759,6 @@
         "sourceTaskIds",
         "statement",
         "stdout",
-        "summary",
         "timezone",
         "title",
         "updatedAt",
@@ -28408,7 +28831,6 @@
         "legacy",
         "managed",
         "migrated",
-        "number",
         "order",
         "pending",
         "readiness",
@@ -28471,7 +28893,6 @@
         "information",
         "initializeProject",
         "invalid",
-        "number",
         "options",
         "process",
         "program",
@@ -28482,7 +28903,6 @@
         "scripts",
         "severity",
         "stdout",
-        "summary",
         "useTemporaryUserHomes"
       ]
     },
@@ -28556,7 +28976,6 @@
         "setup",
         "setupPlatforms",
         "severity",
-        "summary",
         "useTemporaryUserHomes",
         "version",
         "warning"
@@ -28690,10 +29109,11 @@
         "legacy",
         "linkDirectory",
         "must",
+        "newest",
         "notes",
         "notice",
-        "number",
         "old",
+        "orders",
         "outside",
         "planning",
         "process",
@@ -28807,7 +29227,6 @@
         "kiro",
         "legacy",
         "managed",
-        "number",
         "obsolete",
         "options",
         "order",
@@ -28824,6 +29243,7 @@
         "setup",
         "setupPlatforms",
         "sha256",
+        "skills",
         "uninstallGlobalIntegrations",
         "updateGlobalPlatforms",
         "useTemporaryUserHomes"
@@ -29029,8 +29449,7 @@
         "runCli",
         "scripts",
         "snapshotTree",
-        "stdout",
-        "summary"
+        "stdout"
       ]
     },
     {
@@ -29106,7 +29525,6 @@
         "invalid",
         "isDirectory",
         "month",
-        "number",
         "options",
         "planning",
         "process",
@@ -29123,7 +29541,6 @@
         "setup",
         "sha256",
         "stdout",
-        "summary",
         "taskMonth",
         "transition",
         "walk"
@@ -29322,7 +29739,6 @@
         "initializeProject",
         "mapped",
         "nearest",
-        "number",
         "outside",
         "plain",
         "process",
@@ -29375,7 +29791,6 @@
         "commands",
         "developer",
         "initializeProject",
-        "number",
         "offset",
         "process",
         "program",
@@ -29477,7 +29892,6 @@
         "listTaskIds",
         "location",
         "main",
-        "number",
         "outside",
         "process",
         "program",
@@ -29531,7 +29945,6 @@
         "exitCode",
         "kiro",
         "launcher",
-        "number",
         "opencode",
         "process",
         "program",
@@ -29540,6 +29953,70 @@
         "skills",
         "stdout",
         "useTemporaryUserHomes"
+      ]
+    },
+    {
+      "byteLength": 3772,
+      "contentHash": "db03ddde6e0a5d1af4374f3f9dbd95de8cda396ab8f2619644610405fdba6471",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "ACTIVE",
+        "OTHER",
+        "before",
+        "code",
+        "harnix",
+        "originalCwd",
+        "originalExitCode",
+        "result",
+        "root",
+        "run",
+        "stderr",
+        "stdout",
+        "temporaryRepository",
+        "text",
+        "twoTaskProject"
+      ],
+      "importTargets": [
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "src/core/tasks/task.js",
+        "test/support/builders.js",
+        "test/support/integration-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/status-task.test.ts",
+      "language": "typescript",
+      "references": [
+        "activeTask",
+        "args",
+        "before",
+        "buildTaskV3",
+        "cli",
+        "commands",
+        "developer",
+        "exitCode",
+        "goal",
+        "initializeProject",
+        "malformed",
+        "mode",
+        "nearest",
+        "other",
+        "process",
+        "program",
+        "reads",
+        "runCli",
+        "saveTask",
+        "setActiveTask",
+        "snapshotTree",
+        "stdout",
+        "taskId",
+        "title",
+        "workspace"
       ]
     },
     {
@@ -29596,7 +30073,6 @@
         "runCli",
         "stdout",
         "sub",
-        "summary",
         "table",
         "upstream",
         "workspace"
@@ -29649,7 +30125,6 @@
         "developer",
         "does",
         "initializeProject",
-        "number",
         "process",
         "program",
         "readConfig",
@@ -30090,7 +30565,7 @@
     },
     {
       "byteLength": 8693,
-      "contentHash": "2a4aa06e783bb72ffff1668a56c2ee8451c2a17d56ffbc54f9e6f6c5295ab0ad",
+      "contentHash": "0a63f7f38d600e88c78c924b956b5678f12e65df46f6804537ed816853e36d41",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -30707,7 +31182,6 @@
         "matcher",
         "memberMatchers",
         "none",
-        "number",
         "order",
         "other",
         "own",
@@ -30996,6 +31470,7 @@
         "process",
         "profile",
         "scripts",
+        "url",
         "variable"
       ]
     },
@@ -31030,7 +31505,8 @@
         "pathKey",
         "process",
         "release",
-        "scripts"
+        "scripts",
+        "url"
       ]
     },
     {
@@ -31136,7 +31612,6 @@
         "group",
         "killProcessTree",
         "lookup",
-        "number",
         "pnpm",
         "process",
         "resolve",
@@ -31197,7 +31672,6 @@
         "kiro",
         "managed",
         "notice",
-        "number",
         "opencode",
         "own",
         "pending",
@@ -31210,7 +31684,8 @@
         "skills",
         "split",
         "stdout",
-        "temporaryRoot"
+        "temporaryRoot",
+        "url"
       ]
     },
     {
@@ -31280,14 +31755,12 @@
         "context",
         "contextFastPathArguments",
         "dependencies",
-        "extra",
         "hook",
         "hooks",
         "link",
         "managed",
         "max",
         "notice",
-        "number",
         "p95",
         "plain",
         "pnpm",
@@ -31298,6 +31771,7 @@
         "scan",
         "scanTextFiles",
         "scripts",
+        "server",
         "shared",
         "sources",
         "specifier",
@@ -31305,6 +31779,7 @@
         "stdout",
         "style",
         "unsafe",
+        "url",
         "used",
         "workspace"
       ]
@@ -31406,7 +31881,6 @@
         "finishing",
         "followUpOf",
         "met",
-        "number",
         "offset",
         "options",
         "overrides",
@@ -31478,6 +31952,7 @@
         "developer",
         "digest",
         "epics",
+        "evidenceIds",
         "exitCode",
         "finishing",
         "fixed",
@@ -31488,7 +31963,6 @@
         "instant",
         "met",
         "needs",
-        "number",
         "offset",
         "overrides",
         "pending",
@@ -31509,6 +31983,49 @@
         "validateTask",
         "version",
         "writeConfig"
+      ]
+    },
+    {
+      "byteLength": 1955,
+      "contentHash": "346a86643f705ac0fed31e161bdcdee867f560bfba6dd177c85cdd5bc18f4ce1",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "GREETER_CLI_SOURCE",
+        "Map",
+        "Promise",
+        "RunningApi",
+        "Server",
+        "URL",
+        "match",
+        "name",
+        "order",
+        "orders",
+        "send",
+        "server",
+        "startOrderApi",
+        "url"
+      ],
+      "importTargets": [
+        "node:http",
+        "node:net",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "test/support/exercise-fixtures.ts",
+      "language": "typescript",
+      "references": [
+        "argv",
+        "bad",
+        "close",
+        "fixed",
+        "message",
+        "method",
+        "process",
+        "resolve",
+        "stdout",
+        "usage"
       ]
     },
     {
@@ -31651,10 +32168,10 @@
         "shape",
         "stdout",
         "tests",
-        "title",
         "updatedAt",
         "used",
-        "waived"
+        "waived",
+        "written"
       ]
     },
     {
@@ -31714,7 +32231,6 @@
         "inspectWorkflow",
         "kind",
         "met",
-        "number",
         "offset",
         "overrides",
         "per",
@@ -31727,7 +32243,6 @@
         "snapshotWorkflow",
         "sourceTaskIds",
         "statement",
-        "summary",
         "tests",
         "transitionWorkflow",
         "unique",
@@ -32130,7 +32645,6 @@
         "replan",
         "saveWorkflow",
         "specs",
-        "summary",
         "taskMonth",
         "tests",
         "timezone",
@@ -32323,8 +32837,8 @@
       ]
     },
     {
-      "byteLength": 7143,
-      "contentHash": "6a26cd5df9996954d3fed78f6d8c681da371b0fa5af39f02f0e8e409b37b554a",
+      "byteLength": 7573,
+      "contentHash": "947e73b65996b7def0c09307ad53703dfa6e9e8bc2e70e0175f43b9f027d8ed5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -32349,6 +32863,7 @@
       "references": [
         "REDACTED",
         "accepts",
+        "actions",
         "app",
         "bad",
         "cannot",
@@ -32356,14 +32871,11 @@
         "contains",
         "days",
         "defaultDeveloperId",
-        "developer",
         "dotnet",
         "events",
         "exact",
-        "exitCode",
-        "flag",
         "format",
-        "impact",
+        "instead",
         "integer",
         "kiro",
         "limits",
@@ -32389,10 +32901,12 @@
         "redactPublicErrorMessage",
         "refresh",
         "refs",
+        "runs",
         "segment",
         "set",
         "tests",
         "validateRepoMapOptions",
+        "where",
         "work",
         "workspace"
       ]
@@ -32433,7 +32947,6 @@
         "program",
         "splitHint",
         "suggestion",
-        "summary",
         "unchanged",
         "used"
       ]
@@ -32706,7 +33219,6 @@
         "malformed",
         "outside",
         "parseOptionalHookInput",
-        "pattern",
         "process",
         "refs",
         "runInternalContextCommand",
@@ -32882,7 +33394,6 @@
         "malformed",
         "named",
         "other",
-        "pattern",
         "pretoolHintFor",
         "recursive",
         "refs",
@@ -32938,7 +33449,6 @@
         "plain",
         "resolveStatusMode",
         "sub",
-        "summary",
         "workspace"
       ]
     },
@@ -33017,7 +33527,6 @@
         "retired",
         "saveWorkflow",
         "summarizeProjectStatus",
-        "summary",
         "taskId",
         "taskMonth",
         "taskV3",
@@ -33330,7 +33839,6 @@
         "owners",
         "set",
         "size",
-        "summary",
         "unique"
       ]
     },
@@ -33379,8 +33887,8 @@
       ]
     },
     {
-      "byteLength": 9371,
-      "contentHash": "3e21cc443b42690c8758e9a60fd3d1a276f3f6de6c46b24068672ec8478854b8",
+      "byteLength": 9391,
+      "contentHash": "f849237964ef30ea26e5d5d020d331c6f799e8e41432a34567fa217dd777049b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -33448,6 +33956,7 @@
         "order",
         "payload",
         "per",
+        "persisted",
         "planning",
         "pnpm",
         "presentTask",
@@ -33458,21 +33967,23 @@
         "set",
         "severity",
         "taskV3",
-        "title",
         "transition",
         "updatedAt",
         "writeProjectSource"
       ]
     },
     {
-      "byteLength": 2811,
-      "contentHash": "c7d94639f525c2388e68c5051860fa06ebcf155e3bdba84e30c2dafc487ccac0",
+      "byteLength": 3656,
+      "contentHash": "2abb682b9cdfc2012de9629676d631819d998ebfa2a08e85e85c3d4b5e725bd1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "RegExp",
         "context",
+        "created",
         "failure",
+        "flags",
+        "plan",
         "result",
         "root",
         "temporaryRepository"
@@ -33499,6 +34010,7 @@
         "brief",
         "commands",
         "context",
+        "created",
         "field",
         "flags",
         "handlers",
@@ -33508,8 +34020,10 @@
         "named",
         "options",
         "payload",
+        "plain",
         "planning",
         "pnpm",
+        "slug",
         "title",
         "writeProjectSource"
       ]
@@ -33545,7 +34059,6 @@
         "legacyIds",
         "lint",
         "message",
-        "pattern",
         "platformIds",
         "suite",
         "technologyIds",
@@ -33902,6 +34415,7 @@
         "Core",
         "REPO_MAP_TIP",
         "TaskRecordV2",
+        "added",
         "are",
         "blocks",
         "buildCommandlessCheck",
@@ -33919,6 +34433,7 @@
         "contract",
         "createConfig",
         "dated",
+        "developer",
         "does",
         "effective",
         "fallback",
@@ -33933,7 +34448,6 @@
         "maxEntries",
         "none",
         "other",
-        "outside",
         "planning",
         "promoted",
         "read",
@@ -33941,9 +34455,8 @@
         "refs",
         "renderLearnedBlock",
         "seed",
-        "spec",
         "stage",
-        "title",
+        "updatedAt",
         "workspace",
         "writeJournalFile"
       ]
@@ -34015,7 +34528,6 @@
         "cache",
         "context",
         "hash",
-        "number",
         "old",
         "payload",
         "recent",
@@ -34161,7 +34673,6 @@
         "managed",
         "memberMatchers",
         "message",
-        "number",
         "overrides",
         "partial",
         "plans",
@@ -34174,7 +34685,6 @@
         "setup",
         "severity",
         "step",
-        "summary",
         "updated",
         "useTemporaryUserHomes",
         "warning"
@@ -34206,10 +34716,8 @@
         "fixed",
         "globalIntegrations",
         "invalid",
-        "number",
         "report",
-        "set",
-        "summary"
+        "set"
       ]
     },
     {
@@ -34735,13 +35243,11 @@
         "message",
         "met",
         "month",
-        "number",
         "per",
         "recordedAt",
         "recursive",
         "report",
         "severity",
-        "summary",
         "taskId",
         "taskMonth",
         "warning",
@@ -34950,6 +35456,7 @@
         "locateEpicFile",
         "location",
         "month",
+        "newest",
         "old",
         "plain",
         "recursive",
@@ -35316,7 +35823,6 @@
         "JsonTextError",
         "array",
         "byte",
-        "escaped",
         "inside",
         "kind",
         "offset",
@@ -35371,7 +35877,6 @@
         "indent",
         "insertArrayMember",
         "isEmptyJsonRoot",
-        "number",
         "order",
         "other",
         "removeArrayMember",
@@ -35423,7 +35928,6 @@
         "kiro",
         "lock",
         "locks",
-        "number",
         "order",
         "reconciliation",
         "release",
@@ -35615,6 +36119,7 @@
         "kiro",
         "managed",
         "normalizeGlobalPath",
+        "orders",
         "serializeManifest",
         "skills",
         "unique",
@@ -36098,7 +36603,6 @@
         "score",
         "sourceTaskIds",
         "statement",
-        "summary",
         "taskId",
         "term",
         "terms",
@@ -36153,6 +36657,7 @@
         "kind",
         "learning",
         "malformed",
+        "newest",
         "note",
         "old",
         "recordedAt",
@@ -36161,7 +36666,6 @@
         "size",
         "sourceTaskIds",
         "statement",
-        "summary",
         "taskId"
       ]
     },
@@ -36230,7 +36734,6 @@
         "mitigation",
         "named",
         "note",
-        "number",
         "parseLearnedBlocks",
         "planning",
         "prefixes",
@@ -36241,6 +36744,7 @@
         "rule",
         "runner",
         "set",
+        "sourceTaskIds",
         "spec",
         "specPath",
         "suite",
@@ -36362,6 +36866,7 @@
         "general",
         "learning",
         "loadLearnedSpecBlock",
+        "newest",
         "notes",
         "pathsOverlap",
         "reads",
@@ -36446,7 +36951,6 @@
         "install",
         "isBugfixTask",
         "notes",
-        "number",
         "observation",
         "observationCandidateId",
         "old",
@@ -36465,6 +36969,7 @@
         "shared",
         "size",
         "split",
+        "store",
         "tests",
         "threshold",
         "unchanged",
@@ -36515,7 +37020,6 @@
         "rule",
         "severity",
         "starts",
-        "summary",
         "texts"
       ]
     },
@@ -36699,7 +37203,6 @@
         "seed",
         "statement",
         "store",
-        "summary",
         "tests",
         "writeJournalFile"
       ]
@@ -36759,7 +37262,6 @@
         "inside",
         "kind",
         "learning",
-        "matched",
         "notes",
         "override",
         "oversized",
@@ -36783,6 +37285,7 @@
         "time",
         "transition",
         "unit",
+        "url",
         "values"
       ]
     },
@@ -36842,6 +37345,7 @@
         "learning",
         "more",
         "newer",
+        "newest",
         "observationTokens",
         "old",
         "older",
@@ -36935,6 +37439,7 @@
         "kind",
         "learning",
         "malformed",
+        "newest",
         "note",
         "notes",
         "old",
@@ -36945,7 +37450,6 @@
         "size",
         "store",
         "sub",
-        "summary",
         "writeJournalFile"
       ]
     },
@@ -37001,7 +37505,6 @@
         "buildLearningEntry",
         "built",
         "cannot",
-        "characters",
         "does",
         "drafts",
         "general",
@@ -37012,6 +37515,7 @@
         "live",
         "lookup",
         "newer",
+        "newest",
         "noActive",
         "none",
         "note",
@@ -37019,21 +37523,21 @@
         "old",
         "options",
         "order",
+        "orders",
         "override",
         "pair",
         "plain",
         "promoted",
         "quoted",
-        "rank",
         "recordedAt",
         "rejected",
         "renderLearningBlock",
         "resolve",
         "slice",
-        "sourceTaskIds",
         "sources",
         "split",
         "summarizeLearning",
+        "url",
         "writeJournalFile"
       ]
     },
@@ -37294,8 +37798,35 @@
       ]
     },
     {
-      "byteLength": 8139,
-      "contentHash": "53d6bbf08d0e8c2798ea6c173b71b77e5267cf4669760d28cb50adca862ff3cc",
+      "byteLength": 677,
+      "contentHash": "e2705992e97420694d4737592552452a78a327d953adff32d6490ff337d338a1",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "message",
+        "variable"
+      ],
+      "importTargets": [
+        "src/core/platform/user-path-hints.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/platform/user-path-hints.test.ts",
+      "language": "typescript",
+      "references": [
+        "PATH_LINK_MESSAGE",
+        "ROOT_LINK_MESSAGE",
+        "hints",
+        "link",
+        "message",
+        "messages",
+        "variable"
+      ]
+    },
+    {
+      "byteLength": 8330,
+      "contentHash": "255220d81adaa1562ab1d25f67143a972567dfa0d85b13f3411e5acc5be03ffc",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -37466,6 +37997,7 @@
         "dependent",
         "dependents",
         "direct",
+        "distance",
         "endLine",
         "errors",
         "format",
@@ -37476,7 +38008,6 @@
         "lexical",
         "method",
         "must",
-        "order",
         "packagePath",
         "parseRepoMapFormat",
         "parseRepoMapListFormat",
@@ -37610,10 +38141,12 @@
         "msg",
         "must",
         "order",
+        "orders",
         "payload",
         "recursive",
         "res",
         "routes",
+        "send",
         "signature",
         "symbols",
         "topic",
@@ -37708,6 +38241,7 @@
         "msg",
         "options",
         "order",
+        "orders",
         "payload",
         "ready",
         "recursive",
@@ -37715,6 +38249,7 @@
         "relPath",
         "res",
         "saved",
+        "send",
         "set",
         "technologies",
         "topic",
@@ -37757,6 +38292,7 @@
         "imports",
         "load",
         "optional",
+        "orders",
         "reads",
         "replaced",
         "separator"
@@ -37791,6 +38327,7 @@
         "extractIdentifiers",
         "generic",
         "given",
+        "orders",
         "other",
         "read",
         "reads",
@@ -37803,8 +38340,8 @@
       ]
     },
     {
-      "byteLength": 11563,
-      "contentHash": "260e788e9a87f88e03ba61de5b43d3b356e8a1369e851d79773f7c71e472c89b",
+      "byteLength": 11664,
+      "contentHash": "0148f17eeff2d9e1d1461eebabbb0b1f11fdbf0d3cf0cc75aa8f73b0d12db39f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -37901,16 +38438,16 @@
         "named",
         "nested",
         "notes",
-        "order",
         "other",
         "packagePath",
         "plain",
+        "read",
         "reads",
+        "recursive",
         "scan",
         "scripts",
         "selection",
         "size",
-        "tests",
         "typeScriptFiles",
         "writeFixtureFiles"
       ]
@@ -38238,6 +38775,7 @@
         "order",
         "per",
         "recursive",
+        "server",
         "skipped",
         "unit"
       ]
@@ -38293,6 +38831,7 @@
         "Array",
         "MAX_BODY_LINES",
         "RepoMapSymbolOutlineV1",
+        "Server",
         "after",
         "app",
         "array",
@@ -38302,7 +38841,6 @@
         "blocks",
         "count",
         "createRepoMapOutline",
-        "cut",
         "declaration",
         "endLine",
         "field",
@@ -38314,10 +38852,8 @@
         "kind",
         "main",
         "mapped",
-        "matched",
         "nearest",
         "none",
-        "number",
         "other",
         "outlineRepoMap",
         "own",
@@ -38336,6 +38872,7 @@
         "total",
         "unchanged",
         "unquoted",
+        "url",
         "waiver",
         "writeFixtureFiles"
       ]
@@ -38383,6 +38920,32 @@
         "symbol",
         "symbols",
         "truncated"
+      ]
+    },
+    {
+      "byteLength": 623,
+      "contentHash": "56ade7af0917eae25a81e0259359a718ad87b802e7aa19b2d17067461ba0825f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "lines",
+        "symbols"
+      ],
+      "importTargets": [
+        "src/core/repo-map/outline-markdown.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/repo-map/outline-markdown.test.ts",
+      "language": "typescript",
+      "references": [
+        "endLine",
+        "extractMarkdownSymbols",
+        "heading",
+        "headings",
+        "level",
+        "symbols"
       ]
     },
     {
@@ -38455,10 +39018,8 @@
         "language",
         "method",
         "methodRe",
-        "number",
         "options",
         "outlineRepoMap",
-        "pattern",
         "pending",
         "process",
         "ready",
@@ -38554,7 +39115,6 @@
         "ignores",
         "kind",
         "more",
-        "number",
         "other",
         "slice",
         "tests",
@@ -38589,13 +39149,12 @@
         "refresh",
         "skipped",
         "slice",
-        "summarizeSkipped",
-        "summary"
+        "summarizeSkipped"
       ]
     },
     {
-      "byteLength": 9998,
-      "contentHash": "f1979b93fa284dd313eb8a6bdd80e513ff56173e327775c2775cefb42a80e5a3",
+      "byteLength": 10932,
+      "contentHash": "83859f1716eed51aec0ae2af0fbeaaca02ae8ad468ad03d725bf10cb5721cbe3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -38606,10 +39165,12 @@
         "Set",
         "Svc",
         "app",
+        "both",
         "calls",
         "chargeInvoice",
         "csharpProject",
         "first",
+        "getRecords",
         "last",
         "method",
         "notFound",
@@ -38621,6 +39182,7 @@
         "second",
         "secret",
         "temporaryRepository",
+        "total",
         "type",
         "unscoped"
       ],
@@ -38651,16 +39213,17 @@
         "exact",
         "findRepoMapReferences",
         "imports",
+        "inside",
         "integer",
         "invalid",
         "kind",
         "method",
-        "number",
         "offset",
         "options",
         "order",
         "other",
         "partial",
+        "quoted",
         "ready",
         "recursive",
         "refresh",
@@ -38669,6 +39232,7 @@
         "scoped",
         "starts",
         "symbol",
+        "total",
         "truncated",
         "unit"
       ]
@@ -38762,8 +39326,8 @@
       ]
     },
     {
-      "byteLength": 11080,
-      "contentHash": "bdadcfeff5c956843d9c05aa9758882bfe86d2c52fdbfc179c623a80e642336d",
+      "byteLength": 13723,
+      "contentHash": "5e5f292f11165a733b264beb4d0cf263a2f41460955b605c87420891feb52ec7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -38773,14 +39337,19 @@
         "app",
         "cache",
         "chargeAll",
+        "first",
+        "fn$",
         "found",
+        "functions",
         "impact",
         "indexedName",
+        "last",
         "leaked",
         "legitimateSource",
         "limits",
         "lines",
         "map",
+        "noise",
         "outline",
         "query",
         "record",
@@ -38789,6 +39358,7 @@
         "result",
         "root",
         "run",
+        "second",
         "sourceOnly",
         "target",
         "temporaryRepository",
@@ -38813,6 +39383,8 @@
       "path": "test/unit/core/repo-map/service.test.ts",
       "language": "typescript",
       "references": [
+        "Array",
+        "after",
         "app",
         "are",
         "before",
@@ -38833,32 +39405,30 @@
         "impactRepoMapTests",
         "indexed",
         "indexes",
+        "inside",
         "integer",
         "labels",
         "lexical",
         "limits",
+        "load",
         "mapped",
         "maxFiles",
         "nearest",
         "nested",
         "none",
         "notes",
-        "number",
-        "order",
+        "offset",
+        "other",
         "outlineRepoMap",
         "own",
         "packagePath",
         "queryRepoMap",
-        "ready",
-        "reasons",
-        "recursive",
         "refreshRepoMap",
         "refs",
         "refsRepoMap",
         "repoMapCachePath",
         "runs",
         "suggestions",
-        "tests",
         "unit",
         "used"
       ]
@@ -38904,7 +39474,6 @@
         "more",
         "must",
         "nested",
-        "number",
         "packagePath",
         "repoMapCachePath",
         "store",
@@ -38954,9 +39523,7 @@
         "kind",
         "lower",
         "matchSymbols",
-        "matched",
         "method",
-        "number",
         "other",
         "packagePath",
         "queryWords",
@@ -38968,6 +39535,37 @@
         "symbols",
         "withMatchedSymbols",
         "word"
+      ]
+    },
+    {
+      "byteLength": 1393,
+      "contentHash": "92f6053b41e355d98d3dd3ece3f146b41c490bf3cf3e45356c9485c9326eb143",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "a",
+        "root",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/repo-map/service.js",
+        "src/core/repo-map/test-content.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/repo-map/test-content.test.ts",
+      "language": "typescript",
+      "references": [
+        "findContentTests",
+        "load",
+        "own",
+        "recursive",
+        "refreshRepoMap",
+        "tests"
       ]
     },
     {
@@ -39012,8 +39610,8 @@
       ]
     },
     {
-      "byteLength": 11828,
-      "contentHash": "128ddc069db3dfb20103a0f8862558fd80cb28a939aa4596238d7f1531f52f4f",
+      "byteLength": 12429,
+      "contentHash": "8c85bbb5c2c32a640b085e5cf09552421256f3aac7c781651b6f7d9ee91ba9e7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -39071,6 +39669,7 @@
         "commands",
         "common",
         "contentHash",
+        "contentMatches",
         "count",
         "createRepoMap",
         "digest",
@@ -39085,11 +39684,11 @@
         "labels",
         "language",
         "limits",
+        "links",
         "modules",
         "more",
         "named",
-        "number",
-        "order",
+        "orders",
         "overrides",
         "own",
         "packagePath",
@@ -39099,7 +39698,6 @@
         "refreshed",
         "sha256",
         "shared",
-        "spec",
         "split",
         "store",
         "symbols",
@@ -39216,6 +39814,41 @@
       ]
     },
     {
+      "byteLength": 2098,
+      "contentHash": "2589ea14fdf9b49a45791d5aa1c26cfb57427b64a3b82bb211665bccdabc3228",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "createFixture",
+        "other",
+        "root"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/spec/exercise-runbook.js",
+        "src/core/stack/verify-plan.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/spec/exercise-runbook.test.ts",
+      "language": "typescript",
+      "references": [
+        "EXERCISE_RUNBOOK_PATH",
+        "buildVerifyPlan",
+        "empty",
+        "findExerciseRunbook",
+        "other",
+        "recursive",
+        "reported",
+        "runbook",
+        "scripts",
+        "spec"
+      ]
+    },
+    {
       "byteLength": 4423,
       "contentHash": "31111c00d74b88f26a35af8c733ba0d537b970ae6b1370c2b1f9cac06fc34f9d",
       "extension": "ts",
@@ -39313,7 +39946,6 @@
         "discovered",
         "does",
         "empty",
-        "escaped",
         "fileSymlinksSupported",
         "frontmatter",
         "linkDirectory",
@@ -39921,6 +40553,7 @@
         "pnpm",
         "recursive",
         "scripts",
+        "server",
         "shape",
         "solution",
         "solutions",
@@ -40125,6 +40758,7 @@
         "expected",
         "normalizeCheckCwd",
         "other",
+        "server",
         "unsafe"
       ]
     },
@@ -40228,7 +40862,6 @@
         "done",
         "noteTaskRead",
         "noteTaskWritten",
-        "number",
         "other",
         "outside",
         "read",
@@ -40414,16 +41047,16 @@
         "malformed",
         "max",
         "more",
+        "newest",
         "none",
-        "number",
         "old",
-        "outside",
         "parentId",
         "partial",
         "plain",
         "planning",
         "read",
         "reads",
+        "ready",
         "resolve",
         "resultTruncated",
         "running",
@@ -40524,8 +41157,7 @@
         "inputDigest",
         "must",
         "recordedAt",
-        "retired",
-        "summary"
+        "retired"
       ]
     },
     {
@@ -40737,6 +41369,7 @@
         "gate",
         "goal",
         "laterTimestamp",
+        "lineage",
         "link",
         "linked",
         "markdownCode",
@@ -40751,6 +41384,7 @@
         "pnpm",
         "prd",
         "rationale",
+        "read",
         "release",
         "renderTaskReview",
         "residualRisks",
@@ -40762,8 +41396,6 @@
         "split",
         "systemTimezone",
         "taskMonth",
-        "tests",
-        "truncated",
         "verdict"
       ]
     },
@@ -40815,7 +41447,6 @@
         "replan",
         "residualRisks",
         "set",
-        "summary",
         "table",
         "taskRecordFieldManifest",
         "taskRecordKeys",
@@ -40897,7 +41528,6 @@
         "spec",
         "statement",
         "statuses",
-        "summary",
         "taskFixture",
         "terminal",
         "threshold",
@@ -40990,7 +41620,6 @@
         "section",
         "setActiveTask",
         "store",
-        "summary",
         "taskFixture",
         "taskMonth",
         "terminal",
@@ -41092,8 +41721,8 @@
       ]
     },
     {
-      "byteLength": 12300,
-      "contentHash": "884d4e99cbcdeb5d0a65c39791c363d5e3ccc0580a774516f29e4a6765a0c381",
+      "byteLength": 12794,
+      "contentHash": "eb70fd3311f836401be974b504acffabee5b777e7f2aaf4f65f6780d227cdf14",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -41134,6 +41763,7 @@
         "actionable",
         "are",
         "bad",
+        "before",
         "checkId",
         "contract",
         "createTaskV2MigrationEvidence",
@@ -41165,10 +41795,10 @@
         "planning",
         "recordedAt",
         "safe",
+        "set",
         "severity",
         "suggestion",
         "suite",
-        "summary",
         "taskFixture",
         "taskV2Fixture",
         "uncovered",
@@ -41239,7 +41869,6 @@
         "replan",
         "residualRisks",
         "severity",
-        "summary",
         "taskFixture",
         "time",
         "title",
@@ -41338,8 +41967,8 @@
       ]
     },
     {
-      "byteLength": 1861,
-      "contentHash": "dcad7aaf4ccf6e1c4cf5293c8b817bec4b9fdacc9cb8aa3f6b63292cb0e6acfb",
+      "byteLength": 2230,
+      "contentHash": "eb4a6ccc8985cf382bbacf75b57803f3619aa6eb9801e2a113940e090c82a01f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -41365,6 +41994,7 @@
         "ready",
         "recorded",
         "replan",
+        "set",
         "starts",
         "statuses",
         "terminal",
@@ -41519,7 +42149,6 @@
         "severity",
         "skipped",
         "suite",
-        "summary",
         "title",
         "unavailable",
         "unchanged",
@@ -41629,10 +42258,10 @@
         "runs",
         "segment",
         "severity",
+        "sha256",
         "split",
         "taskContractHash",
         "taskFixture",
-        "tests",
         "unchanged",
         "workspace"
       ]
@@ -41671,7 +42300,6 @@
         "dir",
         "glob",
         "instead",
-        "matched",
         "missingInputHint",
         "nearest",
         "old",
@@ -41766,6 +42394,7 @@
         "unchanged",
         "unit",
         "updatedAt",
+        "url",
         "validate"
       ]
     },
@@ -41868,7 +42497,6 @@
         "marker",
         "mode",
         "other",
-        "pattern",
         "recursive",
         "targeted",
         "targetedSegments",
@@ -41899,6 +42527,7 @@
         "included",
         "newer",
         "older",
+        "orders",
         "recorded",
         "release",
         "running",
@@ -42080,6 +42709,7 @@
         "implementingTaskV3",
         "instead",
         "lint",
+        "newest",
         "outcome",
         "planning",
         "pnpm",
@@ -42596,6 +43226,41 @@
       ]
     },
     {
+      "byteLength": 1399,
+      "contentHash": "eed0ad6d3b57db432e9082afc583df1e819a49d9e15313b6b755a4833fda98c9",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "task"
+      ],
+      "importTargets": [
+        "src/core/workflow/check-duration.js",
+        "test/support/builders.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/check-duration.test.ts",
+      "language": "typescript",
+      "references": [
+        "buildEvidence",
+        "buildTaskV3",
+        "checkId",
+        "duration",
+        "durationMs",
+        "exitCode",
+        "fail",
+        "failed",
+        "ignores",
+        "latestPassDurationMs",
+        "newest",
+        "other",
+        "recorded",
+        "recordedAt",
+        "runs"
+      ]
+    },
+    {
       "byteLength": 1449,
       "contentHash": "aa11c26900f72569552b051ec987d6bbdd7fe37f694f3baa121e9870667ae67e",
       "extension": "ts",
@@ -42663,7 +43328,6 @@
         "focused",
         "implementingTaskV3",
         "message",
-        "pattern",
         "pnpm",
         "replacement",
         "setCheckWorkflow",
@@ -42702,7 +43366,6 @@
         "ignores",
         "inside",
         "lint",
-        "number",
         "order",
         "orderChecks",
         "recorded",
@@ -42757,7 +43420,6 @@
         "suggestion",
         "suite",
         "summarizeCheckOutput",
-        "summary",
         "tests",
         "unit"
       ]
@@ -42887,7 +43549,6 @@
         "shared",
         "skipped",
         "suite",
-        "summary",
         "tests",
         "unit",
         "verificationRetryDisposition",
@@ -43043,7 +43704,6 @@
         "setBaselineWorkflow",
         "setCheckWorkflow",
         "suite",
-        "summary",
         "taskV3",
         "unchanged",
         "updatedAt",
@@ -43091,7 +43751,6 @@
         "buildEpic",
         "contextDrift",
         "created",
-        "cut",
         "epicMembers",
         "expected",
         "field",
@@ -43445,7 +44104,6 @@
         "recordedAt",
         "saved",
         "skipped",
-        "summary",
         "tag",
         "taskMonth"
       ]
@@ -43527,9 +44185,54 @@
         "recorded",
         "recordedAt",
         "saveWorkflow",
-        "summary",
         "taskV3",
         "updatedAt"
+      ]
+    },
+    {
+      "byteLength": 2564,
+      "contentHash": "557daf43ab3cf880929c6b960f24f1e0ed0f5cfc2c1536cca82964e7a2f0be11",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "buildCheck",
+        "found",
+        "task",
+        "taskWith",
+        "text",
+        "waived"
+      ],
+      "importTargets": [
+        "src/core/workflow/exercise-advisory.js",
+        "test/support/builders.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/exercise-advisory.test.ts",
+      "language": "typescript",
+      "references": [
+        "acceptanceCriteria",
+        "accepts",
+        "are",
+        "buildCheck",
+        "buildCriterion",
+        "buildTaskV3",
+        "criterionIds",
+        "does",
+        "exerciseAdvisories",
+        "ignores",
+        "met",
+        "notes",
+        "optional",
+        "orders",
+        "page",
+        "skill",
+        "starts",
+        "total",
+        "unchanged",
+        "waived",
+        "written"
       ]
     },
     {
@@ -43575,6 +44278,57 @@
         "recorded",
         "recursive",
         "spec"
+      ]
+    },
+    {
+      "byteLength": 2961,
+      "contentHash": "2b6fa249d8a35e9d177f9c660a1cfdc50f3b95436d1eca5230f89ceaaf3aa419",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Error",
+        "advice",
+        "files",
+        "modified",
+        "noGit",
+        "noPaths",
+        "path",
+        "project",
+        "root",
+        "runner",
+        "status",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/workflow/finish-advice.js",
+        "test/support/builders.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/finish-advice.test.ts",
+      "language": "typescript",
+      "references": [
+        "Array",
+        "advice",
+        "args",
+        "buildTaskV3",
+        "cannot",
+        "commit",
+        "finish",
+        "finishCommitAdvice",
+        "inside",
+        "message",
+        "order",
+        "outside",
+        "recursive",
+        "runner",
+        "slice",
+        "title"
       ]
     },
     {
@@ -43693,8 +44447,8 @@
         "supporting",
         "taskMonth",
         "taskV3",
-        "tests",
-        "transition"
+        "transition",
+        "transitionTask"
       ]
     },
     {
@@ -43723,8 +44477,8 @@
       ]
     },
     {
-      "byteLength": 2048,
-      "contentHash": "109f2f3115c96306cf04edb001a75edcde92c8bf95be81f07fb07bdb41568066",
+      "byteLength": 2103,
+      "contentHash": "fd5fa752623eeca0da015f30f24c650a3dc2855c2764709b3d0a3fd66678c147",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -43757,6 +44511,7 @@
         "finishWorkflowTask",
         "hooks",
         "implementationStrategy",
+        "initEpicWorkflow",
         "initTaskWorkflow",
         "inspectWorkflow",
         "isWithinRequestedScope",
@@ -43772,6 +44527,7 @@
         "removeRiskWorkflow",
         "replaceCheckWorkflow",
         "resetBreakerWorkflow",
+        "resolveReadableTask",
         "routeWorkflow",
         "runCheckWorkflow",
         "runChecksWorkflow",
@@ -43782,9 +44538,7 @@
         "setEpicOrderWorkflow",
         "setGoalWorkflow",
         "setPathsWorkflow",
-        "setTitleWorkflow",
-        "shouldReassessArchitecture",
-        "shouldResearch"
+        "setTitleWorkflow"
       ]
     },
     {
@@ -43914,6 +44668,64 @@
       ]
     },
     {
+      "byteLength": 4099,
+      "contentHash": "9da630917881b156f8e861b9a5d9d3a323a0b67726519c220cb53f4d2e03172b",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MEMBERS",
+        "NOW",
+        "detail",
+        "epic",
+        "failure",
+        "project",
+        "result",
+        "root",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/commands/epic.js",
+        "src/core/epics/epic.js",
+        "src/core/tasks/task.js",
+        "src/core/workflow/init-epic.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/init-epic.test.ts",
+      "language": "typescript",
+      "references": [
+        "NOW",
+        "bad",
+        "commands",
+        "detailPublicEpic",
+        "epics",
+        "gate",
+        "goal",
+        "groups",
+        "initEpicWorkflow",
+        "initializeUtcProject",
+        "loadEpicRecord",
+        "must",
+        "plain",
+        "planned",
+        "planning",
+        "problem",
+        "problems",
+        "recursive",
+        "release",
+        "resolveActiveTask",
+        "scripts",
+        "slug",
+        "title",
+        "used"
+      ]
+    },
+    {
       "byteLength": 1096,
       "contentHash": "eaeb42373b7dc1dd1ede9de75ec71b1409011fa991d86b1a80e173cb309bc6a1",
       "extension": "ts",
@@ -43988,6 +44800,7 @@
         "filesystem",
         "followUpOf",
         "initializeUtcProject",
+        "lineage",
         "other",
         "planning",
         "read",
@@ -44181,10 +44994,10 @@
         "initializeUtcProject",
         "inspect",
         "instead",
+        "lineage",
         "malformed",
         "needs",
         "none",
-        "order",
         "other",
         "page",
         "per",
@@ -44194,6 +45007,7 @@
         "prd",
         "prdPath",
         "quiet",
+        "recursive",
         "resolveActiveTask",
         "routes",
         "saveWorkflow",
@@ -44202,7 +45016,6 @@
         "slug",
         "suite",
         "taskMonth",
-        "tests",
         "unsafe",
         "upsertEpic"
       ]
@@ -44312,10 +45125,10 @@
         "setActiveTask",
         "sourceTaskIds",
         "statement",
-        "summary",
         "taskV3",
         "threshold",
         "updatedAt",
+        "url",
         "workspace",
         "writeProjectSource"
       ]
@@ -44387,7 +45200,6 @@
         "recordedAt",
         "saveTask",
         "setActiveTask",
-        "summary",
         "updatedAt"
       ]
     },
@@ -44738,12 +45550,12 @@
         "after",
         "appendEvidenceFlagsWorkflow",
         "applies",
+        "chunk",
         "common",
         "contract",
         "corrupted",
         "duplicate",
         "focused",
-        "goal",
         "guides",
         "hash",
         "ignores",
@@ -44908,9 +45720,7 @@
         "inside",
         "instead",
         "lock",
-        "matched",
         "other",
-        "pattern",
         "planPath",
         "posix",
         "recursive",
@@ -44938,8 +45748,8 @@
       ]
     },
     {
-      "byteLength": 15450,
-      "contentHash": "7b19ee5ee6154a91671e70c23252a0cf8e4741fb3c71e7c32dfd7b60eae9808e",
+      "byteLength": 15526,
+      "contentHash": "bed0c0eb3982144805b98221b7630101720484457b6a0fe86b836d0ee293f347",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -44997,6 +45807,7 @@
         "acceptance",
         "after",
         "before",
+        "bounded",
         "buildEpic",
         "buildLearningEntry",
         "built",
@@ -45011,7 +45822,6 @@
         "finishing",
         "fresh",
         "generatedHash",
-        "goal",
         "idPrefix",
         "initializeUtcProject",
         "instead",
@@ -45262,8 +46072,8 @@
       ]
     },
     {
-      "byteLength": 13323,
-      "contentHash": "ade4af07be2a2eb7f903287fe102760fb82742dd7b3322fa78e02d33f7adc150",
+      "byteLength": 14036,
+      "contentHash": "184e5eb679fa98347a9ef8e169ea443e5f2db0ac8c86691df8cc352dd7abb1a4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -45346,7 +46156,7 @@
         "named",
         "needs",
         "none",
-        "order",
+        "orders",
         "planning",
         "pnpm",
         "prd",
@@ -45465,7 +46275,6 @@
         "saved",
         "setCheckWorkflow",
         "suite",
-        "summary",
         "taskV3"
       ]
     },
@@ -45526,7 +46335,6 @@
         "retired",
         "saveWorkflow",
         "setCheckWorkflow",
-        "summary",
         "unit"
       ]
     },
@@ -45614,7 +46422,6 @@
         "saveWorkflow",
         "skipped",
         "starts",
-        "summary",
         "taskV3",
         "updatedAt",
         "via"
@@ -45698,8 +46505,8 @@
       ]
     },
     {
-      "byteLength": 13940,
-      "contentHash": "8c2856311a1fda07e4151264516e06e5fa7b842f660fc0ca09eb4c94a1e93437",
+      "byteLength": 14355,
+      "contentHash": "15e75ccb40910a4d9c82f18636590189b8f1c5f79a59a883494d859cae9098d9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -45758,9 +46565,9 @@
         "available",
         "commandlessImplementingTaskV3",
         "digest",
-        "durationMs",
         "escapes",
         "evidenceId",
+        "exact",
         "fail",
         "focused",
         "implementingTaskV3",
@@ -45772,15 +46579,15 @@
         "linked",
         "lint",
         "none",
-        "number",
         "other",
-        "outside",
         "override",
         "planning",
         "pnpm",
         "process",
         "ran",
         "read",
+        "recordedAt",
+        "recursive",
         "replan",
         "resolveActiveTask",
         "runCheckWorkflow",
@@ -45858,7 +46665,6 @@
         "fresh",
         "full",
         "initializeUtcProject",
-        "number",
         "planning",
         "pnpm",
         "quiet",
@@ -46065,9 +46871,7 @@
         "loadPersistedTask",
         "marker",
         "mutated",
-        "order",
         "outcomes",
-        "outside",
         "pending",
         "planning",
         "pnpm",
@@ -46075,8 +46879,10 @@
         "prd",
         "readiness",
         "ready",
+        "recordedAt",
         "rejected",
         "reverseObjectKeys",
+        "saveTask",
         "saveWorkflow",
         "selectionChanges",
         "setActiveTask",
@@ -46242,6 +47048,7 @@
       "path": "test/unit/core/workflow/secret-scan.test.ts",
       "language": "typescript",
       "references": [
+        "Server",
         "app",
         "args",
         "bin",
@@ -46285,6 +47092,7 @@
         "secretAdvisory",
         "started",
         "unchanged",
+        "url",
         "waiver"
       ]
     },
@@ -46601,6 +47409,7 @@
         "named",
         "nested",
         "newer",
+        "newest",
         "old",
         "part",
         "pnpm",
@@ -46610,7 +47419,6 @@
         "runs",
         "scripts",
         "segment",
-        "spec",
         "split",
         "suite",
         "suiteCheck",
@@ -46733,6 +47541,7 @@
         "loadTask",
         "malformed",
         "other",
+        "persisted",
         "planning",
         "pnpm",
         "rationale",
@@ -46752,7 +47561,6 @@
         "taskMonth",
         "taskV3",
         "terminal",
-        "title",
         "touch",
         "transition",
         "withTargetTask",
@@ -47041,7 +47849,6 @@
         "setActiveTask",
         "settled",
         "started",
-        "summary",
         "taskV3",
         "terminal",
         "withWorkflowLock"
@@ -47157,7 +47964,7 @@
       ]
     },
     {
-      "byteLength": 3240,
+      "byteLength": 3300,
       "contentHash": "30a0133aa69973fccfd581f5d82902654d20383582028460e5d1586a5464168a",
       "extension": "ts",
       "headings": [],
@@ -47204,6 +48011,7 @@
         "setup",
         "skills",
         "split",
+        "url",
         "values"
       ]
     },
@@ -47259,6 +48067,7 @@
         "language",
         "old",
         "order",
+        "orders",
         "overrides",
         "provenance",
         "release",
@@ -47342,8 +48151,8 @@
       ]
     },
     {
-      "byteLength": 4144,
-      "contentHash": "5cd2b0cbb8db5405ca2f3e2af485b1b8c689ab8539e8174eb080ebfa0cdc7f88",
+      "byteLength": 4402,
+      "contentHash": "286bbb37a6a7508b304c6bdcba1f2949c899f47a8265f9beb3d02d32f989c067",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -47351,6 +48160,7 @@
         "TOKEN_BUDGET",
         "archReview",
         "bugfixPreserve",
+        "exercise",
         "expectedTechniqueSkillNames",
         "flakyTest",
         "migrationSafety",
@@ -47380,6 +48190,8 @@
         "approximateTokens",
         "budgets",
         "catalog",
+        "cli",
+        "detection",
         "does",
         "frontmatter",
         "heading",
@@ -47554,7 +48366,8 @@
         "per",
         "reads",
         "skill",
-        "skillBudget"
+        "skillBudget",
+        "url"
       ]
     },
     {
@@ -47658,16 +48471,17 @@
         "max",
         "modules",
         "must",
-        "number",
         "optional",
         "packageName",
         "packageVersion",
         "posix",
         "process",
+        "read",
         "readme",
         "release",
         "scan",
         "set",
+        "shape",
         "shared",
         "size",
         "slice",
@@ -47676,7 +48490,6 @@
         "starts",
         "suite",
         "suites",
-        "tests",
         "unit",
         "validate"
       ]
@@ -47788,11 +48601,12 @@
       ]
     },
     {
-      "byteLength": 16750,
-      "contentHash": "4a4adcd0b3f06c3d18c8313063afe666ada08b6656afa80ff450eee64b258459",
+      "byteLength": 17315,
+      "contentHash": "3ea4fb0faec894f6d7711710ef804a2bbdbaeca329304de676cd4dbe83fdc47b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "Error",
         "EventEmitter",
         "FakeChild",
         "ProcessSpawner",
@@ -47864,12 +48678,12 @@
         "invocation",
         "killProcessTree",
         "launcher",
+        "lookup",
         "none",
-        "number",
-        "outside",
         "plain",
         "pnpm",
         "process",
+        "program",
         "quoted",
         "resolve",
         "resolveInvocation",
@@ -47950,7 +48764,6 @@
         "mapWithLimit",
         "max",
         "more",
-        "number",
         "order",
         "resolve",
         "running",
@@ -48111,7 +48924,6 @@
         "lock",
         "lockRecordNamePattern",
         "malformed",
-        "number",
         "old",
         "operationId",
         "overrides",
@@ -48122,6 +48934,7 @@
         "partial",
         "process",
         "processIdentity",
+        "read",
         "readHarnixFileLockSnapshot",
         "reads",
         "recordName",
@@ -48345,6 +49158,7 @@
         "characters",
         "compareCodeUnits",
         "order",
+        "orders",
         "pair",
         "unit"
       ]
@@ -48508,7 +49322,6 @@
         "bounded",
         "does",
         "errorCode",
-        "number",
         "reads",
         "renameWithRetry",
         "resolve"
@@ -48608,7 +49421,6 @@
       "path": "test/unit/utils/safe-slice.test.ts",
       "language": "typescript",
       "references": [
-        "cut",
         "does",
         "empty",
         "inside",
@@ -48645,7 +49457,6 @@
         "message",
         "nearest",
         "none",
-        "number",
         "risk",
         "suggestions",
         "unknownIdError"
@@ -48967,7 +49778,6 @@
         "managed",
         "moduleSpecifiers",
         "modules",
-        "number",
         "oversized",
         "process",
         "rel",
@@ -48981,8 +49791,8 @@
       ]
     },
     {
-      "byteLength": 53486,
-      "contentHash": "0107ca075df1034db21e503344b12938f87739122418ef47868d6ff3134e80b9",
+      "byteLength": 54232,
+      "contentHash": "dde2f2d0673d5b47bbaaf8691be7135994ba18639d707da7bbd7313251b03343",
       "extension": "json",
       "headings": [],
       "identifiers": [
@@ -49089,13 +49899,14 @@
         "formatGolden",
         "goal",
         "initializeProject",
+        "inputDigest",
         "inspect",
         "inspectProjectStatus",
         "inspectWorkflow",
+        "isDirectory",
         "listProjectTasks",
         "listPublicEpics",
         "met",
-        "number",
         "part",
         "pnpm",
         "prd",
@@ -49108,7 +49919,6 @@
         "set",
         "snapshotWorkflow",
         "snapshots",
-        "tests",
         "transitionWorkflow",
         "workflowEnvelopeSchema",
         "workspace",
@@ -49175,6 +49985,7 @@
         "fold",
         "heading",
         "headings",
+        "newest",
         "pnpm",
         "process",
         "release",
@@ -49232,7 +50043,6 @@
         "runs",
         "saved",
         "setCheckWorkflow",
-        "summary",
         "unchanged",
         "used"
       ]
@@ -49278,14 +50088,13 @@
         "replaced",
         "set",
         "setCheckWorkflow",
-        "summary",
         "transition",
         "transitionWorkflow"
       ]
     },
     {
-      "byteLength": 10566,
-      "contentHash": "f84b81ede4b5ae43977913ed21ec73c1f1c8f833928b7d068613513624c85b7f",
+      "byteLength": 10614,
+      "contentHash": "fceeebd7bbaee497ee2fdba70eddda0edb8c13a7dd1b911b6ad8b141a87a4128",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -49319,6 +50128,7 @@
       "language": "typescript",
       "references": [
         "PublicCliErrorV1",
+        "action",
         "archived",
         "bare",
         "brief",
@@ -49345,8 +50155,6 @@
         "nested",
         "note",
         "offset",
-        "order",
-        "outside",
         "pnpm",
         "prd",
         "process",
@@ -49357,6 +50165,7 @@
         "refs",
         "relevant",
         "repoMap",
+        "risks",
         "runCli",
         "set",
         "severity",
@@ -49507,21 +50316,22 @@
         "bounded",
         "capture",
         "changelog",
+        "clock",
         "contract",
         "definition",
+        "delta",
+        "digest",
         "does",
         "focused",
         "followUpOf",
         "format",
         "gate",
-        "goal",
         "heading",
         "instead",
         "language",
         "layout",
         "locateEpicFile",
         "location",
-        "number",
         "older",
         "pnpm",
         "release",
@@ -49532,7 +50342,6 @@
         "safe",
         "scripts",
         "set",
-        "slug",
         "sources",
         "split",
         "stable",
@@ -49894,10 +50703,119 @@
         "resolveActiveTask",
         "saveWorkflow",
         "selectActions",
-        "summary",
         "taskV3",
         "transition",
         "writeProjectSource"
+      ]
+    },
+    {
+      "byteLength": 2884,
+      "contentHash": "7f52caaa327f8326fb8aa15cb1714a86153001688875cbf458d896d7b90d1ef0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Error",
+        "Promise",
+        "RunningApi",
+        "api",
+        "cleanup",
+        "cleanups",
+        "deadline",
+        "directory",
+        "failure",
+        "happy",
+        "invalid",
+        "run",
+        "script",
+        "startApi",
+        "success",
+        "unknown",
+        "waitUntilReady"
+      ],
+      "importTargets": [
+        "node:child_process",
+        "node:fs/promises",
+        "node:os",
+        "node:path",
+        "node:util",
+        "test/support/exercise-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/workflow/exercise-fixtures.test.ts",
+      "language": "typescript",
+      "references": [
+        "GREETER_CLI_SOURCE",
+        "RunningApi",
+        "after",
+        "array",
+        "child",
+        "deadline",
+        "invalid",
+        "method",
+        "orders",
+        "plus",
+        "process",
+        "readiness",
+        "ready",
+        "recursive",
+        "resolve",
+        "runs",
+        "splice",
+        "startOrderApi",
+        "starts",
+        "stdout",
+        "timeoutMs",
+        "usage"
+      ]
+    },
+    {
+      "byteLength": 2210,
+      "contentHash": "2edddfc6564f988f2fefe10e5aded0ffd566e38ddec09fecd01b4a972760ffdb",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Error",
+        "all",
+        "exercise",
+        "needle",
+        "needles",
+        "pointers",
+        "reference",
+        "text",
+        "topic"
+      ],
+      "importTargets": [
+        "src/skills/technique-skills.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/workflow/exercise-skill-content.test.ts",
+      "language": "typescript",
+      "references": [
+        "after",
+        "all",
+        "array",
+        "child",
+        "cli",
+        "contract",
+        "cursor",
+        "does",
+        "install",
+        "kiro",
+        "needle",
+        "posix",
+        "process",
+        "risk",
+        "skill",
+        "skills",
+        "split",
+        "stdout",
+        "techniqueSkills",
+        "topic",
+        "values"
       ]
     },
     {
@@ -50038,6 +50956,7 @@
       "path": "test/workflow/guide-format.test.ts",
       "language": "typescript",
       "references": [
+        "advice",
         "all",
         "audit",
         "bounded",
@@ -50061,9 +50980,7 @@
         "instead",
         "language",
         "layout",
-        "number",
         "order",
-        "pattern",
         "row",
         "section",
         "sections",
@@ -50319,9 +51236,11 @@
         "buildTaskV1",
         "cache",
         "codex",
+        "commands",
         "configured",
         "context",
         "createConfig",
+        "developer",
         "disclosure",
         "effective",
         "escapes",
@@ -50338,7 +51257,6 @@
         "lead",
         "marker",
         "none",
-        "outside",
         "oversized",
         "pair",
         "payload",
@@ -50350,7 +51268,6 @@
         "setActiveTask",
         "shared",
         "split",
-        "title",
         "updatedAt",
         "workspace",
         "workspacePaths",
@@ -50530,7 +51447,6 @@
         "saveTask",
         "saveWorkflow",
         "setActiveTask",
-        "summary",
         "taskV3",
         "title",
         "updatedAt"
@@ -50665,7 +51581,6 @@
         "modules",
         "note",
         "notes",
-        "number",
         "observation",
         "planning",
         "preflightWorkflow",
@@ -50682,11 +51597,12 @@
         "searchMemory",
         "slice",
         "sources",
-        "spec",
         "specPath",
         "split",
+        "store",
         "tests",
-        "transitionWorkflow"
+        "transitionWorkflow",
+        "updatedAt"
       ]
     },
     {
@@ -50805,13 +51721,13 @@
         "malformed",
         "more",
         "must",
+        "newest",
         "none",
         "persisted",
         "process",
         "reads",
         "recursive",
         "suite",
-        "summary",
         "taskFilePath",
         "total",
         "version"
@@ -50877,9 +51793,11 @@
         "buildTaskV3",
         "byte",
         "clock",
+        "commands",
         "completed",
         "configured",
         "createTestProject",
+        "exitCode",
         "finishWorkflow",
         "finishing",
         "flat",
@@ -50908,8 +51826,6 @@
         "taskMonth",
         "taskV3",
         "time",
-        "timezone",
-        "title",
         "transitionWorkflow",
         "updatedAt",
         "waived",
@@ -50945,7 +51861,8 @@
         "pnpm",
         "process",
         "scripts",
-        "seen"
+        "seen",
+        "url"
       ]
     },
     {
@@ -51016,7 +51933,6 @@
         "noTask",
         "note",
         "notes",
-        "number",
         "other",
         "own",
         "pair",
@@ -51035,6 +51951,7 @@
         "size",
         "stdout",
         "transition",
+        "url",
         "usage",
         "used"
       ]
@@ -51113,6 +52030,7 @@
         "transitive",
         "unit",
         "updateConfig",
+        "url",
         "version",
         "workspace"
       ]
@@ -51199,13 +52117,13 @@
         "none",
         "notes",
         "optional",
-        "order",
         "page",
         "per",
         "phrase",
         "prd",
         "problem",
         "program",
+        "read",
         "renderHarnixRules",
         "replan",
         "set",
@@ -51218,6 +52136,49 @@
         "workflowGuidance",
         "workflowSkills",
         "workflowTemplate"
+      ]
+    },
+    {
+      "byteLength": 1718,
+      "contentHash": "d01230112ed32ea38fe4842359b0a25c1b3a36b347c7e1e60f4791407b996e54",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CLI",
+        "base",
+        "root",
+        "suggestions",
+        "suggestionsFor",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "src/core/workflow/preflight.js",
+        "src/core/workflow/save.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/workflow/preflight-exercise.test.ts",
+      "language": "typescript",
+      "references": [
+        "acceptanceCriteria",
+        "does",
+        "goal",
+        "handler",
+        "initializeUtcProject",
+        "orders",
+        "planning",
+        "preflightWorkflow",
+        "saveWorkflow",
+        "suggestedTechniques",
+        "suggestion",
+        "suggestions",
+        "taskV3",
+        "title",
+        "words"
       ]
     },
     {
@@ -51348,6 +52309,7 @@
         "sources",
         "stage",
         "tests",
+        "url",
         "values",
         "version",
         "work"
@@ -51456,7 +52418,6 @@
         "label",
         "lint",
         "measure",
-        "number",
         "order",
         "pnpm",
         "ran",
@@ -51471,7 +52432,8 @@
         "slice",
         "split",
         "step",
-        "tarball"
+        "tarball",
+        "url"
       ]
     },
     {
@@ -51604,7 +52566,6 @@
         "generatedHash",
         "guides",
         "hash",
-        "number",
         "packageVersion",
         "pnpm",
         "process",
@@ -51664,6 +52625,7 @@
         "syncSelfHost",
         "template",
         "updated",
+        "url",
         "version"
       ]
     },
@@ -51702,17 +52664,17 @@
         "measure",
         "needs",
         "notice",
-        "number",
         "pending",
         "readiness",
         "scripts",
         "setup",
-        "stdout"
+        "stdout",
+        "url"
       ]
     },
     {
-      "byteLength": 13160,
-      "contentHash": "be669f0ff80a40ab87adec6f21e2f4fe2942e23449f0fb08e0ecbef1d7ad2657",
+      "byteLength": 13607,
+      "contentHash": "a800c530862bc883837ff18bf69254b8825ef000a15b31ea3927ac606e06445b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -51791,7 +52753,6 @@
         "finish",
         "finishing",
         "gate",
-        "goal",
         "hook",
         "installed",
         "language",
@@ -51803,8 +52764,6 @@
         "needle",
         "nextStage",
         "none",
-        "number",
-        "outside",
         "part",
         "phrase",
         "pnpm",
@@ -51813,13 +52772,16 @@
         "removes",
         "replan",
         "set",
-        "slug",
         "sources",
         "split",
         "stage",
         "template",
-        "tests",
-        "time"
+        "time",
+        "transition",
+        "url",
+        "waived",
+        "work",
+        "workflowSkills"
       ]
     },
     {
@@ -51999,6 +52961,7 @@
       "language": "typescript",
       "references": [
         "after",
+        "all",
         "allowed",
         "appendEvidenceWorkflow",
         "audit",
@@ -52023,9 +52986,7 @@
         "more",
         "must",
         "notes",
-        "number",
         "old",
-        "outside",
         "overrides",
         "pending",
         "planning",
@@ -52045,6 +53006,7 @@
         "taskRecordFieldManifest",
         "taskV3",
         "transitionWorkflow",
+        "updatedAt",
         "workflowEnvelopeSchema"
       ]
     },
@@ -52160,15 +53122,14 @@
         "load",
         "message",
         "messages",
-        "number",
         "plus",
         "report",
         "scripts",
         "suite",
         "suites",
         "summarizeFailures",
-        "summary",
-        "tests"
+        "tests",
+        "url"
       ]
     },
     {
@@ -52260,13 +53221,13 @@
         "scripts",
         "skillPath",
         "slice",
-        "spec",
         "splice",
         "stdout",
         "summaries",
         "syncVersion",
         "template",
         "tests",
+        "url",
         "used",
         "versions",
         "via",
@@ -52274,7 +53235,7 @@
       ]
     },
     {
-      "byteLength": 622,
+      "byteLength": 645,
       "contentHash": "2b7f220d871a6b96004eef51c83cd5c46760da080b66bd978160e47024dc705a",
       "extension": "json",
       "headings": [],
@@ -52306,6 +53267,7 @@
         "clean",
         "cli",
         "format",
+        "url",
         "version"
       ]
     },
@@ -52346,9 +53308,9 @@
         "runs",
         "safe",
         "suite",
-        "summary",
         "tests",
         "time",
+        "url",
         "worker"
       ]
     }
