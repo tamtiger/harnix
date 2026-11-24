@@ -1,0 +1,98 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-232023-git-hygiene",
+  "title": "Giảm nhiễu git: .harnix/.gitignore và .gitattributes do init và update ghi",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Bớt nhiễu git cho repo dùng Harnix: file ignore và line ending của riêng .harnix do init và update ghi, mà không đụng file gốc của người dùng.",
+  "nonGoals": [],
+  "epicId": "20261124-232018-harnix-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`harnix init` và `harnix update` ghi `.harnix/.gitignore` (`cache/`, `tmp/`, `tasks/.active`) và `.harnix/.gitattributes` (`* text eol=lf`) có đánh dấu managed, idempotent, không ghi đè bản người dùng đã sửa (theo manifest hash), không đụng `.gitignore` hay `.gitattributes` gốc; nằm trong manifest và `uninstall --purge` gỡ chúng.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Finding doctor `cache-tracked` và `active-pointer-tracked` in đúng lệnh `git rm --cached ...` cần chạy; harnix không tự chạy git; mức severity không đổi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Journal vẫn được theo dõi mặc định (decision ghi lại lý do: ignore sẽ mất lịch sử khi đổi máy); tài liệu nói rõ cách ignore nếu người dùng muốn. Việc gỡ `.harnix/cache/repo-map-v1.json` khỏi index của chính repo harnix là thao tác git riêng, chỉ làm khi người dùng cho phép, không nằm trong code.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Docs (PRD, README), CHANGELOG, test init/update/doctor và phiên bản `2.40.0-dev.5` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-git-hygiene.mjs` (repo git tạm: sau `repo-map` thì `git status` không hiện cache; `update` lần hai không đổi file; file người dùng đã sửa được giữ).",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T23:20:23.533+07:00",
+  "updatedAt": "2026-11-24T23:21:28.665+07:00",
+  "decisions": [
+    {
+      "id": "dec-journal-tracked",
+      "text": "Journal vẫn theo dõi mặc định: ignore sẽ mất lịch sử khi đổi máy; chỉ ignore cache, tmp, tasks/.active. Ghi file vào .harnix/ thay vì .gitignore gốc để không đụng file của người dùng.",
+      "rationale": "Cần người dùng xác nhận khi duyệt epic."
+    }
+  ]
+}

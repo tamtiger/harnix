@@ -1,0 +1,91 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-232022-context-cost",
+  "title": "Giảm chi phí context mỗi lượt: bỏ Status khỏi băm, learningMax, gom note gần trùng",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Giảm chi phí context mỗi lượt: không chèn lại khối hook chỉ vì đổi trạng thái, cho đặt giới hạn ghi chú học và gom note gần trùng.",
+  "nonGoals": [],
+  "epicId": "20261124-232018-harnix-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Phần băm quyết định ẩn khối hook không còn gồm dòng `Status: x/y`: hai lượt cùng session chỉ khác Status thì lượt sau in rỗng; đổi id, title, goal hoặc learning thì vẫn in lại.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`.harnix/config.yaml` nhận `context.learningMax` (0 đến 5, mặc định 5; `0` tắt note chưa duyệt); validator, schema và doctor chấp nhận; config cũ không đổi hành vi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Khi chọn note cho ngữ cảnh, bỏ note có độ giống token (Jaccard từ 0,6) với note đã chọn; fixture hai note gần trùng chỉ cho vào một; hook protocol và redaction không đổi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu, CHANGELOG, golden và schema config, phiên bản `2.40.0-dev.4` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-context-cost.mjs` (stdin hook event hai lượt trong dự án tạm có task và note học).",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T23:20:22.533+07:00",
+  "updatedAt": "2026-11-24T23:21:03.146+07:00"
+}

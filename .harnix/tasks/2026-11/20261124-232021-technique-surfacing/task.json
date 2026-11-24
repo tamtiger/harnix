@@ -1,0 +1,98 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-232021-technique-surfacing",
+  "title": "Đưa gợi ý technique đến agent: techniqueHint và bỏ quy tắc Full luôn gợi ý",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Làm cho gợi ý technique skill thật sự đến được agent: một dòng chỉ cách nạp khi có gợi ý, và bớt gợi ý lặp vô ích.",
+  "nonGoals": [],
+  "epicId": "20261124-232018-harnix-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`workflow --preflight` thêm trường `techniqueHint` một dòng cố định chỉ khi có `suggestedTechniques` (nạp từng skill bằng `harnix skill <tên> --raw`); ngoại lệ so với quy tắc \"preflight không emit command\" được ghi tường minh trong `docs/HARNIX_WORKFLOW.md`; schema, golden và test preflight cập nhật.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`suggestTechniques` không còn gợi ý `harnix-sequential-thinking` chỉ vì `mode === \"full\"`: chỉ khi khớp regex (refactor, kiến trúc, đánh đổi...) hoặc số tiêu chí hay số `relevantPaths` vượt ngưỡng chốt bằng decision; test preflight, technique-skills và `skill-routing-cases.json` đồng bộ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Phương pháp và số đo cơ sở của phân tích mức nạp skill (88 phiên: technique 0 lần nạp, 11 trong 49 reference từng nạp) được ghi vào `research.md` của epic để so sánh lại sau vài tuần bằng cách phân tích transcript ngoài harnix; harnix không thêm bộ đếm hay telemetry.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu, CHANGELOG và phiên bản `2.40.0-dev.3` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-technique-hint.mjs` (preflight trong dự án tạm: task Full đơn giản không còn gợi ý sequential-thinking, task migration có `techniqueHint`).",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T23:20:21.533+07:00",
+  "updatedAt": "2026-11-24T23:21:28.198+07:00",
+  "decisions": [
+    {
+      "id": "dec-contract-exception",
+      "text": "techniqueHint là mở rộng hợp đồng một dòng: contract hiện nói preflight ngoài learning và baselineHint không emit prose hay command. Cần sửa tường minh docs/HARNIX_WORKFLOW.md và PRD, không in lệnh theo từng tên.",
+      "rationale": "Người dùng cần chấp nhận khi duyệt epic; nếu từ chối, member này chỉ làm phần bỏ quy tắc Full luôn gợi ý."
+    }
+  ]
+}

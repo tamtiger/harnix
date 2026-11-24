@@ -1,0 +1,9 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261124-232018-harnix-friction-fixes",
+  "title": "Giảm ma sát dùng Harnix: chạy check, advisory, gợi ý technique, chi phí context, git và scaffold",
+  "goal": "Sửa các vấn đề dùng Harnix rút ra từ phản hồi một epic thực tế và phân tích 88 phiên: chạy check bớt ma sát, advisory sớm không chặn, gợi ý technique đến được agent, giảm chi phí context mỗi lượt, bớt nhiễu git và sinh khung prd/plan.",
+  "createdAt": "2026-11-24T23:20:18.533+07:00",
+  "updatedAt": "2026-11-24T23:20:18.533+07:00"
+}

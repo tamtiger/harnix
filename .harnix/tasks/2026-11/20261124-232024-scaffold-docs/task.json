@@ -1,0 +1,98 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261124-232024-scaffold-docs",
+  "title": "Sinh khung prd và plan cho task Full đang planning, đóng epic bằng bản minor",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Giúp soạn prd.md và plan.md không cần heredoc: sinh khung từ criteria và check đã khai báo hoặc nạp file UTF-8 cho task Full đang planning; member cuối đóng epic.",
+  "nonGoals": [],
+  "epicId": "20261124-232018-harnix-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`harnix workflow --scaffold-docs [--prd-file <p>] [--plan-file <p>] [--force]` cho task Full đang `planning` (nhận `--task`): không có file thì sinh khung `prd.md` và `plan.md` từ criteria và check hiện tại, không ghi đè nội dung đã có trừ khi `--force`; có file thì nạp UTF-8 nguyên văn (bỏ BOM, qua kiểm mojibake); ghi bằng đường `saveWorkflow`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Task Lite hoặc task không ở `planning` bị từ chối kèm hint; khung sinh ra không chứa token placeholder cứng làm cổng ready từ chối và có dòng checklist `[chk-id]` cho từng required check.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Hành vi có đủ trong `WORKFLOW_ACTIONS`, `--schema`, flag-owners, handler, test action-checklist, golden (chỉ chuỗi mới), docs (HARNIX_WORKFLOW, PRD) và template `workflow.md` (tối đa một dòng trong ngân sách còn lại, rồi `pnpm selfhost:sync`).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Member cuối đóng epic: `pnpm version:sync 2.40.0 --fold-dev` với một entry CHANGELOG, một lượt harnix-review do reviewer độc lập trên toàn diff epic trước finish, chạy lại toàn bộ check và mọi script exercise; kiểm bằng CLI thật qua `scripts/exercise-scaffold-docs.mjs` (tiếng Việt qua `--prd-file` đúng byte).",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".prettierrc.json",
+        "eslint.config.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "Test hợp đồng nhanh (docs, CLI, ngân sách token, nguồn skill)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-24T23:20:24.533+07:00",
+  "updatedAt": "2026-11-24T23:21:29.161+07:00",
+  "decisions": [
+    {
+      "id": "dec-scaffold-full-only",
+      "text": "--scaffold-docs chỉ cho task Full đang planning (Lite không có prd.md và plan.md); member của --init-epic vẫn là Lite.",
+      "rationale": "Mở rộng init-epic sang Full là thay đổi riêng, không nằm trong epic này."
+    }
+  ]
+}
