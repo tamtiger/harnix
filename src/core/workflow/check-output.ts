@@ -24,6 +24,9 @@ function clean(output: string): string {
   return output.replace(ANSI, "").replace(WINDOWS_PATH, "<path>").replace(POSIX_PATH, "<path>");
 }
 
+/** The cleaning the failure summary and the failure log share: no terminal colors, no machine paths. */
+export const scrubCheckOutput = clean;
+
 /**
  * The reason a red check is red, in few tokens: each failing vitest test with the first line of its message
  * (at most 10 and 800 characters), otherwise the last 600 characters. Never persisted.

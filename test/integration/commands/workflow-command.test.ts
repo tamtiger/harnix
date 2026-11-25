@@ -232,7 +232,7 @@ describe.sequential("hidden workflow flag transports", () => {
       [["--save", "--result", "pass"], /--result/u],
       [["--inspect", "--met"], /--met/u],
       [["--criterion", "a"], /--met/u],
-      [["--run-check", "check"], /executable/u],
+      [["--run-check", "check", "--result", "pass"], /--result/u],
       [["--evidence", "--check", "check"], /--result/u],
       [["--snapshot", "--check", "check", "--summary", "x"], /--summary/u],
       [["--inspect", "extra"], /operand/u],

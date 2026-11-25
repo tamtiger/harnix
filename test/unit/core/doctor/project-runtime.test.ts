@@ -34,6 +34,31 @@ describe("tracked runtime file diagnostics", () => {
     expect(seen).toEqual([["ls-files", "--", ".harnix/tasks/.active", ".harnix/cache"]]);
   });
 
+  it("prints the exact git command to run and only ever asks git to list files", async () => {
+    const findings: DoctorFinding[] = [];
+    const seen: (readonly string[])[] = [];
+
+    await inspectTrackedRuntimeFiles("/repo", findings, async (_root, args) => {
+      seen.push(args);
+      return ".harnix/tasks/.active\n.harnix/cache/repo-map-v1.json\n";
+    });
+
+    const messages = Object.fromEntries(findings.map((item) => [item.code, item.message]));
+    expect(messages["active-pointer-tracked"]).toContain("git rm --cached .harnix/tasks/.active");
+    expect(messages["cache-tracked"]).toContain("git rm -r --cached .harnix/cache");
+    // The ignore file is the user's once edited, so the hint says what the file needs and does not promise an update.
+    expect(messages["cache-tracked"]).toContain("`/cache/` in .harnix/.gitignore");
+    expect(messages["cache-tracked"]).toContain("add the line yourself");
+    expect(messages["cache-tracked"]).not.toContain("harnix update");
+    expect(messages["active-pointer-tracked"]).toContain("`tasks/.active` in .harnix/.gitignore");
+    expect(messages["active-pointer-tracked"]).not.toContain("harnix update");
+    for (const message of Object.values(messages)) {
+      expect(message).not.toMatch(/[A-Za-z]:[\\/]/u);
+    }
+    expect(findings.map((item) => item.severity)).toEqual(["warning", "warning"]);
+    expect(seen.every((args) => args[0] === "ls-files")).toBe(true);
+  });
+
   it("stays silent when the pointer is not tracked or git cannot answer", async () => {
     const findings: DoctorFinding[] = [];
 

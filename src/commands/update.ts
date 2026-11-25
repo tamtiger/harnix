@@ -7,6 +7,12 @@ import { refreshProjectConfig, type ConfigRefreshResult } from "src/core/config/
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { workflowTemplate } from "src/templates/harnix/workflow.js";
 import {
+  HARNIX_GITATTRIBUTES_PATH,
+  HARNIX_GITIGNORE_PATH,
+  gitattributesTemplate,
+  gitignoreTemplate,
+} from "src/templates/harnix/git-files.js";
+import {
   reconcileManagedFiles,
   readManifest,
   writeManifest,
@@ -111,6 +117,8 @@ export function desiredFiles(
   return [
     managed("AGENTS.md", "agents-bootstrap", "project", renderAgentsTemplate({ ...config, version: packageVersion })),
     managed(".harnix/workflow.md", "workflow", "project", workflowTemplate),
+    managed(HARNIX_GITIGNORE_PATH, "git-ignore", "project", gitignoreTemplate),
+    managed(HARNIX_GITATTRIBUTES_PATH, "git-attributes", "project", gitattributesTemplate),
     ...selectGuideSources(config).map((source) =>
       managed(guideOutputPath(source), `guide-${source.descriptor.id}`, "project", source.content),
     ),

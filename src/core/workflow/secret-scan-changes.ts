@@ -8,7 +8,8 @@ const GIT_TIMEOUT_MS = 2000;
 const PREFIX_ARGS = ["--no-optional-locks", "rev-parse", "--show-prefix"] as const;
 const STATUS_ARGS = ["--no-optional-locks", "status", "--porcelain=v2", "--untracked-files=all", "-z"] as const;
 
-const defaultRunner: SecretScanGitRunner = (cwd, args) => runGit(cwd, args, GIT_TIMEOUT_MS);
+/** The real Git runner (a two second timeout); the advisories that read Git history share it. */
+export const defaultGitRunner: SecretScanGitRunner = (cwd, args) => runGit(cwd, args, GIT_TIMEOUT_MS);
 
 /**
  * The repository-relative paths that differ from HEAD (modified, staged and untracked), so the secret scan can skip
@@ -17,7 +18,7 @@ const defaultRunner: SecretScanGitRunner = (cwd, args) => runGit(cwd, args, GIT_
  */
 export async function changedPaths(
   root: string,
-  run: SecretScanGitRunner = defaultRunner,
+  run: SecretScanGitRunner = defaultGitRunner,
 ): Promise<Set<string> | undefined> {
   try {
     // allSettled, not all: a failed command must not return while its sibling still holds the directory as its cwd.

@@ -54,3 +54,15 @@ Thêm từ phân tích nạp skill: dòng premortem vào `READY_REVIEW_CHECKLIST
 3. Journal vẫn được theo dõi mặc định, chấp nhận không?
 4. Advisory sửa code sớm chỉ so với HEAD (heuristic, có thể dương tính giả), chấp nhận không?
 5. Ngưỡng tiêu chí nháp cũ (đề xuất 3 ngày hoặc có commit chạm `relevantPaths`) và ngưỡng `sequential-thinking`.
+
+## 6. Số đo cơ sở và cách đo lại (member 3, 2026-11-25)
+
+Số đo cơ sở là bảng ở mục 1: 88 phiên từ 2026-10-23 đến 2026-11-24, 64 phiên dùng `harnix workflow`; `plan` nạp 48, `implement` 36, `verify` 20, `review` 15, `research` 2; 8 technique skill và `harnix-debug` nạp 0; `suggestedTechniques` xuất hiện ở 16 phiên (15 lần là `harnix-sequential-thinking` vì mọi task Full); 11 trong 49 reference từng được nạp.
+
+Cách đo lại, hoàn toàn ngoài harnix:
+1. Lấy các file JSONL của phiên Claude Code (mỗi phiên một file dưới thư mục dự án của Claude), chỉ giữ phiên có chuỗi `harnix` và loại phiên đang chạy.
+2. Với mỗi lời gọi công cụ Bash hoặc PowerShell, đếm lệnh khớp `harnix skill <tên> [--reference <chủ đề>] [--raw]`, và đếm lời gọi công cụ `Skill` có tên bắt đầu bằng `harnix-`.
+3. Với mỗi kết quả công cụ có `"suggestedTechniques":[...]` (và `"techniqueHint"` sau member 3), ghi tên được gợi ý rồi đối chiếu xem cùng phiên có nạp đúng skill đó sau lần gợi ý hay không.
+4. So sánh tỉ lệ "được gợi ý rồi nạp" và số reference từng nạp với bảng ở mục 1. Mốc đề nghị: đo lại sau ít nhất 4 tuần dùng bản `2.40.0` trở lên.
+
+Harnix không thêm bộ đếm, telemetry hay ghi nhật ký mức dùng skill: `harnix skill` vẫn là lệnh chỉ đọc, và phân tích trên là việc của người đọc transcript của chính họ. Giới hạn cũ vẫn đúng: chưa quét transcript của subagent hay nền tảng khác, và chưa đo "nạp rồi có làm theo không".

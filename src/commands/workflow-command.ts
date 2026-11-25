@@ -9,6 +9,7 @@ import {
   selectActions,
   type WorkflowFlags,
 } from "src/commands/workflow-flags.js";
+import { prepareBatch, stoppedBatch } from "src/commands/workflow-batch.js";
 import { reasonHint } from "src/commands/workflow-error-hints.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
 import { requireInitializedProject } from "src/utils/project-discovery.js";
@@ -73,8 +74,16 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       "Edit (or, with --cancel, cancel) this unfinished task instead of the active one (the active pointer stays unless it names that task)",
     )
     .option("--slug <slug>", "English kebab-case slug of the task ID for --init (required for a non-ASCII title)")
-    .option("--prd-file <path>", "Existing Markdown file to use as prd.md of a Full task for --init")
-    .option("--plan-file <path>", "Existing Markdown file to use as plan.md of a Full task for --init")
+    .option(
+      "--scaffold-docs",
+      "Write prd.md and plan.md of a Full task in planning from its criteria and checks (or from --prd-file and --plan-file)",
+    )
+    .option("--force", "Replace a prd.md or plan.md that has content of its own for --scaffold-docs")
+    .option("--prd-file <path>", "Existing Markdown file to use as prd.md of a Full task for --init or --scaffold-docs")
+    .option(
+      "--plan-file <path>",
+      "Existing Markdown file to use as plan.md of a Full task for --init or --scaffold-docs",
+    )
     .option("--mode <mode>", "Task mode for --init: lite or full")
     .option("--goal <goal>", "Task goal for --init")
     .option("--save", "Persist workflow state from stdin")
@@ -188,12 +197,19 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       const commandOptions = { ...options };
       let result: unknown;
       try {
+        await prepareBatch(root, actions);
         for (const action of actions) {
           // One options object per command: the input it read once is reused by a retry instead of an empty stdin.
           const run = () => (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options: commandOptions });
           result = await withTargetTask(flags.task, () =>
             PROCESS_ACTIONS.has(action) ? run() : retryOnTaskConflict(run),
           );
+          // A failing check ends a finish batch here: the later steps would only be refused.
+          const stopped = stoppedBatch(action, actions, result);
+          if (stopped !== undefined) {
+            result = stopped;
+            break;
+          }
         }
       } catch (error: unknown) {
         throw enhanceErrorMessage(error, actions);

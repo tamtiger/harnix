@@ -40,6 +40,7 @@ import {
   splitGlobList,
   splitList,
 } from "src/commands/workflow-handler-utils.js";
+import { presentRun } from "src/commands/workflow-batch.js";
 import { assertOptionalReason } from "src/core/workflow/reason-rules.js";
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
@@ -259,12 +260,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       summary: flags.summary,
       cwd: flags.cwd,
     });
-    return {
-      ...briefTask(run.task, run.evidenceId),
-      result: run.result,
-      exitCode: run.exitCode,
-      ...(run.result === "fail" ? { outputTail: run.outputTail } : {}),
-    };
+    return presentRun(run);
   },
   runChecks: ({ root, options }) => {
     return runChecksWorkflow(root, { runner: options.checkRunner });

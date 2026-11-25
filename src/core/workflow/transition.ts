@@ -6,6 +6,7 @@ import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-h
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { inspectReadyConditions, projectRootOf } from "./ready.js";
 import { suiteGateProblem } from "./suite-gate.js";
+import { transitionAdvisories } from "./transition-advisories.js";
 import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
@@ -78,7 +79,7 @@ export async function transitionWorkflow(
   if (!Object.hasOwn(transitions, status)) throw invalidStatusError(status);
 
   if (dryRun === true) {
-    return handleDryRunTransition(harnixRoot, task, status, checkpoint, options.checklist === true);
+    return handleDryRunTransition(harnixRoot, task, status, checkpoint, options.checklist === true, now);
   }
 
   const entersReady = status === "ready" && checkpoint === "ready";
@@ -99,6 +100,10 @@ export async function transitionWorkflow(
     }
   }
 
+  for (const notice of await transitionAdvisories(projectRootOf(harnixRoot), task, status, checkpoint, now)) {
+    process.stderr.write(`notice: ${notice}\n`);
+  }
+
   const base: TaskRecord = { ...task };
   if (base.status === "blocked") delete base.blocker;
   return saveWorkflow(root, {
@@ -112,6 +117,7 @@ async function handleDryRunTransition(
   status: string,
   checkpoint: string,
   checklist: boolean,
+  now: string,
 ): Promise<DryRunTransitionResult> {
   const issues: string[] = [];
   let advisories: string[] = [];
@@ -136,6 +142,8 @@ async function handleDryRunTransition(
       unbaselinedChecks = readyInspection.unbaselined;
     }
   }
+
+  advisories.push(...(await transitionAdvisories(projectRootOf(harnixRoot), task, status, checkpoint, now)));
 
   if (status !== "ready") {
     const finishing = checkpoint === "finishing" || status === "completed";

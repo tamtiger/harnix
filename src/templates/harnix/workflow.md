@@ -55,9 +55,10 @@ harnix status --summary | --criteria | --checks | --explain [--task <id>]   # no
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
 harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"] [--command "<cmd>"] [--input "src/**"] [--epic <id>] [--follow-up <id>] [--cwd <dir>] [--no-activate] [--with-lint] --brief
 harnix workflow --init-epic --title "<t>" --slug <s> --member "<title>|<slug>"... [--dry-run] --brief   # epic + every member, no JSON
+harnix workflow --scaffold-docs [--prd-file <p>] [--plan-file <p>] [--force] --brief   # Full task in planning: write prd.md/plan.md from the criteria and checks
 harnix workflow --transition ready/ready [--reviewed] [--dry-run] --brief
-harnix workflow --run-checks --brief         # verify: every required check not passing, stops at the first failure
-harnix workflow --run-check <check-id> --brief -- pnpm test   # snapshot, run, record; argv must equal the declared command
+harnix workflow --run-checks --brief         # verify: every required check not passing, stops at the first failure; add --criterion <ids> --met --transition verifying/finishing --finish to end the task in one command
+harnix workflow --run-check <check-id> --brief   # runs the declared command (or repeat it after --); a failure keeps its output at logPath
 harnix workflow --criterion <ids> --met [--transition verifying/finishing] [--finish] --brief
 harnix workflow --reset-breaker <check-id> --reason "<why>" --brief   # user-authorized circuit-breaker reset
 harnix workflow --replace-check <old> <new> --reason "<why>" [--command --input --criteria --cwd] --brief

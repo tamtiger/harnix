@@ -47,13 +47,14 @@ const EDIT_ACTIONS = [
   "removeRisk",
   "setTitle",
   "setGoal",
+  "scaffoldDocs",
   "batch",
 ];
 const taskOwner: FlagOwner = {
   name: "--task",
   isSet: (f) => f.task !== undefined,
   actions: [...EDIT_ACTIONS, "transition", "cancel"],
-  hint: "workflow --inspect, --transition with --dry-run, --set-check, --remove-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --batch or --cancel (the other state changes, evidence and finish act only on the active task)",
+  hint: "workflow --inspect, --transition with --dry-run, --set-check, --remove-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --scaffold-docs, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --batch or --cancel (the other state changes, evidence and finish act only on the active task)",
 };
 
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
@@ -149,8 +150,9 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   initOwner("--title", (f) => f.title, ["init", "initEpic"]),
   initOwner("--slug", (f) => f.slug, ["init", "initEpic"]),
   { name: "--member", isSet: (f) => listed(f.member), actions: ["initEpic"] },
-  initOwner("--prd-file", (f) => f.prdFile),
-  initOwner("--plan-file", (f) => f.planFile),
+  initOwner("--prd-file", (f) => f.prdFile, ["init", "scaffoldDocs"]),
+  initOwner("--plan-file", (f) => f.planFile, ["init", "scaffoldDocs"]),
+  initOwner("--force", (f) => (f.force === true ? "set" : undefined), ["scaffoldDocs"]),
   initOwner("--mode", (f) => f.mode),
   initOwner("--goal", (f) => f.goal, ["init", "initEpic"]),
   {

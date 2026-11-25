@@ -17,8 +17,14 @@ const context = (root: string, flags: WorkflowContext["flags"]): WorkflowContext
 });
 
 describe("workflow lifecycle handlers", () => {
-  it("exposes init, setBaseline and epicOrder", () => {
-    expect(Object.keys(LIFECYCLE_HANDLERS).sort()).toEqual(["epicOrder", "init", "initEpic", "setBaseline"]);
+  it("exposes init, scaffoldDocs, setBaseline and epicOrder", () => {
+    expect(Object.keys(LIFECYCLE_HANDLERS).sort()).toEqual([
+      "epicOrder",
+      "init",
+      "initEpic",
+      "scaffoldDocs",
+      "setBaseline",
+    ]);
   });
 
   it("init creates a task from flags and --brief reports only its state", async () => {

@@ -26,9 +26,17 @@ async function planned(mode: "lite" | "full") {
 }
 
 describe("ready review checklist", () => {
-  it("lists the twelve ready-review items", () => {
-    expect(READY_REVIEW_CHECKLIST).toHaveLength(12);
+  it("lists the thirteen ready-review items", () => {
+    expect(READY_REVIEW_CHECKLIST).toHaveLength(13);
     expect(READY_REVIEW_CHECKLIST.every((item) => item.length > 0 && item.length < 200)).toBe(true);
+  });
+
+  it("asks one premortem question: what most likely makes the plan fail and which check would catch it", () => {
+    const premortem = READY_REVIEW_CHECKLIST.filter((item) => item.startsWith("Premortem:"));
+
+    expect(premortem).toHaveLength(1);
+    expect(premortem[0]).toMatch(/fail/u);
+    expect(premortem[0]).toMatch(/check/u);
   });
 
   it("builds a message that names --reviewed, the checklist, the issues and the advisories", () => {

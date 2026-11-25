@@ -92,7 +92,16 @@ describe("workflow --run-checks", () => {
 
     expect(calls).toEqual(["pnpm exec vitest run one.test.ts"]);
     expect(result).toEqual({
-      ran: [{ id: "focus", result: "fail", exitCode: 1, outputTail: "boom", durationMs: expect.any(Number) }],
+      ran: [
+        {
+          id: "focus",
+          result: "fail",
+          exitCode: 1,
+          outputTail: "boom",
+          durationMs: expect.any(Number),
+          logPath: ".harnix/tmp/check-logs/focus.log",
+        },
+      ],
       remaining: ["suite"],
     });
   });

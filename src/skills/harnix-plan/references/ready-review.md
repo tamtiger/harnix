@@ -10,6 +10,7 @@ Run every item before `ready`; if one fails keep the current planning status, us
 - **Placeholders:** no `TBD`, `TODO`, "handle appropriately", "similar to above", unnamed type or deferred choice that could change the implementation.
 - **Consistency:** PRD, plan, research, task record and repository instructions do not contradict each other.
 - **Context freshness:** if continuation reported `contextDrift: stale`, complete context reselection first.
+- **Premortem:** name what would most likely make this plan fail and the check or criterion that would catch it; add one when none would.
 - **Scope:** small enough to implement and verify without mixing independent products.
 - **Worktree:** unrelated and user-owned changes are identified and their preservation is explicit.
 - **Tracking:** the task name is a readable hyphenated slug; the Full checklist maps one-to-one to the ordered slices and starts unchecked.

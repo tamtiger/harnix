@@ -76,8 +76,10 @@ const nextActionMessages: Record<StatusNextActionCode, string> = {
   "complete-planning": "Complete planning and pass the ready gate.",
   "begin-implementation": "Begin the approved implementation.",
   "continue-implementation": "Continue the active implementation.",
-  "run-verification": "Run or repair the required verification checks.",
-  "finish-task": "Finish and archive the verified task.",
+  "run-verification":
+    "Run or repair the required verification checks. One command runs them and finishes if all pass: harnix workflow --run-checks --criterion <ids> --met --transition verifying/finishing --finish --brief (it stops at the first failing check).",
+  "finish-task":
+    "Finish and archive the verified task: harnix workflow --criterion <ids> --met --transition verifying/finishing --finish --brief.",
   "finalize-task": "Retry terminal task finalization.",
   "no-active-task": "No active task; classify the next request.",
 };

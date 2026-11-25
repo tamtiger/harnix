@@ -72,6 +72,19 @@ describe("status projection", () => {
     },
   );
 
+  it("names the one-command finish batch in the verification and finish messages", () => {
+    const verifying = createActiveStatus(fixture("verifying"), currentContext(), ["pending"]);
+    const finishing = createActiveStatus(fixture("verifying"), currentContext(), ["passed"]);
+
+    expect(verifying.nextAction.message).toContain(
+      "harnix workflow --run-checks --criterion <ids> --met --transition verifying/finishing --finish --brief",
+    );
+    expect(finishing.nextAction.message).toContain("--transition verifying/finishing --finish --brief");
+    expect(createActiveStatus(fixture("planning"), currentContext(), ["pending"]).nextAction.message).not.toContain(
+      "--run-checks",
+    );
+  });
+
   it("creates a concise micro-summary under 100 tokens", () => {
     expect(summarizeStatus(createNoActiveStatus())).toEqual({
       generator: "harnix",

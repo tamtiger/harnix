@@ -81,6 +81,8 @@ describe("initializeProject", () => {
       technologies: [],
       detection: { matches: [] },
       created: [
+        ".harnix/.gitattributes",
+        ".harnix/.gitignore",
         ".harnix/.template-hashes.json",
         ".harnix/cache/repo-map-v1.json",
         ".harnix/config.yaml",

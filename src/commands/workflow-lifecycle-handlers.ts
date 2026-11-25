@@ -1,6 +1,7 @@
 import {
   initEpicWorkflow,
   initTaskWorkflow,
+  scaffoldDocsWorkflow,
   setBaselineWorkflow,
   setEpicOrderWorkflow,
 } from "src/commands/internal-workflow.js";
@@ -92,6 +93,14 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       await resolveTaskDirectory(await resolveSafeHarnixPath(context.root), task.id),
     );
     return { ...(presentTask(context, task) as object), taskDir: taskDir.split(sep).join("/") };
+  },
+  scaffoldDocs: async (context) => {
+    const result = await scaffoldDocsWorkflow(context.root, {
+      prd: await optionalFile(context, context.flags.prdFile),
+      plan: await optionalFile(context, context.flags.planFile),
+      force: context.flags.force,
+    });
+    return { ...(presentTask(context, result.task) as object), written: result.written };
   },
   initEpic: async (context) => {
     const { flags } = context;

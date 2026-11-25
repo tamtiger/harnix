@@ -205,13 +205,13 @@ describe("workflow --run-check", () => {
     expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
   });
 
-  it("rejects an undeclared check, an empty command and a run without an active task", async () => {
+  it("rejects an undeclared check, with or without a command after it, and runs nothing", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);
     const { runner, calls } = fakeRunner(0);
 
     await expect(runCheckWorkflow(root, "nope", ["pnpm"], { runner, now: NOW })).rejects.toThrow(/nope/u);
-    await expect(runCheckWorkflow(root, "check", [], { runner, now: NOW })).rejects.toThrow(/executable/u);
+    await expect(runCheckWorkflow(root, "nope", [], { runner, now: NOW })).rejects.toThrow(/nope/u);
     expect(calls).toEqual([]);
   });
 

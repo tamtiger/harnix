@@ -115,7 +115,7 @@ export async function renderInternalContextForHook(options: RenderInternalContex
     const payload = await renderInternalContext(project.root, options.platform, { forceBounded: true });
     if (event.sessionId !== undefined && payload.length > 0) {
       const tmpDirectory = await resolveSafeProjectPath(await resolveSafeHarnixPath(project.root), "tmp");
-      if (await shouldElideContext(tmpDirectory, event.sessionId, sha256(payload)))
+      if (await shouldElideContext(tmpDirectory, event.sessionId, elisionFingerprint(payload)))
         return emptyPayload(options.platform);
     }
     return payload;
@@ -158,6 +158,14 @@ function formatPlatformPayload(platform: InternalContextPlatform, text: string):
     return JSON.stringify({ injectSteps: [{ ephemeralMessage: text }] });
   }
   return text;
+}
+
+/** The `Status: status/checkpoint` line of the task header: a transition alone must not send the block again. */
+const STATUS_LINE = /Status: [a-z_-]+\/[a-z_-]+/u;
+
+/** What decides whether a session already received this block: the payload without the moving status line. */
+function elisionFingerprint(payload: string): string {
+  return sha256(payload.replace(STATUS_LINE, "Status: *"));
 }
 
 function emptyPayload(platform: InternalContextPlatform): string {

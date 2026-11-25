@@ -4,8 +4,8 @@
   "id": "20261124-232023-git-hygiene",
   "title": "Giảm nhiễu git: .harnix/.gitignore và .gitattributes do init và update ghi",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Bớt nhiễu git cho repo dùng Harnix: file ignore và line ending của riêng .harnix do init và update ghi, mà không đụng file gốc của người dùng.",
   "nonGoals": [],
   "epicId": "20261124-232018-harnix-friction-fixes",
@@ -13,26 +13,42 @@
     {
       "id": "ac-1",
       "text": "`harnix init` và `harnix update` ghi `.harnix/.gitignore` (`cache/`, `tmp/`, `tasks/.active`) và `.harnix/.gitattributes` (`* text eol=lf`) có đánh dấu managed, idempotent, không ghi đè bản người dùng đã sửa (theo manifest hash), không đụng `.gitignore` hay `.gitattributes` gốc; nằm trong manifest và `uninstall --purge` gỡ chúng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-git-hygiene-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Finding doctor `cache-tracked` và `active-pointer-tracked` in đúng lệnh `git rm --cached ...` cần chạy; harnix không tự chạy git; mức severity không đổi.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-git-hygiene-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Journal vẫn được theo dõi mặc định (decision ghi lại lý do: ignore sẽ mất lịch sử khi đổi máy); tài liệu nói rõ cách ignore nếu người dùng muốn. Việc gỡ `.harnix/cache/repo-map-v1.json` khỏi index của chính repo harnix là thao tác git riêng, chỉ làm khi người dùng cho phép, không nằm trong code.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-git-hygiene-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Docs (PRD, README), CHANGELOG, test init/update/doctor và phiên bản `2.40.0-dev.5` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-git-hygiene.mjs` (repo git tạm: sau `repo-map` thì `git status` không hiện cache; `update` lần hai không đổi file; file người dùng đã sửa được giữ).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-git-hygiene-2",
+        "ev-chk-focused-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -81,18 +97,111 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-exercise-git-hygiene",
+      "description": "Exercise git-hygiene: init/update/doctor/uninstall bằng CLI build thật trong repo git tạm",
+      "command": "node scripts/exercise-git-hygiene.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T19:51:53.668+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9471849116290c9e2e17fb8674a2f0ed336397a3626e8b13ec81cb226bcc04e4",
+      "durationMs": 9413
+    },
+    {
+      "id": "ev-chk-exercise-git-hygiene-1",
+      "checkId": "chk-exercise-git-hygiene",
+      "recordedAt": "2026-11-25T19:51:57.570+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-git-hygiene.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e8c624487942f95a887ceafb12ee602978284fa09782d78b154564deca9d4980",
+      "durationMs": 2938
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T19:53:43.228+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "55f253b48fc7da6fa8df242eaefd0b6f0ff6bf34df129990dafe02c704cf8d9f",
+      "durationMs": 104528
+    },
+    {
+      "id": "ev-chk-exercise-git-hygiene-2",
+      "checkId": "chk-exercise-git-hygiene",
+      "recordedAt": "2026-11-25T19:53:52.782+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full; scripts/exercise-git-hygiene.mjs chạy dist/cli.js thật trong repo git tạm: 7 kiểm tra, 0 lỗi (init ghi hai file trong .harnix và không đụng file gốc, repo-map rồi git status sạch, con trỏ .active bị ignore và eol=lf, update lần hai không đổi file, file người dùng sửa được giữ, doctor in đúng lệnh git rm và không đổi index, uninstall --purge gỡ file)",
+      "artifactPaths": [],
+      "inputDigest": "e8c624487942f95a887ceafb12ee602978284fa09782d78b154564deca9d4980"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "scripts/exercise-git-hygiene.mjs",
+    "src/commands/init.ts",
+    "src/commands/update.ts",
+    "src/core/doctor/project-runtime.ts",
+    "src/templates/harnix/git-files.ts",
+    "test/**"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-11-24T23:20:23.533+07:00",
-  "updatedAt": "2026-11-24T23:21:28.665+07:00",
+  "updatedAt": "2026-11-25T19:54:03.893+07:00",
   "decisions": [
     {
       "id": "dec-journal-tracked",
       "text": "Journal vẫn theo dõi mặc định: ignore sẽ mất lịch sử khi đổi máy; chỉ ignore cache, tmp, tasks/.active. Ghi file vào .harnix/ thay vì .gitignore gốc để không đụng file của người dùng.",
       "rationale": "Cần người dùng xác nhận khi duyệt epic."
+    },
+    {
+      "id": "trace-advisory-false-positive",
+      "text": "Advisory sửa code trước in_progress liệt kê 34 file nhưng tất cả là thay đổi chưa commit của member 1-4 có từ trước task này; bỏ qua có chủ đích.",
+      "rationale": "Advisory so với HEAD nên dương tính giả khi cây bẩn từ trước (dec-advisory-vs-head)."
+    },
+    {
+      "id": "dec-git-files-managed",
+      "text": "Hai file .harnix/.gitignore và .harnix/.gitattributes là file managed phạm vi project trong desiredFiles của update.ts (sourceId git-ignore, git-attributes), dùng cơ chế manifest hash sẵn có nên idempotent, giữ bản người dùng sửa và uninstall --purge gỡ cùng .harnix; doctor chỉ in lệnh git rm, harnix không chạy git ghi.",
+      "rationale": "Không cần cơ chế mới và không đụng .gitignore hay .gitattributes gốc của repo; journal vẫn theo dõi theo dec-journal-tracked."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-git-existing-repos",
+      "text": "Repo đã theo dõi cache hoặc con trỏ từ trước vẫn bị nhiễu cho tới khi người dùng chạy git rm --cached; .harnix/.gitattributes ép LF cho toàn bộ .harnix nên file người dùng tự thêm cần CRLF phải sửa file này; chưa thử Linux hay macOS.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-25T19:54:03.893+07:00"
 }

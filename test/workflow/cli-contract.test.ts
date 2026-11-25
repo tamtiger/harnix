@@ -106,6 +106,8 @@ describe("CLI command contract", () => {
       "--title",
       "--task",
       "--slug",
+      "--scaffold-docs",
+      "--force",
       "--prd-file",
       "--plan-file",
       "--mode",

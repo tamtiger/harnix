@@ -11,6 +11,11 @@ function fold(text: string): string {
   return text.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/gu, "d").replace(/Đ/gu, "D").toLowerCase();
 }
 
+/** True when the criterion text describes behavior a user or caller can observe (route, screen, command). */
+export function isObservableCriterion(text: string): boolean {
+  return OBSERVABLE.test(fold(text));
+}
+
 /** A required check whose id has an `exercise` segment (`chk-exercise-api`) or whose description starts with the word. */
 function isExerciseCheck(check: TaskRecord["validationPlan"][number]): boolean {
   if (!check.required) return false;
@@ -30,7 +35,7 @@ export function exerciseAdvisories(task: TaskRecord): string[] {
   const advisories: string[] = [];
   const uncovered = task.acceptanceCriteria
     .filter((criterion) => criterion.status !== "waived")
-    .filter((criterion) => OBSERVABLE.test(fold(criterion.text)) && !covered.has(criterion.id))
+    .filter((criterion) => isObservableCriterion(criterion.text) && !covered.has(criterion.id))
     .map((criterion) => criterion.id);
   if (uncovered.length > 0) {
     advisories.push(

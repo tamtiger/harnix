@@ -24,6 +24,7 @@ export const WORKFLOW_ACTIONS: readonly WorkflowActionSpec[] = [
   action("preflight", "switch", true),
   action("init", "switch", true),
   action("initEpic", "switch", true),
+  action("scaffoldDocs", "switch", true),
   action("batch", "switch", true),
   action("save", "switch", true),
   action("transition", "value", true),

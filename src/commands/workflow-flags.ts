@@ -7,6 +7,8 @@ export interface WorkflowFlags {
   preflight?: boolean;
   init?: boolean;
   initEpic?: boolean;
+  scaffoldDocs?: boolean;
+  force?: boolean;
   member?: string[];
   batch?: boolean;
   save?: boolean;
@@ -87,7 +89,21 @@ export interface WorkflowFlags {
 const SWITCH_ACTIONS = WORKFLOW_ACTIONS.filter((spec) => spec.kind === "switch").map((spec) => spec.name);
 const VALUE_ACTIONS = WORKFLOW_ACTIONS.filter((spec) => spec.kind === "value").map((spec) => spec.name);
 
-const BATCHABLE_ACTIONS = new Set(["criterion", "transition", "finish"]);
+/** The steps a finish batch may hold, in the order they run. */
+const BATCH_ORDER = ["runChecks", "criterion", "transition", "finish"] as const;
+const BATCHABLE_ACTIONS = new Set<string>(BATCH_ORDER);
+
+/** `--run-checks` starts a finish batch: it never stands in for the ready gate, the start of work or the finish checkpoint. */
+function assertChecksBatch(flags: WorkflowFlags, selected: readonly string[]): void {
+  if (selected.includes("transition") && flags.transition !== "verifying/finishing")
+    throw new Error(
+      "workflow --run-checks combines only with --transition verifying/finishing: the batch moves an implementing task to verifying itself, and ready or the start of implementation are never part of it.",
+    );
+  if (selected.includes("finish") && !selected.includes("transition"))
+    throw new Error(
+      "workflow --run-checks with --finish also needs --transition verifying/finishing (finish works only at the finishing checkpoint).",
+    );
+}
 
 export function selectActions(flags: WorkflowFlags): string[] {
   const values = flags as Record<string, unknown>;
@@ -118,6 +134,8 @@ export function selectActions(flags: WorkflowFlags): string[] {
     throw new Error("workflow --criterion requires --met.");
   }
 
+  if (selected.includes("runChecks")) assertChecksBatch(flags, selected);
+
   if (selected.includes("transition") && selected.includes("finish")) {
     if (flags.transition !== "verifying/finishing") {
       throw new Error(
@@ -130,7 +148,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
     throw new Error("workflow action batching does not support --dry-run.");
   }
 
-  return ["criterion", "transition", "finish"].filter((action) => selected.includes(action));
+  return BATCH_ORDER.filter((action) => selected.includes(action));
 }
 
 export function selectAction(flags: WorkflowFlags): string {
@@ -183,8 +201,6 @@ function operandMessage(action: string, operands: string[]): string {
 
 export function assertCommandShape(action: string, flags: WorkflowFlags, operands: string[]): void {
   assertIdFlagValues(flags);
-  if (action === "runCheck" && operands.length === 0)
-    throw new Error("workflow --run-check requires an executable after --.");
   if (action !== "runCheck" && operands.length > 0) throw new Error(operandMessage(action, operands));
   if (flags.brief === true && flags.full === true)
     throw new Error("--brief and --full are mutually exclusive.\nGợi ý: Chọn một trong --brief hoặc --full.");

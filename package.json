@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "2.39.0",
+  "version": "2.40.0",
   "description": "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor integrations.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -34,7 +34,7 @@
     "test:migration": "vitest run test/migration",
     "test:platform": "vitest run test/platform",
     "test:workflow": "vitest run test/workflow",
-    "test:gates": "vitest run test/unit/test-structure.test.ts test/workflow/cli-contract.test.ts test/workflow/architecture.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/skill-routing.test.ts test/workflow/skill-reference-audit.test.ts test/workflow/reasoning-references.test.ts test/workflow/review-verify-wording.test.ts test/workflow/skill-scan-exercise.test.ts test/workflow/instruction-budget.test.ts test/workflow/test-gates-script.test.ts test/workflow/behavior-snapshot.test.ts",
+    "test:gates": "vitest run test/unit/test-structure.test.ts test/workflow/cli-contract.test.ts test/workflow/architecture.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/skill-routing.test.ts test/workflow/skill-reference-audit.test.ts test/workflow/reasoning-references.test.ts test/workflow/review-verify-wording.test.ts test/workflow/skill-scan-exercise.test.ts test/workflow/run-check-exercise.test.ts test/workflow/instruction-budget.test.ts test/workflow/advisories-exercise.test.ts test/workflow/test-gates-script.test.ts test/workflow/preflight-technique-hint.test.ts test/workflow/technique-hint-exercise.test.ts test/workflow/context-cost.test.ts test/workflow/context-cost-exercise.test.ts test/workflow/git-hygiene.test.ts test/workflow/git-hygiene-exercise.test.ts test/workflow/scaffold-docs-exercise.test.ts test/workflow/output-redaction-performance.test.ts test/workflow/behavior-snapshot.test.ts",
     "test:failures": "node scripts/test-failures.mjs",
     "test:safety": "vitest run test/safety",
     "test:acceptance": "pnpm run test",

@@ -1,6 +1,7 @@
 import { effectiveLearningStatus, type LearningStatus } from "src/core/journal/learning.js";
 import { relevanceScore } from "src/core/journal/learning-relevance.js";
 import { isTaskSpecific } from "src/core/journal/learning-quality.js";
+import { jaccard, observationTokens } from "src/core/journal/learning-similarity.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -21,7 +22,12 @@ export interface SummarizeOptions {
   activePaths?: readonly string[] | undefined;
   /** Relevant paths of the given source tasks; a failure falls back to the plain order. */
   sourcePaths?: ((taskIds: readonly string[]) => Promise<string[]>) | undefined;
+  /** How many notes to return, 0 to `MAX_SUMMARY_ITEMS` (default `MAX_SUMMARY_ITEMS`); 0 returns none. */
+  maxItems?: number | undefined;
 }
+
+/** A note sharing at least this much of its words with a note already chosen adds nothing to the hook context. */
+export const NEAR_DUPLICATE_THRESHOLD = 0.6;
 
 type Collected = LearningSummaryItem & {
   recordedAt: string;
@@ -59,17 +65,33 @@ export async function summarizeLearning(
     });
   }
   await scoreRelevance(items, options);
-  return items
-    .sort(
-      (left, right) =>
-        right.relevance - left.relevance ||
-        Number(left.specific) - Number(right.specific) ||
-        rank(left.status) - rank(right.status) ||
-        compareCodeUnits(right.recordedAt, left.recordedAt) ||
-        compareCodeUnits(left.id, right.id),
-    )
-    .slice(0, MAX_SUMMARY_ITEMS)
-    .map(({ id, status, sources, statement }) => ({ id, status, sources, statement }));
+  const limit = Math.max(0, Math.min(options.maxItems ?? MAX_SUMMARY_ITEMS, MAX_SUMMARY_ITEMS));
+  const ordered = items.sort(
+    (left, right) =>
+      right.relevance - left.relevance ||
+      Number(left.specific) - Number(right.specific) ||
+      rank(left.status) - rank(right.status) ||
+      compareCodeUnits(right.recordedAt, left.recordedAt) ||
+      compareCodeUnits(left.id, right.id),
+  );
+  return withoutNearDuplicates(ordered, limit).map(({ id, status, sources, statement }) => ({
+    id,
+    status,
+    sources,
+    statement,
+  }));
+}
+
+/** Walks the ranked notes and keeps one only when it is not a near copy of a note already kept, up to `limit`. */
+function withoutNearDuplicates(ranked: readonly Collected[], limit: number): Collected[] {
+  const kept: { item: Collected; tokens: Set<string> }[] = [];
+  for (const item of ranked) {
+    if (kept.length >= limit) break;
+    const tokens = observationTokens(item.statement);
+    if (kept.some((other) => jaccard(tokens, other.tokens) >= NEAR_DUPLICATE_THRESHOLD)) continue;
+    kept.push({ item, tokens });
+  }
+  return kept.map(({ item }) => item);
 }
 
 async function scoreRelevance(items: Collected[], options: SummarizeOptions): Promise<void> {

@@ -6,8 +6,10 @@ import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { saveInputDigestSnapshot } from "src/core/verification/snapshot-cache.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { removeCheckLog, writeCheckLog } from "./check-log.js";
 import { launcherFailure, noTestsRan, summarizeCheckOutput } from "./check-output.js";
 import { describeCommand, sameCommand, splitCommand } from "./command-match.js";
+import { redactCheckOutput } from "./output-redaction.js";
 import { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 import { assertRetryAllowed } from "./retry-guard.js";
 import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
@@ -31,6 +33,8 @@ export interface RunCheckResult {
   outputTail: string;
   /** Milliseconds the check's process ran. */
   durationMs: number;
+  /** Repository-relative path of the full cleaned output; only for a failing run (see `writeCheckLog`). */
+  logPath?: string | undefined;
 }
 
 function safeCwd(value: string, label: string): string {
@@ -70,15 +74,45 @@ function assertDeclaredCommand(declared: ValidationCheckV3, argv: readonly strin
   }
   if (!sameCommand(declared.command, argv))
     throw new Error(
-      `Workflow run-check command differs from the command declared by check ${declared.id}. The declared command is: ${describeCommand(splitCommand(declared.command))}. Rerun exactly: harnix workflow --run-check ${declared.id} -- ${describeCommand(splitCommand(declared.command))}`,
+      `Workflow run-check command differs from the command declared by check ${declared.id}. The declared command is: ${describeCommand(splitCommand(declared.command))}. Rerun exactly: harnix workflow --run-check ${declared.id} -- ${describeCommand(splitCommand(declared.command))} (or without repeating it: harnix workflow --run-check ${declared.id})`,
     );
+}
+
+/** The command of a run that names none: the declared one. A check without a declared command has nothing to run. */
+function declaredArgv(declared: ValidationCheckV3): readonly string[] {
+  if (declared.command === undefined)
+    throw new Error(
+      `Check ${declared.id} declares no command, so there is nothing to run without one after --; nothing was run. Declare it first: harnix workflow --set-check ${declared.id} --command "<cmd>" --reason "<why>" (see harnix status --checks), or pass the command after --.`,
+    );
+  return splitCommand(declared.command);
+}
+
+/** The full cleaned output of a failing run, kept for reading; a pass drops the log of an earlier failure. */
+async function keepLog(
+  harnixRoot: string,
+  checkId: string,
+  result: string,
+  output: string,
+): Promise<string | undefined> {
+  try {
+    if (result === "pass") {
+      await removeCheckLog(harnixRoot, checkId);
+      return undefined;
+    }
+    return await writeCheckLog(harnixRoot, checkId, output);
+  } catch {
+    // The log is a convenience: the evidence is already recorded and the short tail is still returned.
+    return undefined;
+  }
 }
 
 /**
  * Snapshot, run, snapshot, record: the evidence is written only when the
  * check ran against unchanged inputs. The output tail is returned to the
- * caller (a short failure summary, nothing for a pass) and never persisted because command output can carry
- * secrets. A launcher error means the check never ran, so it throws and records no evidence.
+ * caller (a short failure summary, nothing for a pass); the evidence never carries command output. A failing run
+ * also leaves the whole output, cleaned of colors, machine paths and secrets, in a git-ignored log (`logPath`).
+ * No command after the check id means the declared command. A launcher error means the check never ran, so it
+ * throws and records no evidence.
  */
 export async function runCheckWorkflow(
   root: string,
@@ -86,8 +120,6 @@ export async function runCheckWorkflow(
   argv: readonly string[],
   dependencies: RunCheckDependencies = {},
 ): Promise<RunCheckResult> {
-  const [executable, ...args] = argv;
-  if (executable === undefined) throw new Error("workflow --run-check requires an executable after --.");
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw noActiveTaskError("Workflow run-check");
@@ -104,10 +136,13 @@ export async function runCheckWorkflow(
     process.stderr.write(
       "notice: a check run while the task is still planning records evidence, and evidence freezes the planning obligations; finish editing criteria and checks first, or use --replace-check afterwards.\n",
     );
+  const command = argv.length > 0 ? argv : declaredArgv(declared);
+  const [executable, ...args] = command;
+  if (executable === undefined) throw new Error("workflow --run-check requires an executable after --.");
   const beforeSnapshot = await computeInputDigest(root, task, checkId);
   const before = beforeSnapshot.inputDigest;
   assertRetryAllowed(task, checkId, dependencies.now ? Date.parse(dependencies.now) : undefined, before);
-  assertDeclaredCommand(declared, argv);
+  assertDeclaredCommand(declared, command);
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
   await saveInputDigestSnapshot(harnixRoot, beforeSnapshot);
   const clock = dependencies.monotonicNow ?? (() => performance.now());
@@ -133,19 +168,21 @@ export async function runCheckWorkflow(
         check: checkId,
         result,
         exitCode: String(run.exitCode),
-        summary: dependencies.summary ?? `${describeCommand(argv)} — exit ${run.exitCode}`,
+        summary: dependencies.summary ?? `${describeCommand(command)} — exit ${run.exitCode}`,
         digest: before,
         durationMs,
       },
       dependencies.now,
     ),
   );
+  const logPath = await keepLog(harnixRoot, checkId, result, run.output);
   return {
     task: appended.task,
     evidenceId: appended.evidenceId,
     result,
     exitCode: run.exitCode,
-    outputTail: result === "fail" ? summarizeCheckOutput(run.output) : "",
+    outputTail: result === "fail" ? summarizeCheckOutput(redactCheckOutput(run.output)) : "",
     durationMs,
+    ...(logPath === undefined ? {} : { logPath }),
   };
 }

@@ -3,25 +3,39 @@
   "schemaVersion": 1,
   "entries": [
     {
+      "path": ".harnix/.gitattributes",
+      "sourceId": "git-attributes",
+      "scope": "project",
+      "generatedHash": "f194b05052a57ba303349048f052a4c2778c81b4a8dcd61f3ee8db7ae84b5027",
+      "generatorVersion": "2.40.0"
+    },
+    {
+      "path": ".harnix/.gitignore",
+      "sourceId": "git-ignore",
+      "scope": "project",
+      "generatedHash": "ad642e5e75113cfae291fad3b5b1e9eee0c5c5507de9b1d3a7c94af6e05f9d66",
+      "generatorVersion": "2.40.0"
+    },
+    {
       "path": ".harnix/spec/guides/common.md",
       "sourceId": "guide-common-engineering",
       "scope": "project",
       "generatedHash": "2ad67aa562e0998542da9dda3c3aa230c10940152622b1366858889dfc2eab83",
-      "generatorVersion": "2.39.0"
+      "generatorVersion": "2.40.0"
     },
     {
       "path": ".harnix/spec/guides/languages/typescript.md",
       "sourceId": "guide-language-typescript",
       "scope": "project",
       "generatedHash": "4337166b036e79887d3c34b9cca5f70c661d47bcb0ceab383638a883301f4348",
-      "generatorVersion": "2.39.0"
+      "generatorVersion": "2.40.0"
     },
     {
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
-      "generatedHash": "01c9c79f629a32912987705073456667fdcbcff20d082a2ed81aa17bf3b3addd",
-      "generatorVersion": "2.39.0"
+      "generatedHash": "7aceda9e42509c7b831641329ac56a46b1ce00c7fadbcb8405875f17f89aee09",
+      "generatorVersion": "2.40.0"
     }
   ]
 }

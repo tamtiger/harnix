@@ -7,6 +7,7 @@ export const READY_REVIEW_CHECKLIST: readonly string[] = [
   "Placeholders: no TBD, TODO, deferred choice or unnamed type that could change the implementation.",
   "Consistency: PRD, plan, task record and repository instructions do not contradict each other.",
   "Context freshness: stale context drift is reselected before ready.",
+  "Premortem: name what would most likely make this plan fail and the check or criterion that would catch it.",
   "Scope: small enough to implement and verify without mixing independent products.",
   "Worktree: unrelated and user-owned changes are identified and preserved.",
   "Tracking: the task name is a readable English slug and the checklist maps one to one to the ordered slices.",

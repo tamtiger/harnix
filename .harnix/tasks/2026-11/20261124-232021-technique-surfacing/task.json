@@ -4,8 +4,8 @@
   "id": "20261124-232021-technique-surfacing",
   "title": "Đưa gợi ý technique đến agent: techniqueHint và bỏ quy tắc Full luôn gợi ý",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Làm cho gợi ý technique skill thật sự đến được agent: một dòng chỉ cách nạp khi có gợi ý, và bớt gợi ý lặp vô ích.",
   "nonGoals": [],
   "epicId": "20261124-232018-harnix-friction-fixes",
@@ -13,26 +13,50 @@
     {
       "id": "ac-1",
       "text": "`workflow --preflight` thêm trường `techniqueHint` một dòng cố định chỉ khi có `suggestedTechniques` (nạp từng skill bằng `harnix skill <tên> --raw`); ngoại lệ so với quy tắc \"preflight không emit command\" được ghi tường minh trong `docs/HARNIX_WORKFLOW.md`; schema, golden và test preflight cập nhật.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-technique-hint-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "`suggestTechniques` không còn gợi ý `harnix-sequential-thinking` chỉ vì `mode === \"full\"`: chỉ khi khớp regex (refactor, kiến trúc, đánh đổi...) hoặc số tiêu chí hay số `relevantPaths` vượt ngưỡng chốt bằng decision; test preflight, technique-skills và `skill-routing-cases.json` đồng bộ.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`suggestTechniques` không còn gợi ý `harnix-sequential-thinking` chỉ vì `mode === \"full\"`: chỉ khi title hoặc goal khớp refactor, kiến trúc, complex, đánh đổi, hoặc có từ 6 tiêu chí, hoặc từ 8 relevantPaths (dec-sequential-threshold); test preflight và technique-skills đồng bộ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-technique-hint-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Phương pháp và số đo cơ sở của phân tích mức nạp skill (88 phiên: technique 0 lần nạp, 11 trong 49 reference từng nạp) được ghi vào `research.md` của epic để so sánh lại sau vài tuần bằng cách phân tích transcript ngoài harnix; harnix không thêm bộ đếm hay telemetry.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Tài liệu, CHANGELOG và phiên bản `2.40.0-dev.3` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-technique-hint.mjs` (preflight trong dự án tạm: task Full đơn giản không còn gợi ý sequential-thinking, task migration có `techniqueHint`).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-technique-hint-2",
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Test `test-gates-script.test.ts` bắt được lỗi dính tên file trong `test:gates` (token phải khớp `^test/...test.ts$`, không có `.ts` theo sau bởi ký tự khác khoảng trắng) và có test chứng minh chuỗi dính bị bắt; số file trong `test:gates` đếm lại sau mọi sửa `package.json`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focused-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -46,7 +70,8 @@
         "ac-1",
         "ac-2",
         "ac-3",
-        "ac-4"
+        "ac-4",
+        "ac-5"
       ],
       "inputs": [
         ".prettierrc.json",
@@ -70,6 +95,28 @@
         "ac-1",
         "ac-2",
         "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-exercise-technique-hint",
+      "description": "Exercise: preflight bằng CLI build thật trong dự án tạm (techniqueHint và gợi ý sequential-thinking)",
+      "command": "node scripts/exercise-technique-hint.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
         "ac-4"
       ],
       "inputs": [
@@ -83,16 +130,88 @@
       ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T19:06:12.947+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "545299998681c72df8e367d57e1e85c9616f4ff8efb4c87400850f70265864a5",
+      "durationMs": 9149
+    },
+    {
+      "id": "ev-chk-exercise-technique-hint-1",
+      "checkId": "chk-exercise-technique-hint",
+      "recordedAt": "2026-11-25T19:06:18.187+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-technique-hint.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fe876ff708045c12e4f7aed3fb597e1cc0e7a7fddc59ec03aaff4dbff8f2b1f3",
+      "durationMs": 4186
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T19:08:12.402+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13b52704c07974fa000cc3c1031b1f286121db006c86da69fb8715a07712a611",
+      "durationMs": 113030
+    },
+    {
+      "id": "ev-chk-exercise-technique-hint-2",
+      "checkId": "chk-exercise-technique-hint",
+      "recordedAt": "2026-11-25T19:08:22.340+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full; chạy scripts/exercise-technique-hint.mjs với dist/cli.js trong dự án tạm: 4 ca (task Full thường không bị gợi ý sequential-thinking, task refactor có, migration trỏ đúng skill, task đang làm không gợi ý và không có techniqueHint)",
+      "artifactPaths": [],
+      "inputDigest": "fe876ff708045c12e4f7aed3fb597e1cc0e7a7fddc59ec03aaff4dbff8f2b1f3"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "scripts/exercise-technique-hint.mjs",
+    "src/core/workflow/preflight.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/technique-hint.ts",
+    "test/unit/core/workflow/preflight.test.ts",
+    "test/unit/core/workflow/technique-hint.test.ts",
+    "test/workflow/behavior-snapshot.golden.json",
+    "test/workflow/preflight-exercise.test.ts",
+    "test/workflow/technique-hint-exercise.test.ts",
+    "test/workflow/test-gates-script.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-11-24T23:20:21.533+07:00",
-  "updatedAt": "2026-11-24T23:21:28.198+07:00",
+  "updatedAt": "2026-11-25T19:08:33.779+07:00",
   "decisions": [
     {
       "id": "dec-contract-exception",
       "text": "techniqueHint là mở rộng hợp đồng một dòng: contract hiện nói preflight ngoài learning và baselineHint không emit prose hay command. Cần sửa tường minh docs/HARNIX_WORKFLOW.md và PRD, không in lệnh theo từng tên.",
       "rationale": "Người dùng cần chấp nhận khi duyệt epic; nếu từ chối, member này chỉ làm phần bỏ quy tắc Full luôn gợi ý."
+    },
+    {
+      "id": "dec-sequential-threshold",
+      "text": "sequential-thinking chỉ được gợi ý khi title hoặc goal khớp refactor|kiến trúc|complex|đánh đổi, hoặc task có từ 6 tiêu chí trở lên, hoặc từ 8 relevantPaths; mode full một mình không còn đủ.",
+      "rationale": "Nghiên cứu 88 phiên: 15/16 lần preflight gợi ý là sequential-thinking vì mọi task Full, không ai nạp; gợi ý lặp mất tác dụng."
+    },
+    {
+      "id": "dec-gates-test-hardening",
+      "text": "Làm chặt test/workflow/test-gates-script.test.ts: mỗi token của test:gates phải khớp ^test/[^\\s]+\\.test\\.ts$ và chuỗi script không chứa .ts theo sau bởi ký tự không phải khoảng trắng hoặc hết chuỗi; thêm test chứng minh chuỗi dính bị bắt.",
+      "rationale": "Lỗi dính tên file trong test:gates (…test.tstest/…) tái diễn ở member 2 vì chính test hiện tại cũng nằm trong chuỗi dính nên không bắt được."
     }
-  ]
+  ],
+  "completedAt": "2026-11-25T19:08:33.779+07:00"
 }

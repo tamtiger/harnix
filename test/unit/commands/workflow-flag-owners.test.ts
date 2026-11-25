@@ -42,10 +42,21 @@ describe("flags that an action would silently ignore", () => {
     ["cancel", { cancel: true, authorizedBy: "user" }, /--authorized-by/u],
     ["evidence", { evidence: true, check: "a,b", result: "pass", summary: "s" }, /one check id/u],
     ["snapshot", { snapshot: true, check: "a,b" }, /one check id/u],
+    ["init", { init: true, title: "t", force: true }, /--force requires workflow --scaffold-docs/u],
+    ["schema", { schema: true, force: true }, /--force/u],
   ])("rejects workflow %s with %j", (action, flags, message) => {
     expect(() => {
       assertCommandShape(action, flags, []);
       assertFlagGroups(action, flags);
     }).toThrow(message);
+  });
+
+  it("lets --scaffold-docs take --force, --prd-file, --plan-file and --task", () => {
+    const flags = { scaffoldDocs: true, force: true, prdFile: "p.md", planFile: "q.md", task: "20261124-000000-x" };
+
+    expect(() => {
+      assertCommandShape("scaffoldDocs", flags, []);
+      assertFlagGroups("scaffoldDocs", flags);
+    }).not.toThrow();
   });
 });

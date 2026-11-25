@@ -50,6 +50,7 @@ describe("workflow handlers", () => {
         "runCheck",
         "runChecks",
         "save",
+        "scaffoldDocs",
         "schema",
         "setBaseline",
         "setCheck",

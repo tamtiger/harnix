@@ -31,7 +31,7 @@ export async function inspectTrackedRuntimeFiles(
         "active-pointer-tracked",
         "warning",
         ACTIVE_POINTER,
-        "The per-person active task pointer is tracked by git; add it to .gitignore and run `git rm --cached` on it.",
+        "The per-person active task pointer is tracked by git; run `git rm --cached .harnix/tasks/.active`. Keep `tasks/.active` in .harnix/.gitignore (a file harnix writes only while you have not edited it) so it stays out.",
         false,
       ),
     );
@@ -42,7 +42,7 @@ export async function inspectTrackedRuntimeFiles(
         "cache-tracked",
         "warning",
         CACHE_DIRECTORY,
-        "Regenerable files under .harnix/cache are tracked by git; add the directory to .gitignore and run `git rm -r --cached` on it.",
+        "Regenerable files under .harnix/cache are tracked by git; run `git rm -r --cached .harnix/cache`. Keep `/cache/` in .harnix/.gitignore so they stay out (harnix writes that file only while you have not edited it: add the line yourself when the file is yours).",
         false,
       ),
     );

@@ -10,6 +10,7 @@ import { detectVersionSkew, skewMessage, type VersionSkew } from "src/core/versi
 import { findEpicContext } from "./epic-context.js";
 import { checkFactsStale, FACTS_HINT } from "./facts-hint.js";
 import { baselineHint } from "./baseline-hint.js";
+import { needsSequentialThinking, TECHNIQUE_HINT } from "./technique-hint.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
@@ -27,6 +28,8 @@ export interface WorkflowPreflightResultV1 {
   nextStage: "await" | "debug" | "implement" | "plan" | "stop" | "verify";
   /** Contextually suggested technique skills based on symptoms and active task attributes. */
   suggestedTechniques?: string[];
+  /** One fixed line on how to load a suggested skill; present exactly when `suggestedTechniques` is. */
+  techniqueHint?: string;
   /** Present and true when project-facts.md was extracted at an older git commit than HEAD. */
   projectFactsStale?: boolean;
   /** Guidance command when projectFactsStale is true. */
@@ -177,7 +180,7 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
     requiredChecks,
     retryLimitReached,
     nextStage: stageOf(task),
-    ...(suggestedTechniques === undefined ? {} : { suggestedTechniques }),
+    ...(suggestedTechniques === undefined ? {} : { suggestedTechniques, techniqueHint: TECHNIQUE_HINT }),
   };
 }
 
@@ -199,7 +202,7 @@ function suggestTechniques(
   if (/flaky|intermittent|chập chờn|timing|race condition/u.test(text)) set.add("harnix-flaky-test");
   if (/migration|schema|v3|contract break|chuyển đổi/u.test(text)) set.add("harnix-migration-safety");
   if (/security|traversal|injection|secret|bảo mật|auth/u.test(text)) set.add("harnix-security-lens");
-  if (task.mode === "full" || /refactor|kiến trúc|complex|đánh đổi/u.test(text)) set.add("harnix-sequential-thinking");
+  if (needsSequentialThinking(task)) set.add("harnix-sequential-thinking");
   if (
     task.status === "planning" ||
     task.checkpoint === "planning" ||

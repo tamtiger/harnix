@@ -18,9 +18,12 @@ harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" 
 ```
 
 - `--run-checks` runs every required check that is not passing (focused first, suite last) with its declared command
-  and prints `{ ran, remaining }`; a failing check carries a short `outputTail`, a launcher error is "could not start"
-  and records nothing. A check that failed twice in a row runs again once its inputs change (a new input digest).
-- `--criterion <ids> --met --transition verifying/finishing --finish` marks criteria, advances and finishes in one call.
+  and prints `{ ran, remaining }`; a failing check carries a short `outputTail` and a `logPath` to its whole cleaned
+  output, a launcher error is "could not start" and records nothing. A check that failed twice in a row runs again once
+  its inputs change (a new input digest).
+- `--criterion <ids> --met --transition verifying/finishing --finish` marks criteria, advances and finishes in one call;
+  start it with `--run-checks` to run the pending checks first (an implementing task moves to verifying itself, the first
+  failing check stops the batch and the result lists `skipped`; it never replaces ready, the start of work or review).
 - `--batch` is atomic and order does not matter: references between items resolve after all are applied.
 - `harnix status --criteria` lists id, status, text and coveredBy of each criterion; `harnix status --checks` lists id, scope, required, criterionIds, command and freshness of each check (`harnix workflow --remove-check <id>` drops a check that never recorded evidence; `--evidence ... --criterion <ids> --met` records a pass and marks the criteria in one command), plus `baseline { accepted, reason? }` when a check declares one (`accepted` is what the finish gate decides, `reason` says what is still missing); the other public commands are in
   the `workflow-routing` reference.

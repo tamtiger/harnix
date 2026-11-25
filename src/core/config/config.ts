@@ -140,6 +140,7 @@ function normalizeV1(value: HarnixConfigV1): HarnixConfigV2 {
       maxCharacters: value.context.maxCharacters,
       tokenApproximation: value.context.tokenApproximation,
       ...(value.context.mode === undefined ? {} : { mode: value.context.mode }),
+      ...(value.context.learningMax === undefined ? {} : { learningMax: value.context.learningMax }),
       ...unknownEntries(value.context, contextKeys),
     },
     runtime: {
@@ -170,6 +171,7 @@ function orderedConfig(value: HarnixConfigV2): Record<string, unknown> {
       maxCharacters: value.context.maxCharacters,
       tokenApproximation: value.context.tokenApproximation,
       ...(value.context.mode === undefined ? {} : { mode: value.context.mode }),
+      ...(value.context.learningMax === undefined ? {} : { learningMax: value.context.learningMax }),
       ...unknownEntries(value.context, contextKeys),
     },
     runtime: {

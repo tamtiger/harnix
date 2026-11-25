@@ -15,6 +15,19 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories("harnix-learning-summary-");
 const now = Date.parse(at(60));
 
+/** Notes that share no words, so none of them is dropped as a near duplicate of another. */
+const DISTINCT_STATEMENTS = [
+  "Pool database connections per request scope",
+  "Back off retries exponentially with jitter",
+  "Invalidate caches when the schema version moves",
+  "Migrate legacy layouts only under the workflow lock",
+  "Scan staged files for credentials before committing",
+  "Recompute digests instead of trusting stored hashes",
+  "Reset the breaker only after the user authorizes it",
+  "Keep fixtures small and builders shared across suites",
+];
+const distinct = (index: number): string => DISTINCT_STATEMENTS[index]!;
+
 async function summarize(
   entries: ReturnType<typeof buildLearningEntry>[],
   at2 = now,
@@ -63,11 +76,14 @@ describe("learning summary", () => {
 
   it("returns at most five items, candidates before drafts, newest first inside a rank", async () => {
     const entries = [
-      buildLearningEntry({ id: "obs-draft-new", status: "draft" }, { recordedAt: at(50) }),
+      buildLearningEntry({ id: "obs-draft-new", status: "draft", statement: distinct(5) }, { recordedAt: at(50) }),
       ...Array.from({ length: 5 }, (_, index) =>
-        buildLearningEntry({ id: `obs-cand-${index}`, status: "candidate" }, { recordedAt: at(index) }),
+        buildLearningEntry(
+          { id: `obs-cand-${index}`, status: "candidate", statement: distinct(index) },
+          { recordedAt: at(index) },
+        ),
       ),
-      buildLearningEntry({ id: "obs-draft-old", status: "draft" }, { recordedAt: at(2) }),
+      buildLearningEntry({ id: "obs-draft-old", status: "draft", statement: distinct(6) }, { recordedAt: at(2) }),
     ];
 
     const items = await summarize(entries);
@@ -100,8 +116,8 @@ describe("learning summary", () => {
 
   it("counts source tasks and orders drafts after candidates when there is room", async () => {
     const items = await summarize([
-      buildLearningEntry({ id: "obs-draft", status: "draft", sourceTaskIds: ["a"] }),
-      buildLearningEntry({ id: "obs-cand", status: "candidate" }),
+      buildLearningEntry({ id: "obs-draft", status: "draft", sourceTaskIds: ["a"], statement: distinct(0) }),
+      buildLearningEntry({ id: "obs-cand", status: "candidate", statement: distinct(1) }),
     ]);
 
     expect(items.map((item) => [item.id, item.status, item.sources])).toEqual([
@@ -135,9 +151,18 @@ describe("learning summary relevance", () => {
     sourcePaths: (taskIds) => Promise.resolve(taskIds.flatMap((id) => sources[id] ?? [])),
   });
   const entries = [
-    buildLearningEntry({ id: "obs-docs", status: "candidate", sourceTaskIds: ["task-docs"] }, { recordedAt: at(5) }),
-    buildLearningEntry({ id: "obs-core", status: "draft", sourceTaskIds: ["task-core"] }, { recordedAt: at(1) }),
-    buildLearningEntry({ id: "obs-none", status: "draft", sourceTaskIds: ["task-x"] }, { recordedAt: at(9) }),
+    buildLearningEntry(
+      { id: "obs-docs", status: "candidate", sourceTaskIds: ["task-docs"], statement: distinct(2) },
+      { recordedAt: at(5) },
+    ),
+    buildLearningEntry(
+      { id: "obs-core", status: "draft", sourceTaskIds: ["task-core"], statement: distinct(3) },
+      { recordedAt: at(1) },
+    ),
+    buildLearningEntry(
+      { id: "obs-none", status: "draft", sourceTaskIds: ["task-x"], statement: distinct(4) },
+      { recordedAt: at(9) },
+    ),
   ];
 
   it("puts a lesson whose source paths overlap the task before a newer or stronger unrelated one", async () => {

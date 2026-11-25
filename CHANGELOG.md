@@ -4,6 +4,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.40.0] - 2026-11-25
+
+### Added
+
+- run-check bớt ma sát: --run-check <id> không cần nhắc lệnh khai báo, check fail để lại log đầy đủ ở .harnix/tmp/check-logs (logPath) đã bỏ mã màu, đường dẫn máy và che các giá trị giống credential (quy tắc heuristic gồm Authorization, KEY=value không nháy, token nhà cung cấp, JWT, mật khẩu trong URL, nên một log sạch không đảm bảo không có secret; mọi quy tắc chạy tuyến tính và mỗi dòng dài hơn 4096 ký tự chỉ giữ phần đầu và cuối; outputTail dùng cùng bước che), --run-checks mở đầu batch hoàn tất với criterion, transition và finish, status --explain nêu lệnh batch
+- advisory không chặn cho transition: file trong relevantPaths đã đổi trước in_progress, tiêu chí nháp đã cũ (3 ngày hoặc có commit chạm relevantPaths), evidence code-only hoặc partial thiếu residual risk (advisories của --dry-run và notice trên stderr, không đổi valid hay exit code), và dòng premortem trong READY_REVIEW_CHECKLIST; một dòng trong harnix-implement; script exercise chạy CLI thật trong repo git tạm
+- preflight: thêm techniqueHint một dòng khi có suggestedTechniques và bỏ gợi ý sequential-thinking chỉ vì task Full; làm chặt test chống dính tên file của test:gates
+- Hook context không chèn lại khi chỉ đổi trạng thái (Status ra khỏi phần băm), context.learningMax 0 đến 5 giới hạn ghi chú học, và bỏ ghi chú giống nhau từ 60% số từ
+- init và update ghi .harnix/.gitignore (/cache/ và /tmp/ neo ở gốc .harnix, tasks/.active) và .harnix/.gitattributes (* text eol=lf) do Harnix quản lý, không đụng file gốc của repo; doctor cache-tracked và active-pointer-tracked in đúng lệnh git rm --cached; journal vẫn được theo dõi mặc định
+- workflow --scaffold-docs ghi prd.md và plan.md của task Full còn planning từ criteria và check hiện có hoặc từ file UTF-8 (giữ tài liệu đã có nội dung riêng, thay bằng --force)
+
 ## [2.39.0] - 2026-11-24
 
 ### Added

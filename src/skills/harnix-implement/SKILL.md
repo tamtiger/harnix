@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.39.0"
+  version: "2.40.0"
 ---
 
 # Implement with evidence
@@ -13,7 +13,7 @@ Review before coding, prove the behavior with a failing test, make the smallest 
 
 The guard and state rules are in the always-loaded Harnix block. For a tracked task run `harnix workflow --preflight`; `nextStage: implement` is yours. A `ready` task needs the latest request to authorize implementation; then `harnix workflow --transition in_progress/implementing` before the first product edit. A direct Bypass change has no task: skip the task steps, keep the TDD and verify rules, and report the commands you ran.
 
-A blocked task: read its blocker, resolve it or report the exact condition, then continue at its resume status. Route every reproducible failure to `harnix-debug`.
+A blocked task: read its blocker, resolve it or report the exact condition, then continue at its resume status. Route every reproducible failure to `harnix-debug`. A transition can carry advisories (`notice:` on stderr, `advisories` in `--dry-run`): product files changed before `in_progress`, drafts older than the code, a `code-only` run with no risk; they never block, so read and act on them.
 
 ## Review the plan
 

@@ -4,8 +4,8 @@
   "id": "20261124-232022-context-cost",
   "title": "Giảm chi phí context mỗi lượt: bỏ Status khỏi băm, learningMax, gom note gần trùng",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Giảm chi phí context mỗi lượt: không chèn lại khối hook chỉ vì đổi trạng thái, cho đặt giới hạn ghi chú học và gom note gần trùng.",
   "nonGoals": [],
   "epicId": "20261124-232018-harnix-friction-fixes",
@@ -13,26 +13,42 @@
     {
       "id": "ac-1",
       "text": "Phần băm quyết định ẩn khối hook không còn gồm dòng `Status: x/y`: hai lượt cùng session chỉ khác Status thì lượt sau in rỗng; đổi id, title, goal hoặc learning thì vẫn in lại.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-context-cost-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "`.harnix/config.yaml` nhận `context.learningMax` (0 đến 5, mặc định 5; `0` tắt note chưa duyệt); validator, schema và doctor chấp nhận; config cũ không đổi hành vi.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-context-cost-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Khi chọn note cho ngữ cảnh, bỏ note có độ giống token (Jaccard từ 0,6) với note đã chọn; fixture hai note gần trùng chỉ cho vào một; hook protocol và redaction không đổi.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-context-cost-2",
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Tài liệu, CHANGELOG, golden và schema config, phiên bản `2.40.0-dev.4` đồng bộ; kiểm bằng CLI thật qua `scripts/exercise-context-cost.mjs` (stdin hook event hai lượt trong dự án tạm có task và note học).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-exercise-context-cost-2",
+        "ev-chk-focused-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -81,11 +97,113 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-exercise-context-cost",
+      "description": "Exercise chạy CLI build thật: hook context hai lượt cùng session và learningMax trong dự án tạm",
+      "command": "node scripts/exercise-context-cost.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/exercise-context-cost.mjs",
+        "src/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T19:16:35.367+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a642ebe6e3ae33abeb5e9e01cdfdecfaadfd775aa851218b6124c8b727cf8de8",
+      "durationMs": 11444
+    },
+    {
+      "id": "ev-chk-exercise-context-cost-1",
+      "checkId": "chk-exercise-context-cost",
+      "recordedAt": "2026-11-25T19:16:40.375+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-context-cost.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7251980823bddf438135becb198788fadec4f0e67f7fb49fff03d009faffe48f",
+      "durationMs": 3475
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T19:18:27.797+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13490cd892c35077f0b91e85794a8ff98cc7af6cba77ab7a1c198b4ea8b6ad56",
+      "durationMs": 106259
+    },
+    {
+      "id": "ev-chk-exercise-context-cost-2",
+      "checkId": "chk-exercise-context-cost",
+      "recordedAt": "2026-11-25T19:18:49.877+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. node scripts/exercise-context-cost.mjs chạy dist/cli.js thật trong dự án tạm: lượt 1 643 ký tự, lượt 2 cùng trạng thái 0, sau khi chỉ đổi trạng thái 0 (trước đó in lại khối), sau khi đổi tiêu đề 646, ghi chú học hiện mặc định (824 ký tự) và biến mất khi learningMax 0 (627 ký tự).",
+      "artifactPaths": [],
+      "inputDigest": "7251980823bddf438135becb198788fadec4f0e67f7fb49fff03d009faffe48f"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "scripts/exercise-context-cost.mjs",
+    "src/commands/internal-context.ts",
+    "src/core/config/*",
+    "src/core/context/*",
+    "src/core/journal/learning-summary.ts",
+    "test/README.md",
+    "test/unit/*",
+    "test/workflow/*"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-11-24T23:20:22.533+07:00",
-  "updatedAt": "2026-11-24T23:21:03.146+07:00"
+  "updatedAt": "2026-11-25T19:18:57.574+07:00",
+  "decisions": [
+    {
+      "id": "dec-status-out-of-hash",
+      "text": "Dòng Status: x/y của header bị thay bằng Status: * trước khi băm để quyết định ẩn khối hook; chỉ dòng đầu tiên khớp mẫu [a-z_-]+/[a-z_-]+ bị thay. Đổi id, title, goal hoặc ghi chú học vẫn in lại.",
+      "rationale": "Chuyển trạng thái là việc thường xuyên nhất trong một task nên không đáng chèn lại cả khối; đo bằng CLI thật: lượt sau khi chỉ đổi trạng thái giảm từ khoảng 640 ký tự xuống 0."
+    },
+    {
+      "id": "dec-learning-max-hook-only",
+      "text": "context.learningMax chỉ giới hạn khối hook; trường learning của workflow --preflight vẫn tối đa 5 (nhưng đã được gom note gần trùng vì dedupe nằm trong summarizeLearning). Ngưỡng gom Jaccard 0,6 đặt trong NEAR_DUPLICATE_THRESHOLD.",
+      "rationale": "Tiêu chí ac-2 và ac-3 nói về ngữ cảnh hook; đổi preflight cần quyết định riêng và đổi golden."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-near-duplicate-threshold",
+      "text": "Ngưỡng 0,6 là phỏng đoán: hai ghi chú khác ý nhưng dùng nhiều từ chung có thể bị gộp nhầm, ghi chú bị gộp không tới được agent; chưa đo trên journal thật.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-status-hidden",
+      "text": "Sau khi agent nén ngữ cảnh, khối đã bị ẩn không được chèn lại và agent không thấy Status mới; rủi ro này đã có với cơ chế ẩn cũ, nay rộng hơn vì đổi trạng thái cũng bị ẩn. Agent đọc trạng thái thật bằng harnix status --summary hoặc preflight.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-25T19:18:57.574+07:00"
 }

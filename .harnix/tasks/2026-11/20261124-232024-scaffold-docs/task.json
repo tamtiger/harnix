@@ -4,8 +4,8 @@
   "id": "20261124-232024-scaffold-docs",
   "title": "Sinh khung prd và plan cho task Full đang planning, đóng epic bằng bản minor",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Giúp soạn prd.md và plan.md không cần heredoc: sinh khung từ criteria và check đã khai báo hoặc nạp file UTF-8 cho task Full đang planning; member cuối đóng epic.",
   "nonGoals": [],
   "epicId": "20261124-232018-harnix-friction-fixes",
@@ -13,26 +13,42 @@
     {
       "id": "ac-1",
       "text": "`harnix workflow --scaffold-docs [--prd-file <p>] [--plan-file <p>] [--force]` cho task Full đang `planning` (nhận `--task`): không có file thì sinh khung `prd.md` và `plan.md` từ criteria và check hiện tại, không ghi đè nội dung đã có trừ khi `--force`; có file thì nạp UTF-8 nguyên văn (bỏ BOM, qua kiểm mojibake); ghi bằng đường `saveWorkflow`.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-scaffold-docs-3",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Task Lite hoặc task không ở `planning` bị từ chối kèm hint; khung sinh ra không chứa token placeholder cứng làm cổng ready từ chối và có dòng checklist `[chk-id]` cho từng required check.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-scaffold-docs-3",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Hành vi có đủ trong `WORKFLOW_ACTIONS`, `--schema`, flag-owners, handler, test action-checklist, golden (chỉ chuỗi mới), docs (HARNIX_WORKFLOW, PRD) và template `workflow.md` (tối đa một dòng trong ngân sách còn lại, rồi `pnpm selfhost:sync`).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-scaffold-docs-3",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Member cuối đóng epic: `pnpm version:sync 2.40.0 --fold-dev` với một entry CHANGELOG, một lượt harnix-review do reviewer độc lập trên toàn diff epic trước finish, chạy lại toàn bộ check và mọi script exercise; kiểm bằng CLI thật qua `scripts/exercise-scaffold-docs.mjs` (tiếng Việt qua `--prd-file` đúng byte).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-5",
+        "ev-chk-exercise-scaffold-docs-9",
+        "ev-chk-focused-5"
+      ]
     }
   ],
   "validationPlan": [
@@ -81,18 +97,343 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-exercise-scaffold-docs",
+      "description": "Exercise chạy CLI build thật: --scaffold-docs trên dự án tạm (task Full planning, từ chối khi đã có nội dung, Lite bị từ chối, --prd-file tiếng Việt đúng byte, ready không đỏ vì placeholder)",
+      "command": "node scripts/exercise-scaffold-docs.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T20:05:57.510+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1973dbffc52e029e86bb304177a46afd28d4fda36078fa99d803f822824509f1",
+      "durationMs": 16068
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-1",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:06:04.530+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-scaffold-docs.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4d01404a48978bc277427a66a7666d84e0ce7e318682466c11fdd10ebdcba46f",
+      "durationMs": 5392
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T20:08:50.885+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e9ab4af4e0536a6d5e826a22aa5de33e5c14ff8c1289b84aec41f9fb4101c9ae",
+      "durationMs": 164611
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-2",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:10:33.842+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-scaffold-docs.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "be8280b180a302eef764cb8c6ead3e85fcc229659cbb532cfacde20b0caf7eff",
+      "durationMs": 5289
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T20:10:52.142+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c3524f86fdae3fac9c051573f60fa232cb97bffe530732c0a6742af55544bb11",
+      "durationMs": 16988
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T20:13:25.411+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ccfd1ac80aded9ea36bc98ce6766658f69b70447110561143c82444dc48f9ec9",
+      "durationMs": 151389
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-3",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:13:46.414+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. scripts/exercise-scaffold-docs.mjs chạy CLI build thật trên dự án tạm: 8 kiểm tra, 0 lỗi (khung chưa sửa không bị ghi, bị từ chối kèm --force sau khi thêm tiêu chí, --force sinh lại cả hai và ready không đỏ vì placeholder, --prd-file tiếng Việt đúng byte và bỏ BOM, tài liệu có nội dung riêng được giữ, văn bản U+FFFD bị từ chối, Lite bị từ chối kèm lệnh đúng, --force ngoài --scaffold-docs bị từ chối).",
+      "artifactPaths": [],
+      "inputDigest": "be8280b180a302eef764cb8c6ead3e85fcc229659cbb532cfacde20b0caf7eff"
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-4",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:26:35.350+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-scaffold-docs.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01736b5e28979489b0cd3f1a56c14f15147468b0daff928df9dca7ca809227f1",
+      "durationMs": 5021
+    },
+    {
+      "id": "ev-chk-focused-3",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T20:26:48.018+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "436090b950bd52c838050fdaf735be028d671eb7b04ba4f9a17f6029def2eefc",
+      "durationMs": 11529
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T20:29:21.970+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2cdf3d60a2e2a4ac6ab28d89ef6d2a9831308bd1cccd35166bfcc3a050e128d3",
+      "durationMs": 152350
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-5",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:29:27.401+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full — scripts/exercise-scaffold-docs.mjs chạy dist/cli.js thật (9 kiểm tra, 0 lỗi) sau các bản sửa review, gồm --scaffold-docs --task cho task Full không active và task đã hủy bị từ chối",
+      "artifactPaths": [],
+      "inputDigest": "01736b5e28979489b0cd3f1a56c14f15147468b0daff928df9dca7ca809227f1"
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-6",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:41:41.148+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-scaffold-docs.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fbe6271db02cc5a50317d1316c951d7c2bd6759ae26c4d3194b4fb9ae6ec83f8",
+      "durationMs": 6020
+    },
+    {
+      "id": "ev-chk-focused-4",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T20:41:52.848+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b0744fd0b0297d3e11a7cfe80cc13ac4c94d03950502ccd5d14ae870a400d93d",
+      "durationMs": 10379
+    },
+    {
+      "id": "ev-check-suite-4",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T20:44:25.067+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0a4d9948acc9e36364fc6583aeb553bfc4cf898ebc1a773629712271449c4fad",
+      "durationMs": 150891
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-7",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:44:26.288+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full — scripts/exercise-scaffold-docs.mjs chạy dist/cli.js thật (9 kiểm tra, 0 lỗi) trên bản build cuối sau các bản sửa review",
+      "artifactPaths": [],
+      "inputDigest": "fbe6271db02cc5a50317d1316c951d7c2bd6759ae26c4d3194b4fb9ae6ec83f8"
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-8",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T20:59:07.524+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-scaffold-docs.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "28133319ea59cf3ebf5a39effadfd4db3c2ba3bbcef70d8ab20b02b448fae444",
+      "durationMs": 4927
+    },
+    {
+      "id": "ev-chk-focused-5",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T20:59:18.811+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae6bf34d462ea7177d494231899915ee3022a7a921132dee4933be0c7815e262",
+      "durationMs": 10214
+    },
+    {
+      "id": "ev-check-suite-5",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T21:01:23.114+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "642455558b776ac14f9b68c5224888c052d6404e6edec4fe52ed8e443475d368",
+      "durationMs": 123063
+    },
+    {
+      "id": "ev-chk-exercise-scaffold-docs-9",
+      "checkId": "chk-exercise-scaffold-docs",
+      "recordedAt": "2026-11-25T21:01:30.464+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full. node scripts/exercise-scaffold-docs.mjs chạy dist/cli.js thật trong dự án tạm sau khi sửa regex che secret (N1, N2) của log lỗi; 9 kiểm tra, 0 lỗi.",
+      "artifactPaths": [],
+      "inputDigest": "28133319ea59cf3ebf5a39effadfd4db3c2ba3bbcef70d8ab20b02b448fae444"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "scripts/exercise-scaffold-docs.mjs",
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/commands/workflow-lifecycle-handlers.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/artifact-templates.ts",
+    "src/core/workflow/index.ts",
+    "src/core/workflow/scaffold-docs.ts",
+    "src/core/workflow/schema.ts",
+    "src/templates/harnix/workflow.md",
+    "test/README.md",
+    "test/unit/core/workflow/scaffold-docs.test.ts",
+    "test/workflow/scaffold-docs.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-11-24T23:20:24.533+07:00",
-  "updatedAt": "2026-11-24T23:21:29.161+07:00",
+  "updatedAt": "2026-11-25T21:07:00.395+07:00",
   "decisions": [
     {
       "id": "dec-scaffold-full-only",
       "text": "--scaffold-docs chỉ cho task Full đang planning (Lite không có prd.md và plan.md); member của --init-epic vẫn là Lite.",
       "rationale": "Mở rộng init-epic sang Full là thay đổi riêng, không nằm trong epic này."
+    },
+    {
+      "id": "trace-advisory-false-positive",
+      "text": "Advisory sửa-code-trước-in_progress báo các file thuộc thay đổi chưa commit của member 1-5; bỏ qua có chủ đích vì cây làm việc đã bẩn từ trước khi member 6 bắt đầu, và member 6 chưa sửa file src nào trước ready.",
+      "rationale": "Advisory so với HEAD nên dương tính giả khi các member trước chưa commit (decision dec-advisory-vs-head)."
+    },
+    {
+      "id": "dec-scaffold-protect-edited",
+      "text": "Tài liệu rỗng hoặc còn là khung sinh sẵn của chính task (so sánh với renderPrdTemplate/renderPlanTemplate của trạng thái hiện tại, bỏ khác biệt CRLF và khoảng trắng đầu cuối) được thay không cần --force; mọi nội dung khác được giữ và lệnh bị từ chối kèm gợi ý --force. Có file thì chỉ ghi tài liệu đó; không file thì ghi cả hai; từ chối bất kỳ đích nào thì không ghi gì.",
+      "rationale": "Task Full luôn có prd.md và plan.md không rỗng từ lúc tạo (validateTaskArtifacts), nên 'chưa có nội dung' chỉ có nghĩa là còn là khung; khung cũ lệch sau khi thêm tiêu chí vẫn cần --force để không mất sửa tay."
+    },
+    {
+      "id": "trace-epic-review",
+      "text": "Review độc lập toàn diff epic 2.40.0 bởi 3 reviewer (member 1-2, member 3-5, member 6 và rà chéo). Đã sửa: F1 log lỗi sót Bearer/KEY=value/secret: (che riêng ở output-redaction.ts, không thêm vào RULES chung), F2 redactSecrets thay theo vị trí capture group, F4 outputTail dùng cùng bước che, F3 glob có ngoặc nhọn thành nhiều pathspec (expandBraces, tối đa 16, quá thì thay bằng *), B-F1 .harnix/.gitignore neo /cache/ và /tmp/, B-F3 lời doctor không hứa harnix update ghi file của người dùng, C-F2 exercise chạy thật --scaffold-docs --task cho task Full không active và task đã hủy. Chấp nhận như đánh đổi: bỏ Status khỏi băm hook, --scaffold-docs coi khung lệch sau --add-criterion là đã sửa, Jaccard 0,6, eol=lf trong .harnix/.gitattributes, relevantPaths chỉ so HEAD. Bản sửa cần lượt kiểm lại độc lập trước finish.",
+      "rationale": "Tiêu chí ac-4 yêu cầu một lượt review độc lập trước finish; bản sửa chưa được reviewer thứ hai xem."
+    },
+    {
+      "id": "dec-redaction-separate",
+      "text": "Che secret của log và outputTail nằm ở output-redaction.ts (redactSecrets chung + quy tắc riêng cho Authorization, KEY=value không nháy), không thêm vào RULES của secret-scan vì sẽ làm secretAdvisory của finish dương tính giả trên mã nguồn.",
+      "rationale": "Reviewer A xác nhận log sót mẫu phổ biến; sửa không được tăng nhiễu cho gate finish."
+    },
+    {
+      "id": "dec-update-run-in-repo",
+      "text": "Đã chạy harnix update trong repo harnix sau khi xem trước bằng --dry-run: chỉ tạo .harnix/.gitignore và .harnix/.gitattributes, làm mới project-facts.md (dẫn xuất, preflight đã nhắc) và manifest; AGENTS.md, README, guides không đổi.",
+      "rationale": "Hết hai cảnh báo managed-untracked do doctor báo; kiểm trước/sau bằng bản sao và hash."
+    },
+    {
+      "id": "dec-redaction-line-cap",
+      "text": "Bản sửa N1/N2: mọi regex của LOG_RULES viết lại tuyến tính (từ khóa literal đứng cuối tên biến rồi tối đa 8 khoảng trắng, không còn hai vòng lặp không giới hạn quanh từ khóa) và mỗi dòng dài hơn 4096 ký tự bị cắt còn 1024 ký tự đầu và 3072 ký tự cuối kèm [line truncated, N more characters]; phần giữa bị bỏ nên không thể lộ secret. Giữ cả đầu lẫn đuôi vì lỗi thường nằm ở cuối dòng (test cũ run-check mong đuôi END và check-log mong THE-END). Hệ quả có chủ ý: một dòng đơn dài hơn 64 KiB không còn cho log 64 KiB đầy đủ nên test check-log đổi sang nhiều dòng; hành vi dòng dài nằm trong test output-redaction-performance.",
+      "rationale": "Đo thật: regex cũ 4 KB tokenx. mất 1,1 s và 8 KB mất 12 s (bậc ba); bản mới 64 KB và 1 MB dưới 3 ms. Test hiệu năng bắt buộc có ca đầu vào độc vì lần review trước cũng có ReDoS."
+    },
+    {
+      "id": "trace-epic-rereview",
+      "text": "Lượt kiểm lại độc lập của bản sửa tìm ra N1 (ReDoS bậc ba trong rule thứ 3 của LOG_RULES, do chính bản sửa F1 gây ra) và N2 (che nhầm secretary, tokenizer, token_count); đã sửa bằng regex tuyến tính cộng trần dòng 4096 ký tự và test hiệu năng. Điều phối tự đo lại bằng bundle esbuild của mã thật: 13 đầu vào độc qua redactCheckOutput tối đa 2,5 ms và từng rule riêng trên 1 MB không qua trần dòng tối đa 9,3 ms. Bản sửa cuối của N1 và N2 chưa có reviewer thứ ba.",
+      "rationale": "Đáp ứng ac-4 (review độc lập trên toàn diff epic trước finish) và ghi trung thực phạm vi đã được review."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-scaffold-force-loses-edits",
+      "text": "--scaffold-docs --force thay cả tài liệu đã sửa tay mà không sao lưu; khung sinh ra gộp mọi check vào một slice nên người dùng vẫn phải tự chia slice. (Mitigation: Lệnh mặc định từ chối khi có nội dung riêng và nêu rõ --force làm mất nội dung hiện có; task vẫn nằm trong git của người dùng.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-epic-status-stale",
+      "text": "Bỏ Status khỏi phần băm của hook nên agent có thể giữ Status cũ sau khi đổi trạng thái hoặc sau khi nén ngữ cảnh; nguồn chuẩn là preflight và workflow. (Mitigation: Chấp nhận; nếu thấy hại thì băm kèm nhóm trạng thái hoặc chèn lại mỗi N lượt.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-epic-scaffold-force",
+      "text": "--scaffold-docs coi khung sinh sẵn đã lệch sau --add-criterion là đã sửa nên cần --force, và --force thay cả tài liệu sửa tay mà không sao lưu. (Mitigation: Hint nói rõ nội dung hiện có sẽ mất; so sánh chặt nên chỉ thà từ chối nhầm.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-epic-jaccard",
+      "text": "Ngưỡng Jaccard 0,6 khi gom note học có thể gộp nhầm hai note ngược nghĩa nhưng gần từ; chưa đo trên journal thật. (Mitigation: Chỉ ảnh hưởng ngữ cảnh hook, không xóa note.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-epic-eol-lf",
+      "text": "* text eol=lf trong .harnix/.gitattributes làm repo cũ đã commit CRLF thấy hàng loạt file modified cho tới khi git add --renormalize; file cần CRLF dưới .harnix phải sửa file này. (Mitigation: Tài liệu nêu rõ; file gốc của repo không bị đụng.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-epic-head-compare",
+      "text": "Advisory sửa code trước in_progress chỉ so với HEAD nên dương tính giả khi cây đã bẩn từ trước, và advisory tiêu chí cũ im lặng với glob lồng ngoặc nhọn hoặc quá 16 tổ hợp (thay bằng *). (Mitigation: Chỉ advisory, không đổi valid hay exit code.)",
+      "severity": "low"
+    },
+    {
+      "id": "risk-redaction-gaps",
+      "text": "Che secret trong log chỉ là heuristic: không che --token abcdefghijklmnop (cờ dòng lệnh), bearer= chữ thường, tên biến Unicode, giá trị trong nháy có khoảng trắng như PASSWORD=\"quoted value here\" và Bearer ngắn dưới 16 ký tự khi không có Authorization; một log sạch không đảm bảo không có secret, và log là dữ liệu cục bộ chưa tin cậy.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-expandbraces-escape",
+      "text": "expandBraces chưa nhận biết dấu thoát \\{ nên một tên file chứa dấu ngoặc nhọn thật bị mở rộng sai, và {,a} đứng riêng sinh pathspec rỗng nên advisory im lặng; chỉ ảnh hưởng advisory tiêu chí nháp cũ, không đổi valid hay exit code.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-25T21:07:00.395+07:00"
 }

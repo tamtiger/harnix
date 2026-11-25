@@ -23,6 +23,8 @@ export interface RanCheck {
   durationMs: number;
   /** Only a failing check carries its output, so a pass costs no tokens. */
   outputTail?: string;
+  /** Where the whole cleaned output of a failing check was kept (`.harnix/tmp/check-logs/<id>.log`). */
+  logPath?: string;
 }
 
 export interface RunChecksResult {
@@ -85,6 +87,7 @@ export async function runChecksWorkflow(
       exitCode: run.exitCode,
       durationMs: run.durationMs,
       outputTail: run.outputTail,
+      ...(run.logPath === undefined ? {} : { logPath: run.logPath }),
     });
     return { ran, remaining: todo.slice(index + 1).map((rest) => rest.id) };
   }

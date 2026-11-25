@@ -162,6 +162,13 @@ function assertContext(value: unknown): void {
   if (value.mode !== undefined && value.mode !== "lean" && value.mode !== "full") {
     throw new ConfigValidationError("context.mode must be 'lean' or 'full'.");
   }
+  if (value.learningMax !== undefined && !isLearningMax(value.learningMax)) {
+    throw new ConfigValidationError("context.learningMax must be an integer from 0 to 5.");
+  }
+}
+
+function isLearningMax(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 5;
 }
 
 function assertRuntime(value: unknown): void {

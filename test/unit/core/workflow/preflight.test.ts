@@ -406,8 +406,8 @@ describe("workflow preflight version skew", () => {
     expect(preflight.suggestedTechniques).toBeDefined();
     expect(preflight.suggestedTechniques).toContain("harnix-flaky-test");
     expect(preflight.suggestedTechniques).toContain("harnix-migration-safety");
-    expect(preflight.suggestedTechniques).toContain("harnix-sequential-thinking");
     expect(preflight.suggestedTechniques).toContain("harnix-verification-gap");
     expect(preflight.suggestedTechniques).not.toContain("harnix-exercise");
+    expect(preflight.suggestedTechniques).not.toContain("harnix-sequential-thinking");
   });
 });

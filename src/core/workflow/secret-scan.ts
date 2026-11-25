@@ -83,6 +83,31 @@ function matchesRule(text: string, rule: Rule): boolean {
   return false;
 }
 
+/**
+ * The text with every value one of the rules recognizes replaced by `<redacted>`: only the value for a password or a
+ * credential assignment, the whole match for a token or a key. A placeholder value is masked too; cheap and safe.
+ */
+export function redactSecrets(text: string): string {
+  let result = text;
+  for (const rule of RULES) result = redactRule(result, rule);
+  return result;
+}
+
+/** Masks by position (the `d` flag), so a value that repeats the name written before it is hit, not the name. */
+function redactRule(text: string, rule: Rule): string {
+  const indexed = new RegExp(rule.pattern.source, `${rule.pattern.flags}d`);
+  let result = "";
+  let cursor = 0;
+  for (const match of text.matchAll(indexed)) {
+    const start = match.index;
+    const span = rule.valueGroup === undefined ? undefined : match.indices?.[rule.valueGroup];
+    const [from, to] = span !== undefined && span[1] > span[0] ? span : [start, start + match[0].length];
+    result += `${text.slice(cursor, from)}<redacted>`;
+    cursor = to;
+  }
+  return result + text.slice(cursor);
+}
+
 async function candidateFiles(root: string, task: TaskRecord, changed: Set<string> | undefined): Promise<string[]> {
   const inputs = task.validationPlan.flatMap((check) => ("inputs" in check ? check.inputs : []));
   const groups = [task.relevantPaths, inputs].map((patterns) =>

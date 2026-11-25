@@ -28,6 +28,7 @@ export { replaceCheckWorkflow } from "./replace-check.js";
 export type { ReplaceCheckInput } from "./replace-check.js";
 export { runCheckWorkflow } from "./run-check.js";
 export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
+export { prepareChecksBatch } from "./checks-batch.js";
 export { runChecksWorkflow } from "./run-checks.js";
 export type { RanCheck, RunChecksDependencies, RunChecksResult } from "./run-checks.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";
@@ -38,6 +39,8 @@ export type { WorkflowSaveArtifacts, WorkflowSaveEnvelope } from "./envelope.js"
 export { finishWorkflow, finishWorkflowReport, finishWorkflowTask } from "./finish.js";
 export type { FinishLearningReport, FinishReport, WorkflowFinishDependencies } from "./finish.js";
 export { inspectWorkflow } from "./inspect.js";
+export { scaffoldDocsWorkflow } from "./scaffold-docs.js";
+export type { ScaffoldDocsOptions, ScaffoldDocsResult } from "./scaffold-docs.js";
 export { initEpicWorkflow } from "./init-epic.js";
 export type { InitEpicOptions, InitEpicResult } from "./init-epic.js";
 export { initTaskWorkflow } from "./init-task.js";

@@ -4,8 +4,8 @@
   "id": "20261124-232019-run-check-ergonomics",
   "title": "Chạy check bớt ma sát: run-check không nhắc lệnh, log lỗi đầy đủ, batch finish có run-checks",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Bỏ ma sát khi chạy check: --run-check lấy lệnh từ khai báo, log lỗi đầy đủ đọc lại được, và chuỗi hoàn tất task chạy được trong một lệnh batch.",
   "nonGoals": [],
   "epicId": "20261124-232018-harnix-friction-fixes",
@@ -13,26 +13,42 @@
     {
       "id": "ac-1",
       "text": "`harnix workflow --run-check <id>` không có `--` chạy đúng lệnh và cwd đã khai báo của check (không qua shell, cùng đường thực thi với `--run-checks`); argv truyền vào mà khác khai báo vẫn bị từ chối kèm hint.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-run-check-4",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Khi một check fail, output tới trần 64 KB được ghi vào `.harnix/tmp/check-logs/<id>.log` (git-ignored, che đường dẫn tuyệt đối, mã ANSI và chuỗi giống secret, nằm ngoài input digest) và kết quả CLI có `logPath`; lần pass không ghi log; không thêm trường nào vào evidence hay TaskRecord.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-run-check-4",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "`--run-checks` được phép đứng cùng `--criterion --met --transition verifying/finishing --finish` theo thứ tự cố định và dừng ở lần fail đầu (task giữ `verifying`, báo `ran` và `remaining`); task chưa ở `in_progress` hoặc `verifying` bị từ chối kèm hint; `status --explain` `nextAction` kèm lệnh batch gợi ý. Không gộp `ready/ready`, bước ủy quyền triển khai hay review.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`--run-checks` được phép đứng cùng `--criterion <ids> --met`, `--transition verifying/finishing` và `--finish` (thứ tự cố định run-checks, criterion, transition, finish); task đang `in_progress` được tự chuyển `verifying/verifying` trước khi chạy; dừng ở lần fail đầu (task giữ `verifying`, báo `ran`, `remaining` và các bước `skipped`); task ở trạng thái khác `in_progress` hoặc `verifying` bị từ chối kèm hint; trong batch này `--finish` chỉ hợp lệ khi có cả `--transition verifying/finishing`; `status --explain` `nextAction` kèm lệnh batch gợi ý. Không gộp `ready/ready`, bước ủy quyền triển khai hay review.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-run-check-4",
+        "ev-chk-focused-2"
+      ]
     },
     {
       "id": "ac-4",
       "text": "`WORKFLOW_ACTIONS`, `--schema`, workflow-flag-owners, golden (chỉ chuỗi mới), docs (HARNIX_WORKFLOW, PRD), CHANGELOG và phiên bản `2.40.0-dev.1` đồng bộ; template `workflow.md` chỉ đổi dòng cookbook sẵn có (không tăng quá mức, ngân sách còn dư khoảng 200 token cho cả epic); kiểm bằng CLI thật qua `scripts/exercise-run-check.mjs` trong dự án tạm (không nhắc lệnh, check fail để lại log, batch finish).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-exercise-run-check-4",
+        "ev-chk-focused-2"
+      ]
     }
   ],
   "validationPlan": [
@@ -81,13 +97,136 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-exercise-run-check",
+      "description": "Exercise: chạy CLI build thật trong dự án tạm, run-check không nhắc lệnh, log lỗi và batch finish",
+      "command": "node scripts/exercise-run-check.mjs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T18:06:50.377+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0960db86386ee06ccf0af3954c58cfad7519f2f2a559842703c85b8d25e5c33a",
+      "durationMs": 8216
+    },
+    {
+      "id": "ev-chk-exercise-run-check-1",
+      "checkId": "chk-exercise-run-check",
+      "recordedAt": "2026-11-25T18:06:56.282+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-run-check.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7a295e526676c4b85aff324c58dc1b67401ea112ac84f22a00a50c9e36d95601",
+      "durationMs": 4827
+    },
+    {
+      "id": "ev-chk-exercise-run-check-2",
+      "checkId": "chk-exercise-run-check",
+      "recordedAt": "2026-11-25T18:07:01.580+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full - scripts/exercise-run-check.mjs chạy dist/cli.js thật trong dự án tạm: run-check không nhắc lệnh, check fail để lại log đã che đường dẫn, lệnh khác khai báo bị từ chối, batch fail dừng với skipped, batch pass hoàn tất task bằng một lệnh; 0 failed",
+      "artifactPaths": [],
+      "inputDigest": "7a295e526676c4b85aff324c58dc1b67401ea112ac84f22a00a50c9e36d95601"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T18:08:50.976+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0f5f2fdb580201200d15a610ec9f3b27265cd058e7f72d921308bcf4fb996bd8",
+      "durationMs": 107483
+    },
+    {
+      "id": "ev-chk-exercise-run-check-3",
+      "checkId": "chk-exercise-run-check",
+      "recordedAt": "2026-11-25T18:10:59.788+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node scripts/exercise-run-check.mjs — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a4de8ec0b31049e511cf9ef9873a7c31f69d48f37b8e2acfdb67cb8bafd0d704",
+      "durationMs": 6062
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-25T18:11:09.424+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5ebb3cd58d747ae8ff2e4586c20a6e09a1f99e530eecdfcdf79b04f9e1625b8e",
+      "durationMs": 8790
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-25T18:13:07.722+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "12cb9d7cdef2f44f939920a470583663774459acfc80cbe14a9d09bb4b8f901d",
+      "durationMs": 117169
+    },
+    {
+      "id": "ev-chk-exercise-run-check-4",
+      "checkId": "chk-exercise-run-check",
+      "recordedAt": "2026-11-25T18:13:19.395+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "mode: full - scripts/exercise-run-check.mjs chạy dist/cli.js 2.40.0-dev.1 thật trong dự án tạm với npm test: run-check không nhắc lệnh chạy đúng lệnh khai báo, check fail để lại log đã che đường dẫn máy, lệnh khác khai báo bị từ chối, batch gặp check fail dừng với skipped và task giữ verifying, batch cuối hoàn tất task bằng một lệnh; 0 failed",
+      "artifactPaths": [],
+      "inputDigest": "a4de8ec0b31049e511cf9ef9873a7c31f69d48f37b8e2acfdb67cb8bafd0d704"
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "scripts/exercise-run-check.mjs",
+    "src/commands/workflow-batch.ts",
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/status.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/check-log.ts",
+    "src/core/workflow/check-output.ts",
+    "src/core/workflow/run-check.ts",
+    "src/core/workflow/run-checks.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/secret-scan.ts",
+    "src/templates/harnix/workflow.md",
+    "test/**"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-11-24T23:20:19.533+07:00",
-  "updatedAt": "2026-11-24T23:21:27.219+07:00",
+  "updatedAt": "2026-11-25T18:13:28.633+07:00",
   "decisions": [
     {
       "id": "dec-scope-dropped",
@@ -103,6 +242,24 @@
       "id": "dec-workflow-md-budget",
       "text": "Template workflow.md còn dư khoảng 200 token cho cả epic: chỉ member 1 (sửa dòng cookbook sẵn có, không tăng) và member 6 (một dòng cho --scaffold-docs) được chạm; các member khác viết vào docs/HARNIX_WORKFLOW.md, PRD hoặc reference, không nâng token-budgets.json.",
       "rationale": "Trần token chỉ chặn tăng; không nâng để một thay đổi qua test."
+    },
+    {
+      "id": "dec-batch-autotransition",
+      "text": "Batch --run-checks tự chuyển task in_progress sang verifying/verifying qua transitionWorkflow (đủ cổng của transition) và từ chối task ready hoặc planning kèm hint, nên batch không thay thế cổng ready, ủy quyền triển khai hay review; --finish trong batch luôn đi kèm --transition verifying/finishing.",
+      "rationale": "Giữ điểm dừng bắt buộc của quy trình; chuỗi ngắn hơn mà không thêm action mới (không dùng --complete)."
+    },
+    {
+      "id": "dec-log-fail-only-done",
+      "text": "Log lỗi của check chỉ ghi khi fail ở .harnix/tmp/check-logs/<id>.log (ghi đè, 64 KB cuối, bỏ ANSI, đường dẫn máy và chuỗi giống secret bằng rule của secret-scan), pass xóa log cũ; log nằm ngoài input digest (kiểm bằng test snapshot), không vào evidence hay TaskRecord, và việc ghi log lỗi không làm hỏng việc ghi evidence.",
+      "rationale": "Đảo quyết định cũ never persisted của run-check.ts theo xác nhận mặc định của người dùng khi duyệt epic; phương án nhẹ hơn là chỉ nới đuôi tóm tắt."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-log-sensitive",
+      "text": "Log lỗi lưu output lệnh ra đĩa (git-ignored): rule che secret là heuristic nên một giá trị nhạy cảm không khớp rule vẫn có thể nằm trong log cục bộ; lệnh batch không chạy được trên task chưa start nên agent vẫn phải ghi ready và ủy quyền triển khai bằng tay.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-25T18:13:28.633+07:00"
 }

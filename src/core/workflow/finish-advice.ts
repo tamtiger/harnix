@@ -1,11 +1,9 @@
 import { lstat } from "node:fs/promises";
 import { join } from "node:path";
 
-import { globby } from "globby";
-
 import type { TaskRecord } from "src/core/tasks/task.js";
-import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
 
+import { coveredFiles, relevantPatterns } from "./relevant-paths.js";
 import { changedPaths, type SecretScanGitRunner } from "./secret-scan-changes.js";
 
 const MAX_OUTSIDE = 10;
@@ -37,20 +35,12 @@ export async function finishCommitAdvice(
   git?: SecretScanGitRunner,
 ): Promise<FinishCommitAdvice> {
   const advice: FinishCommitAdvice = { suggestedMessage: task.title };
-  const patterns = task.relevantPaths.filter((pattern) => pattern !== "@task-contract" && !pattern.startsWith("!"));
+  const patterns = relevantPatterns(task);
   if (patterns.length === 0) return advice;
   try {
     const changed = await changedPaths(root, git);
     if (changed === undefined) return advice;
-    const covered = new Set(
-      await globby(patterns, {
-        cwd: root,
-        onlyFiles: true,
-        followSymbolicLinks: false,
-        dot: true,
-        ignore: buildGlobIgnores(new Set(patterns.flatMap((pattern) => [...targetedSegments(pattern)]))),
-      }),
-    );
+    const covered = await coveredFiles(root, patterns);
     const candidates = [...changed].filter((path) => !path.startsWith(".harnix/") && !covered.has(path)).sort();
     const outside: string[] = [];
     for (const path of candidates) {

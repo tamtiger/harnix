@@ -148,6 +148,7 @@ async function unreviewedLearningBlock(input: EffectiveContextInput): Promise<st
       await summarizeLearning(journalRoot, input.now ?? Date.now(), {
         activePaths: input.task.relevantPaths,
         sourcePaths: createSourcePathsLoader(input.harnixRoot),
+        maxItems: input.config.context.learningMax,
       }),
     );
   } catch {
